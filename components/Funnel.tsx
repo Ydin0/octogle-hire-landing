@@ -127,6 +127,42 @@ function QuizModal({ onClose }: { onClose: () => void }) {
     setStep(3);
   };
 
+  // Post the lead to Leadey. Fired once at step 3 (partial, so we keep the
+  // contact even if they never finish step 4) and again on final submit with
+  // the same event_id + email so Leadey updates the record instead of
+  // creating a duplicate.
+  const postLead = (partial: boolean) => {
+    const lead = {
+      name: f.name.trim(),
+      email: f.email.trim(),
+      phone: f.phone.trim(),
+      company: f.company.trim(),
+      website: f.website.trim(),
+      build,
+      stage,
+      status: partial ? "partial" : "complete",
+      captured_step: partial ? 3 : 4,
+      location: LOCATION_TAG,
+      source: LOCATION_TAG,
+      note: LOCATION_TAG,
+      page: typeof location !== "undefined" ? location.href : "",
+      submitted_at: new Date().toISOString(),
+      event_id: eventId.current,
+    };
+    try {
+      return fetch(WEBHOOK_URL, {
+        method: "POST",
+        mode: "no-cors",
+        keepalive: true,
+        headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify(lead),
+      });
+    } catch {
+      /* opaque no-cors response still delivers the payload */
+      return Promise.resolve();
+    }
+  };
+
   const contactNext = () => {
     if (!f.name.trim()) return setError("Add your name.");
     if (!emailOk(f.email)) return setError("Add a valid work email.");
@@ -137,6 +173,8 @@ function QuizModal({ onClose }: { onClose: () => void }) {
       { content_category: build, content_name: stage },
       { eventID: eventId.current },
     );
+    // Partial capture: send contact details now, before the company step.
+    void postLead(true);
     setStep(4);
   };
 
@@ -144,32 +182,7 @@ function QuizModal({ onClose }: { onClose: () => void }) {
     if (!f.company.trim()) return setError("Add your company.");
     setError("");
     setSubmitting(true);
-    const lead = {
-      name: f.name.trim(),
-      email: f.email.trim(),
-      phone: f.phone.trim(),
-      company: f.company.trim(),
-      website: f.website.trim(),
-      build,
-      stage,
-      location: LOCATION_TAG,
-      source: LOCATION_TAG,
-      note: LOCATION_TAG,
-      page: typeof location !== "undefined" ? location.href : "",
-      submitted_at: new Date().toISOString(),
-      event_id: eventId.current,
-    };
-    try {
-      await fetch(WEBHOOK_URL, {
-        method: "POST",
-        mode: "no-cors",
-        keepalive: true,
-        headers: { "Content-Type": "text/plain" },
-        body: JSON.stringify(lead),
-      });
-    } catch {
-      /* opaque no-cors response still delivers the payload */
-    }
+    await postLead(false);
     track(
       "SubmitApplication",
       { content_category: build, content_name: stage },

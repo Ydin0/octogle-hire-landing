@@ -42,7 +42,7 @@ body {
   text-transform: uppercase;
 }
 
-/* Struck-through "old price" — steel line, not red. */
+/* Struck-through "old price": steel line, not red. */
 .strike {
   position: relative;
   white-space: nowrap;
