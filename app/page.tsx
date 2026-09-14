@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { FunnelProvider, CtaButton } from "@/components/Funnel";
 import Faq from "@/components/Faq";
+import Testimonials from "@/components/Testimonials";
 import StickyCta from "@/components/StickyCta";
 import before from "@/public/before.jpg";
 import after from "@/public/after.jpg";
@@ -57,17 +58,16 @@ export default function Page() {
           </div>
 
           <h1 className="mt-7 font-display text-[clamp(2.6rem,8vw,5.1rem)] font-semibold leading-[1.02] tracking-[-0.02em] text-navy-900">
-            One UK senior dev is{" "}
-            <span className="strike">£99,768</span> a year.
+            A senior engineer, embedded in your team.
             <br />
-            <span className="headline-gradient">
-              Ours start at £1,500 a month.
-            </span>
+            <span className="headline-gradient">From £1,500 a month.</span>
           </h1>
 
           <p className="mt-6 max-w-2xl text-[clamp(1.05rem,2.4vw,1.35rem)] leading-relaxed text-steel-700">
-            Same work. Your product, your repo, your ownership. An embedded
-            engineer inside your team, not a project you hand off.
+            The same senior developer UK companies pay{" "}
+            <span className="strike">£99,768</span> a year for. In your repo, on
+            your standups, shipping your product from week one. Not a freelancer.
+            Not an agency.
           </p>
 
           {/* Compare cards */}
@@ -217,6 +217,19 @@ export default function Page() {
               </div>
             </div>
           </div>
+        </section>
+
+        {/* Proof */}
+        <section className="mx-auto mt-24 max-w-content px-5 sm:px-8">
+          <Eyebrow>The numbers founders walked away with</Eyebrow>
+          <h2 className="max-w-3xl font-display text-[clamp(1.9rem,4.5vw,2.9rem)] font-semibold leading-[1.08] tracking-[-0.01em] text-navy-900">
+            Real teams. Real engineers. Real money saved.
+          </h2>
+          <p className="mt-4 max-w-2xl text-[17px] leading-relaxed text-steel-700">
+            Same senior work, a fraction of the local cost. Here is what that
+            looked like for four of them.
+          </p>
+          <Testimonials />
         </section>
 
         {/* Not a marketplace */}

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import ScheduleTracker from "@/components/ScheduleTracker";
 
 export const metadata: Metadata = {
-  title: "Booking confirmed — Octogle Hire",
+  title: "Booking confirmed | Octogle Hire",
   robots: { index: false, follow: false },
 };
 
