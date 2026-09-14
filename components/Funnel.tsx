@@ -23,12 +23,6 @@ function track(event: string, params?: object, opts?: object) {
 }
 
 const BUILD_OPTIONS = ["SaaS", "Website", "Ecom store", "App"];
-const STAGE_OPTIONS = [
-  "Not started",
-  "Starting soon",
-  "Mid way through",
-  "Nearly finished",
-];
 
 type Ctx = { open: () => void };
 const FunnelCtx = createContext<Ctx | null>(null);
@@ -77,7 +71,6 @@ const emailOk = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
 function QuizModal({ onClose }: { onClose: () => void }) {
   const [step, setStep] = useState(1);
   const [build, setBuild] = useState("");
-  const [stage, setStage] = useState("");
   const [f, setF] = useState({
     name: "",
     email: "",
@@ -122,10 +115,6 @@ function QuizModal({ onClose }: { onClose: () => void }) {
     setBuild(v);
     setStep(2);
   };
-  const pickStage = (v: string) => {
-    setStage(v);
-    setStep(3);
-  };
 
   // Post the lead to Leadey. Fired once at step 3 (partial, so we keep the
   // contact even if they never finish step 4) and again on final submit with
@@ -139,9 +128,8 @@ function QuizModal({ onClose }: { onClose: () => void }) {
       company: f.company.trim(),
       website: f.website.trim(),
       build,
-      stage,
       status: partial ? "partial" : "complete",
-      captured_step: partial ? 3 : 4,
+      captured_step: partial ? 2 : 3,
       location: LOCATION_TAG,
       source: LOCATION_TAG,
       note: LOCATION_TAG,
@@ -170,12 +158,12 @@ function QuizModal({ onClose }: { onClose: () => void }) {
     setError("");
     track(
       "Lead",
-      { content_category: build, content_name: stage },
+      { content_category: build },
       { eventID: eventId.current },
     );
     // Partial capture: send contact details now, before the company step.
     void postLead(true);
-    setStep(4);
+    setStep(3);
   };
 
   const submit = async () => {
@@ -185,14 +173,14 @@ function QuizModal({ onClose }: { onClose: () => void }) {
     await postLead(false);
     track(
       "SubmitApplication",
-      { content_category: build, content_name: stage },
+      { content_category: build },
       { eventID: "app_" + eventId.current },
     );
     setSubmitting(false);
-    setStep(5);
+    setStep(4);
   };
 
-  const progress = step >= 5 ? 100 : (step / 4) * 100;
+  const progress = step >= 4 ? 100 : (step / 3) * 100;
 
   return (
     <div
@@ -204,7 +192,7 @@ function QuizModal({ onClose }: { onClose: () => void }) {
       <div className="sheet-in my-auto w-full max-w-[460px] rounded-3xl bg-white p-6 shadow-cta sm:p-7">
         <div className="mb-4 flex items-center justify-between">
           <span className="eyebrow text-[11px] text-steel-600">
-            {step >= 5 ? "Done" : `Step ${step} of 4`}
+            {step >= 4 ? "Done" : `Step ${step} of 3`}
           </span>
           <button
             type="button"
@@ -243,19 +231,6 @@ function QuizModal({ onClose }: { onClose: () => void }) {
         )}
 
         {step === 2 && (
-          <Step title="How far through the build are you?">
-            <div className="grid grid-cols-2 gap-3">
-              {STAGE_OPTIONS.map((o) => (
-                <OptionButton key={o} onClick={() => pickStage(o)}>
-                  {o}
-                </OptionButton>
-              ))}
-            </div>
-            <FootRow onBack={() => setStep(1)} />
-          </Step>
-        )}
-
-        {step === 3 && (
           <Step title="Where do we send the three profiles?">
             <div className="space-y-3">
               <Field
@@ -279,11 +254,11 @@ function QuizModal({ onClose }: { onClose: () => void }) {
             </div>
             {error && <ErrorLine>{error}</ErrorLine>}
             <PrimaryButton onClick={contactNext}>Continue</PrimaryButton>
-            <FootRow onBack={() => setStep(2)} hint="One more step." />
+            <FootRow onBack={() => setStep(1)} hint="One more step." />
           </Step>
         )}
 
-        {step === 4 && (
+        {step === 3 && (
           <Step title="And the company we're building for?">
             <div className="space-y-3">
               <Field
@@ -305,13 +280,13 @@ function QuizModal({ onClose }: { onClose: () => void }) {
               {submitting ? "Sending…" : "Send me the three profiles"}
             </PrimaryButton>
             <FootRow
-              onBack={() => setStep(3)}
+              onBack={() => setStep(2)}
               hint="No placement fee. No commitment to hire."
             />
           </Step>
         )}
 
-        {step === 5 && (
+        {step === 4 && (
           <div>
             <div className="mb-4 grid h-11 w-11 place-items-center rounded-2xl bg-sky-500/15 text-steel-600">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
