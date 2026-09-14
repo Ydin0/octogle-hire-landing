@@ -24,7 +24,15 @@ function track(event: string, params?: object, opts?: object) {
 
 const BUILD_OPTIONS = ["SaaS", "Website", "Ecom store", "App"];
 
-type Ctx = { open: () => void };
+// Post-contact qualifier: quick taps we send back to Leadey as enrichment so
+// the team can walk into the call with the right profiles + budget in mind.
+const ENRICH_QUESTIONS: { key: string; q: string; opts: string[] }[] = [
+  { key: "seniority", q: "Level you need", opts: ["Intern", "Junior", "Mid", "Senior", "A mix"] },
+  { key: "budget", q: "Monthly budget", opts: ["£1.5k to £3k", "£3k to £5k", "£5k+", "Not sure yet"] },
+  { key: "timeline", q: "When to start", opts: ["ASAP", "2 to 4 weeks", "Just exploring"] },
+];
+
+type Ctx = { open: (build?: string) => void };
 const FunnelCtx = createContext<Ctx | null>(null);
 
 export function useFunnel() {
@@ -35,9 +43,11 @@ export function useFunnel() {
 
 export function FunnelProvider({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [initialBuild, setInitialBuild] = useState<string | undefined>();
 
-  const open = useCallback(() => {
+  const open = useCallback((build?: string) => {
     track("InitiateCheckout", {}, { eventID: "ic_" + Date.now() });
+    setInitialBuild(build);
     setIsOpen(true);
   }, []);
 
@@ -46,7 +56,12 @@ export function FunnelProvider({ children }: { children: React.ReactNode }) {
   return (
     <FunnelCtx.Provider value={value}>
       {children}
-      {isOpen && <QuizModal onClose={() => setIsOpen(false)} />}
+      {isOpen && (
+        <QuizModal
+          initialBuild={initialBuild}
+          onClose={() => setIsOpen(false)}
+        />
+      )}
     </FunnelCtx.Provider>
   );
 }
@@ -60,17 +75,49 @@ export function CtaButton({
 }) {
   const { open } = useFunnel();
   return (
-    <button type="button" onClick={open} className={className}>
+    <button type="button" onClick={() => open()} className={className}>
       {children}
     </button>
   );
 }
 
+// Embedded first question, rendered directly on the page. Tapping an option
+// opens the modal already at the contact step, so starting the funnel costs
+// a single tap instead of "open a form".
+export function InlineStart({ className }: { className?: string }) {
+  const { open } = useFunnel();
+  return (
+    <div className={className}>
+      <p className="mb-3 font-display text-[17px] font-semibold text-navy-900">
+        What are you building?
+      </p>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {BUILD_OPTIONS.map((o) => (
+          <button
+            key={o}
+            type="button"
+            onClick={() => open(o)}
+            className="rounded-2xl border border-navy-900/15 bg-white px-4 py-4 text-center font-display text-[16px] font-medium text-navy-900 shadow-card transition hover:border-sky-500 hover:bg-sky-500/5 hover:shadow-glow focus:outline-none focus-visible:border-sky-500"
+          >
+            {o}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 const emailOk = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
 
-function QuizModal({ onClose }: { onClose: () => void }) {
-  const [step, setStep] = useState(1);
-  const [build, setBuild] = useState("");
+function QuizModal({
+  initialBuild,
+  onClose,
+}: {
+  initialBuild?: string;
+  onClose: () => void;
+}) {
+  const [step, setStep] = useState(initialBuild ? 2 : 1);
+  const [build, setBuild] = useState(initialBuild ?? "");
   const [f, setF] = useState({
     name: "",
     email: "",
@@ -80,6 +127,7 @@ function QuizModal({ onClose }: { onClose: () => void }) {
   });
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [enrich, setEnrich] = useState<Record<string, string>>({});
   const eventId = useRef("lead_" + crypto.randomUUID());
   const scheduled = useRef(false);
 
@@ -151,6 +199,48 @@ function QuizModal({ onClose }: { onClose: () => void }) {
     }
   };
 
+  // Send the post-contact qualifier answers back to Leadey against the SAME
+  // lead (same event_id + email), as a note so the team gets the extra context
+  // on the existing lead rather than a new record.
+  const postEnrichment = (answers: Record<string, string>) => {
+    const summary = ENRICH_QUESTIONS.filter((q) => answers[q.key])
+      .map((q) => `${q.q}: ${answers[q.key]}`)
+      .join("; ");
+    if (!summary) return Promise.resolve();
+    const payload = {
+      name: f.name.trim(),
+      email: f.email.trim(),
+      phone: f.phone.trim(),
+      company: f.company.trim(),
+      website: f.website.trim(),
+      build,
+      ...answers,
+      status: "enriched",
+      location: LOCATION_TAG,
+      source: LOCATION_TAG,
+      note: "Landing page qualifier: " + summary,
+      page: typeof location !== "undefined" ? location.href : "",
+      submitted_at: new Date().toISOString(),
+      event_id: eventId.current,
+    };
+    try {
+      return fetch(WEBHOOK_URL, {
+        method: "POST",
+        mode: "no-cors",
+        keepalive: true,
+        headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify(payload),
+      });
+    } catch {
+      return Promise.resolve();
+    }
+  };
+
+  const finishQualifier = () => {
+    void postEnrichment(enrich);
+    setStep(5);
+  };
+
   const contactNext = () => {
     if (!f.name.trim()) return setError("Add your name.");
     if (!emailOk(f.email)) return setError("Add a valid work email.");
@@ -180,7 +270,9 @@ function QuizModal({ onClose }: { onClose: () => void }) {
     setStep(4);
   };
 
-  const progress = step >= 4 ? 100 : (step / 3) * 100;
+  const progress = step >= 3 ? 100 : (step / 3) * 100;
+  const stepLabel =
+    step <= 3 ? `Step ${step} of 3` : step === 4 ? "Almost there" : "Done";
 
   return (
     <div
@@ -191,9 +283,7 @@ function QuizModal({ onClose }: { onClose: () => void }) {
     >
       <div className="sheet-in my-auto w-full max-w-[460px] rounded-3xl bg-white p-6 shadow-cta sm:p-7">
         <div className="mb-4 flex items-center justify-between">
-          <span className="eyebrow text-[11px] text-steel-600">
-            {step >= 4 ? "Done" : `Step ${step} of 3`}
-          </span>
+          <span className="eyebrow text-[11px] text-steel-600">{stepLabel}</span>
           <button
             type="button"
             onClick={onClose}
@@ -287,6 +377,60 @@ function QuizModal({ onClose }: { onClose: () => void }) {
         )}
 
         {step === 4 && (
+          <div>
+            <h3 className="font-display text-[24px] font-semibold leading-[1.14] text-navy-900">
+              Got it. Your three profiles are being put together now.
+            </h3>
+            <p className="mt-2 text-[15px] leading-relaxed text-steel-700">
+              Two quick things so we match them to you. Optional.
+            </p>
+
+            <div className="mt-5 space-y-5">
+              {ENRICH_QUESTIONS.map((q) => (
+                <div key={q.key}>
+                  <p className="mb-2 text-[13px] font-medium text-steel-700">
+                    {q.q}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {q.opts.map((o) => {
+                      const active = enrich[q.key] === o;
+                      return (
+                        <button
+                          key={o}
+                          type="button"
+                          onClick={() =>
+                            setEnrich((e) => ({ ...e, [q.key]: o }))
+                          }
+                          className={
+                            "rounded-full border px-3.5 py-2 text-[13px] font-medium transition " +
+                            (active
+                              ? "border-sky-500 bg-sky-500/10 text-navy-900 shadow-glow"
+                              : "border-[var(--border-default)] bg-white text-steel-700 hover:border-sky-500")
+                          }
+                        >
+                          {o}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <PrimaryButton onClick={finishQualifier}>
+              Continue to booking
+            </PrimaryButton>
+            <button
+              type="button"
+              onClick={finishQualifier}
+              className="mt-3 w-full text-center text-[13px] font-medium text-[var(--text-faint)] transition hover:text-steel-700"
+            >
+              Skip
+            </button>
+          </div>
+        )}
+
+        {step === 5 && (
           <div>
             <div className="mb-4 grid h-11 w-11 place-items-center rounded-2xl bg-sky-500/15 text-steel-600">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
