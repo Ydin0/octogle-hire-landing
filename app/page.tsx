@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { FunnelProvider, CtaButton } from "@/components/Funnel";
+import { FunnelProvider, CtaButton, InlineStart } from "@/components/Funnel";
 import Faq from "@/components/Faq";
 import Testimonials from "@/components/Testimonials";
 import StickyCta from "@/components/StickyCta";
@@ -70,6 +70,12 @@ export default function Page() {
             Not an agency.
           </p>
 
+          <p className="mt-4 max-w-2xl text-[15px] leading-relaxed text-steel-600">
+            Full time, from interns to senior developers, in our fully managed
+            in-person office and working inside your repo. Not a freelancer
+            marketplace. That is why it costs a fraction of a local hire.
+          </p>
+
           {/* Compare cards */}
           <div className="mt-10 grid gap-4 sm:grid-cols-2">
             <div className="rounded-3xl border border-[var(--border-subtle)] bg-white p-6 shadow-card sm:p-7">
@@ -108,27 +114,24 @@ export default function Page() {
             fee.
           </p>
 
-          <div className="mt-6">
-            <CtaButton className="inline-flex items-center gap-3 rounded-2xl bg-navy-900 px-8 py-4 font-display text-[17px] font-medium text-white shadow-cta transition hover:bg-navy-800">
-              See 3 engineers we&apos;d put on it{" "}
-              <span aria-hidden>→</span>
-            </CtaButton>
-            <p className="mt-3 text-[14px] text-[var(--text-faint)]">
-              Profiles in 48 hours. No commitment to view them.
+          {/* Embedded first question: one tap starts the funnel */}
+          <div className="mt-8 rounded-3xl border border-[var(--border-default)] bg-ice-100/50 p-5 shadow-card sm:p-6">
+            <InlineStart />
+            <p className="mt-4 text-[14px] text-[var(--text-faint)]">
+              Pick one to see three engineers we&apos;d put on it. Profiles in 48
+              hours, no placement fee, no commitment to view them.
             </p>
           </div>
 
-          <div className="mt-6 flex flex-wrap gap-2">
-            {["48h profiles", "No placement fee", "One client at a time"].map(
-              (t) => (
-                <span
-                  key={t}
-                  className="rounded-full border border-[var(--border-subtle)] bg-white/70 px-3.5 py-1.5 text-[13px] font-medium text-steel-700"
-                >
-                  {t}
-                </span>
-              ),
-            )}
+          {/* Trust bar */}
+          <div className="mt-6">
+            <p className="text-[13px] font-medium text-steel-700">
+              40+ engineers placed. Founders at{" "}
+              <span className="text-navy-900">
+                TNW, Hireflow, Hyrra, 1VA, Beekey, Gecko, Leadey and Corpwise
+              </span>
+              .
+            </p>
           </div>
         </section>
 
