@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { FunnelProvider, CtaButton, InlineStart } from "@/components/Funnel";
-import Faq, { FAQS } from "@/components/Faq";
+import Faq from "@/components/Faq";
+import { FAQS } from "@/components/faqData";
 import Testimonials from "@/components/Testimonials";
 import StickyCta from "@/components/StickyCta";
 import before from "@/public/before.jpg";
