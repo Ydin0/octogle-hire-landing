@@ -9,6 +9,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { DIAL_CODES, PRIORITY_ISO2, composePhone } from "@/lib/dial-codes";
 
 const WEBHOOK_URL =
   "https://backend.leadey.ai/webhooks/funnels/funnel_mtukds7fvcp7yz/leads?token=whk_mtukds7l2028s9";
@@ -122,6 +123,9 @@ function QuizModal({
     name: "",
     email: "",
     phone: "",
+    // ISO2 of the selected country prefix; the dial code is prepended to the
+    // number on every send via composePhone().
+    dialCc: "GB",
     company: "",
     website: "",
   });
@@ -172,7 +176,7 @@ function QuizModal({
     const lead = {
       name: f.name.trim(),
       email: f.email.trim(),
-      phone: f.phone.trim(),
+      phone: composePhone(f.dialCc, f.phone),
       company: f.company.trim(),
       website: f.website.trim(),
       build,
@@ -210,7 +214,7 @@ function QuizModal({
     const payload = {
       name: f.name.trim(),
       email: f.email.trim(),
-      phone: f.phone.trim(),
+      phone: composePhone(f.dialCc, f.phone),
       company: f.company.trim(),
       website: f.website.trim(),
       build,
@@ -335,12 +339,46 @@ function QuizModal({
                 value={f.email}
                 onChange={(v) => setF({ ...f, email: v })}
               />
-              <Field
-                label="Phone"
-                type="tel"
-                value={f.phone}
-                onChange={(v) => setF({ ...f, phone: v })}
-              />
+              <label className="block">
+                <span className="mb-1.5 block text-[13px] font-medium text-steel-700">
+                  Phone
+                </span>
+                <div className="flex gap-2">
+                  <select
+                    aria-label="Country dialling code"
+                    value={f.dialCc}
+                    onChange={(e) => setF({ ...f, dialCc: e.target.value })}
+                    className="w-[132px] shrink-0 rounded-xl border border-[var(--border-default)] bg-ice-100/40 px-2 py-3 text-[16px] text-navy-900 outline-none transition focus:border-sky-500 focus:bg-white focus:shadow-glow"
+                  >
+                    <optgroup label="Common">
+                      {PRIORITY_ISO2.map((iso) => {
+                        const c = DIAL_CODES.find((d) => d.iso2 === iso);
+                        return c ? (
+                          <option key={`pri-${c.iso2}`} value={c.iso2}>
+                            {c.flag} {c.dial} {c.name}
+                          </option>
+                        ) : null;
+                      })}
+                    </optgroup>
+                    <optgroup label="All countries">
+                      {DIAL_CODES.map((c) => (
+                        <option key={c.iso2} value={c.iso2}>
+                          {c.flag} {c.dial} {c.name}
+                        </option>
+                      ))}
+                    </optgroup>
+                  </select>
+                  <input
+                    type="tel"
+                    inputMode="tel"
+                    autoComplete="tel"
+                    placeholder="7737 000000"
+                    value={f.phone}
+                    onChange={(e) => setF({ ...f, phone: e.target.value })}
+                    className="w-full min-w-0 rounded-xl border border-[var(--border-default)] bg-ice-100/40 px-4 py-3 text-[16px] text-navy-900 outline-none transition placeholder:text-[var(--text-faint)] focus:border-sky-500 focus:bg-white focus:shadow-glow"
+                  />
+                </div>
+              </label>
             </div>
             {error && <ErrorLine>{error}</ErrorLine>}
             <PrimaryButton onClick={contactNext}>Continue</PrimaryButton>
