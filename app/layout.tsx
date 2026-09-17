@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import { display, sans, mono } from "@/lib/fonts";
+import SiteSchema from "@/components/SiteSchema";
 import "./globals.css";
 
 const META_PIXEL_ID = "1614640659743336";
@@ -42,6 +43,7 @@ export default function RootLayout({
       className={`${display.variable} ${sans.variable} ${mono.variable}`}
     >
       <body>
+        <SiteSchema />
         {children}
 
         {/* Meta Pixel */}

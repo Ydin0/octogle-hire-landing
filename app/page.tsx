@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { FunnelProvider, CtaButton, InlineStart } from "@/components/Funnel";
 import Faq from "@/components/Faq";
+import { FAQS } from "@/components/faqData";
 import Testimonials from "@/components/Testimonials";
 import StickyCta from "@/components/StickyCta";
 import before from "@/public/before.jpg";
@@ -31,8 +32,21 @@ function Check() {
 }
 
 export default function Page() {
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: FAQS.map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: { "@type": "Answer", text: f.a },
+    })),
+  };
   return (
     <FunnelProvider>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
       {/* Header */}
       <header className="mx-auto flex max-w-content items-center justify-between px-5 py-6 sm:px-8">
         <div className="flex items-center">

@@ -1,0 +1,16 @@
+# Octogle Hire
+
+> Senior software engineers embedded in your team, from £1,500/month. The same senior developer UK companies pay around £99,768 a year for, working full time on one client at a time from Octogle's own office, on your standups, in your repo, with your ownership. Three profiles in 48 hours, no placement fee.
+
+## Key pages
+- [Octogle Hire](https://try.octoglehire.com): what it is, pricing, how it works, FAQ and booking.
+
+## What it is
+- One full-time senior engineer per client. Not a marketplace, not freelancers, not a project handed back on completion.
+- Embedded in your team from week one: your product, your repo, your ownership.
+- From £1,500/month, with no UK payroll, NI, benefits or overhead on top.
+- Three candidate profiles in 48 hours. Swap the engineer if the fit is wrong. No placement fee either way.
+
+## Contact
+- Book a call: https://try.octoglehire.com
+- Parent company: Octogle Technologies — https://www.octogle.com
