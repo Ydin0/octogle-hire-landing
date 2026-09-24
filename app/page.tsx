@@ -1,13 +1,10 @@
-import Image from "next/image";
 import { FunnelProvider, CtaButton, InlineStart } from "@/components/Funnel";
 import Faq from "@/components/Faq";
 import Testimonials from "@/components/Testimonials";
 import Engineers from "@/components/Engineers";
 import Pricing from "@/components/Pricing";
 import { TrustBadges, LogoStrip } from "@/components/Proof";
-import { PhImage } from "@/components/Placeholder";
 import StickyCta from "@/components/StickyCta";
-import officeFloor from "@/public/office/floor.jpg";
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
@@ -144,23 +141,6 @@ export default function Page() {
           </p>
 
           <div className="mt-10 grid gap-4 sm:grid-cols-3">
-            {/* Real photo of the Octogle office floor (Dan, 2026-09-24). Portrait
-                source, so frame on the wall logo and the desks, not the ceiling. */}
-            <div className="relative aspect-[4/3] overflow-hidden rounded-3xl shadow-card">
-              <Image
-                src={officeFloor}
-                alt="The Octogle engineering office, with the team at their desks"
-                fill
-                sizes="(max-width: 640px) 100vw, 360px"
-                className="object-cover object-[center_68%]"
-                placeholder="blur"
-              />
-            </div>
-            <PhImage label="Team photo" className="aspect-[4/3] rounded-3xl" />
-            <PhImage label="A standup or code review in progress" className="aspect-[4/3] rounded-3xl" />
-          </div>
-
-          <div className="mt-6 grid gap-4 sm:grid-cols-3">
             {[
               {
                 t: "60-person engineering office",

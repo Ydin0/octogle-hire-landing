@@ -1,5 +1,3 @@
-import { Ph, PhImage } from "./Placeholder";
-
 // Client proof: real clients with their permission and a real photo, all
 // confirmed by Dan 2026-09-24. Lead with what they shipped, not savings maths.
 // Photos live in /public/proof/.
@@ -44,26 +42,7 @@ const QUOTES: Quote[] = [
 
 export default function Testimonials() {
   return (
-    <div className="mt-10 space-y-5">
-      {/* Video first: for an offshore offer, a client on camera beats any text. */}
-      <div className="overflow-hidden rounded-3xl border border-[var(--border-subtle)] bg-white shadow-card lg:grid lg:grid-cols-[1.4fr_1fr]">
-        <PhImage
-          label="30 to 60 second client video (founder on camera: what they built, how the engineer fits in)"
-          className="aspect-video w-full lg:aspect-auto lg:h-full"
-        />
-        <div className="p-6 sm:p-8">
-          <p className="eyebrow text-[11px] font-medium text-steel-500">
-            Client story
-          </p>
-          <p className="mt-3 font-display text-[22px] font-semibold leading-snug text-navy-900">
-            <Ph>&ldquo;Pull quote from the video.&rdquo;</Ph>
-          </p>
-          <p className="mt-4 text-[15px] text-steel-700">
-            <Ph>Name, role, company</Ph>
-          </p>
-        </div>
-      </div>
-
+    <div className="mt-10">
       <div className="grid gap-5 md:grid-cols-3">
         {QUOTES.map((q, i) => (
           <figure
