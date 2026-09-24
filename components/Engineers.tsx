@@ -23,7 +23,7 @@ const ENGINEERS: Engineer[] = [
     name: "Priya",
     role: "Full-Stack Engineer",
     years: "7 yrs",
-    stack: [],
+    stack: ["TypeScript", "React", "Next.js", "Node.js", "PostgreSQL", "AWS"],
     previously: "B2B SaaS platforms",
   },
   {
@@ -43,6 +43,26 @@ const ENGINEERS: Engineer[] = [
     placeholder: true,
   },
 ];
+
+// Every Octogle engineer is trained on Claude Code (the same claim
+// octoglehire.com makes), so the badge sits on every card. Claude's colour and a
+// generic spark, not Anthropic's logo, so it does not read as a partnership.
+function ClaudeCodeBadge() {
+  return (
+    <span className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-[#D97757]/35 bg-[#D97757]/10 px-2.5 py-1 text-[12px] font-semibold text-[#B4532F]">
+      <svg
+        width="13"
+        height="13"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        aria-hidden
+      >
+        <path d="M12 2l1.6 6.1L20 6.3l-4.3 4.6L22 12l-6.3 1.1 4.3 4.6-6.4-1.8L12 22l-1.6-6.1L4 17.7l4.3-4.6L2 12l6.3-1.1L4 6.3l6.4 1.8z" />
+      </svg>
+      Builds with Claude Code
+    </span>
+  );
+}
 
 function Field({ on, children }: { on?: boolean; children: React.ReactNode }) {
   return on ? <Ph>{children}</Ph> : <>{children}</>;
@@ -85,6 +105,7 @@ export default function Engineers() {
                   {e.role} · {e.years}
                 </Field>
               </p>
+              <ClaudeCodeBadge />
               {e.stack.length > 0 && (
                 <div className="mt-4 flex flex-wrap gap-2">
                   {e.stack.map((s) => (
