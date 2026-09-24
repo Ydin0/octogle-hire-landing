@@ -1,11 +1,13 @@
+import Image from "next/image";
 import { FunnelProvider, CtaButton, InlineStart } from "@/components/Funnel";
 import Faq from "@/components/Faq";
 import Testimonials from "@/components/Testimonials";
 import Engineers from "@/components/Engineers";
 import Pricing from "@/components/Pricing";
 import { TrustBadges, LogoStrip } from "@/components/Proof";
-import { Ph, PhImage } from "@/components/Placeholder";
+import { PhImage } from "@/components/Placeholder";
 import StickyCta from "@/components/StickyCta";
+import officeFloor from "@/public/office/floor.jpg";
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
@@ -141,7 +143,18 @@ export default function Page() {
           </p>
 
           <div className="mt-10 grid gap-4 sm:grid-cols-3">
-            <PhImage label="Office floor, engineers at desks" className="aspect-[4/3] rounded-3xl" />
+            {/* Real photo of the Octogle office floor (Dan, 2026-09-24). Portrait
+                source, so frame on the wall logo and the desks, not the ceiling. */}
+            <div className="relative aspect-[4/3] overflow-hidden rounded-3xl shadow-card">
+              <Image
+                src={officeFloor}
+                alt="The Octogle engineering office, with the team at their desks"
+                fill
+                sizes="(max-width: 640px) 100vw, 360px"
+                className="object-cover object-[center_68%]"
+                placeholder="blur"
+              />
+            </div>
             <PhImage label="Team photo" className="aspect-[4/3] rounded-3xl" />
             <PhImage label="A standup or code review in progress" className="aspect-[4/3] rounded-3xl" />
           </div>
@@ -149,13 +162,8 @@ export default function Page() {
           <div className="mt-6 grid gap-4 sm:grid-cols-3">
             {[
               {
-                t: "40+ person engineering office",
-                b: (
-                  <>
-                    Our own delivery office in <Ph>city</Ph>, India. Managed,
-                    in person, every day.
-                  </>
-                ),
+                t: "60-person engineering office",
+                b: "Our own delivery office in India. Managed, in person, every day.",
               },
               {
                 t: "Headquartered in Dubai",
@@ -180,15 +188,30 @@ export default function Page() {
             ))}
           </div>
 
-          <div className="mt-4 flex items-center gap-4 rounded-3xl border border-[var(--border-subtle)] bg-white p-6 shadow-card">
-            <PhImage label="Founder photo" className="h-16 w-16 shrink-0 rounded-2xl !p-1 text-[11px]" />
+          <div className="mt-4 flex flex-col gap-5 rounded-3xl border border-[var(--border-subtle)] bg-white p-6 shadow-card sm:flex-row sm:items-center">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/proof/yaseen.jpg"
+              alt="Yaseen Deen, founder of Octogle"
+              className="h-20 w-20 shrink-0 rounded-2xl object-cover"
+            />
             <div>
               <p className="font-display text-[17px] font-semibold text-navy-900">
-                <Ph>Founder name, role</Ph>
+                Yaseen Deen, Founder
               </p>
-              <p className="mt-1 text-[15px] text-steel-700">
-                <Ph>One line on who runs Octogle and why, plus a LinkedIn link.</Ph>
+              <p className="mt-1 max-w-2xl text-[15px] leading-relaxed text-steel-700">
+                From the UK, with deep ties in India. Yaseen built our 60-person
+                engineering office in India and runs Octogle from Dubai, helping
+                companies around the world get better development for less.
               </p>
+              <a
+                href="https://www.linkedin.com/in/yaseen-deen-52249219b/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2 inline-block text-[14px] font-medium text-steel-600 underline underline-offset-4 transition hover:text-navy-900"
+              >
+                Yaseen on LinkedIn
+              </a>
             </div>
           </div>
         </section>
@@ -220,19 +243,11 @@ export default function Page() {
               },
               {
                 t: "Monthly, no lock-in",
-                b: (
-                  <>
-                    Rolling monthly contract with <Ph>X days&apos;</Ph> notice.
-                  </>
-                ),
+                b: "Rolling monthly contract with 14 days' notice.",
               },
               {
                 t: "IP and NDA in writing",
-                b: (
-                  <>
-                    <Ph>Confirm: IP assigned to you and NDA as standard in the contract.</Ph>
-                  </>
-                ),
+                b: "All IP is yours, confirmed in our NDA and standard contract.",
               },
             ].map((c) => (
               <div
