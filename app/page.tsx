@@ -100,8 +100,9 @@ export default function Page() {
             Real engineers. You see them before you commit.
           </h2>
           <p className="mt-4 max-w-2xl text-[17px] leading-relaxed text-steel-700">
-            Full time, from our own office, on one client at a time. Here are a
-            few of the people on the team right now.
+            Full time, from our own office, on one client at a time. Every
+            engineer is a graduate of one of India&apos;s top tech universities
+            and builds with Claude Code. Here are a few of the team right now.
           </p>
           <Engineers />
         </section>

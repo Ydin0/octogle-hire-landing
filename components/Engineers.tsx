@@ -27,12 +27,13 @@ const ENGINEERS: Engineer[] = [
     previously: "B2B SaaS platforms",
   },
   {
-    name: "First name",
-    role: "Backend Engineer",
+    photo: "/engineers/rohit.jpg",
+    name: "Rohit",
+    role: "Full-Stack Engineer, backend focus",
     years: "5 yrs",
-    stack: ["Python", "Django", "AWS"],
-    previously: "Previous company",
-    placeholder: true,
+    stack: ["Python", "Django", "AWS", "PostgreSQL", "REST APIs", "Docker"],
+    previously:
+      "B2C apps and cybersecurity platforms handling personal data under UK GDPR",
   },
   {
     name: "First name",
@@ -61,6 +62,29 @@ function ClaudeCodeBadge() {
       </svg>
       Builds with Claude Code
     </span>
+  );
+}
+
+// Per Dan: every engineer graduated from one of India's top tech universities.
+function UniversityLine() {
+  return (
+    <p className="mt-3 flex items-center gap-1.5 text-[13px] font-medium text-steel-700">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden>
+        <path
+          d="M2 9l10-5 10 5-10 5L2 9z"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M6 11v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinejoin="round"
+        />
+      </svg>
+      Top Indian tech university graduate
+    </p>
   );
 }
 
@@ -106,6 +130,7 @@ export default function Engineers() {
                 </Field>
               </p>
               <ClaudeCodeBadge />
+              <UniversityLine />
               {e.stack.length > 0 && (
                 <div className="mt-4 flex flex-wrap gap-2">
                   {e.stack.map((s) => (
