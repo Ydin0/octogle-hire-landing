@@ -36,12 +36,12 @@ const ENGINEERS: Engineer[] = [
       "B2C apps and cybersecurity platforms handling personal data under UK GDPR",
   },
   {
-    name: "First name",
-    role: "AI / ML Engineer",
-    years: "6 yrs",
-    stack: ["Python", "LLMs", "RAG"],
-    previously: "Previous company",
-    placeholder: true,
+    photo: "/engineers/prasanna.jpg",
+    name: "Prasanna",
+    role: "AI / ML Engineer, backend",
+    years: "17 yrs",
+    stack: ["Python", "LLMs", "RAG", "FastAPI", "Vector DBs", "AWS"],
+    previously: "B2B and B2C software, building AI models for clients",
   },
 ];
 
