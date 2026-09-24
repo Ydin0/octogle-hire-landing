@@ -11,8 +11,9 @@ import {
 } from "react";
 import { DIAL_CODES, PRIORITY_ISO2, composePhone } from "@/lib/dial-codes";
 
-const WEBHOOK_URL =
-  "https://backend.leadey.ai/webhooks/funnels/funnel_mtukds7fvcp7yz/leads?token=whk_mtukds7l2028s9";
+// Same-origin relay to Leadey (see app/api/lead/route.ts). Posting to Leadey
+// directly with no-cors dropped every lead.
+const LEAD_ENDPOINT = "/api/lead";
 const CALENDAR_URL =
   "https://app.leadey.ai/book/octogle-hire-connor-lp-mcjcg2?embed=1";
 const LOCATION_TAG = "landing page -dan";
@@ -108,6 +109,16 @@ export function InlineStart({ className }: { className?: string }) {
   );
 }
 
+// keepalive so the request survives the visitor closing the tab mid-send.
+function sendLead(body: object) {
+  return fetch(LEAD_ENDPOINT, {
+    method: "POST",
+    keepalive: true,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  }).catch(() => undefined);
+}
+
 const emailOk = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
 
 function QuizModal({
@@ -189,18 +200,7 @@ function QuizModal({
       submitted_at: new Date().toISOString(),
       event_id: eventId.current,
     };
-    try {
-      return fetch(WEBHOOK_URL, {
-        method: "POST",
-        mode: "no-cors",
-        keepalive: true,
-        headers: { "Content-Type": "text/plain" },
-        body: JSON.stringify(lead),
-      });
-    } catch {
-      /* opaque no-cors response still delivers the payload */
-      return Promise.resolve();
-    }
+    return sendLead(lead);
   };
 
   // Send the post-contact qualifier answers back to Leadey against the SAME
@@ -227,17 +227,7 @@ function QuizModal({
       submitted_at: new Date().toISOString(),
       event_id: eventId.current,
     };
-    try {
-      return fetch(WEBHOOK_URL, {
-        method: "POST",
-        mode: "no-cors",
-        keepalive: true,
-        headers: { "Content-Type": "text/plain" },
-        body: JSON.stringify(payload),
-      });
-    } catch {
-      return Promise.resolve();
-    }
+    return sendLead(payload);
   };
 
   const finishQualifier = () => {

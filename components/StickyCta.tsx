@@ -6,11 +6,20 @@ import { CtaButton } from "./Funnel";
 export default function StickyCta() {
   const [show, setShow] = useState(false);
 
+  // Visible whenever the hero's first question is off screen, so there is
+  // always one tap to start the funnel. (Previously only after 560px of
+  // scroll, which left mobile visitors with no action at all.)
   useEffect(() => {
-    const onScroll = () => setShow(window.scrollY > 560);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    const start = document.getElementById("start");
+    if (!start) {
+      setShow(true);
+      return;
+    }
+    const io = new IntersectionObserver(([e]) => setShow(!e.isIntersecting), {
+      threshold: 0,
+    });
+    io.observe(start);
+    return () => io.disconnect();
   }, []);
 
   return (
