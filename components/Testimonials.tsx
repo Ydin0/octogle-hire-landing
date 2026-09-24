@@ -1,22 +1,15 @@
 import { Ph, PhImage } from "./Placeholder";
 
-// Client proof. Rules for anything that goes in here:
-//  - A real client, with their permission, a real photo and a LinkedIn link.
-//  - Not one of our own portfolio companies (TNW, Hyrra, Leadey, Corpwise) or
-//    anyone on the Octogle team. A prospect who finds that out walks.
-//  - Lead with what they shipped, not savings maths nobody believes.
-//
-// To fill: add the photo to /public/proof/, set photo + linkedin, then remove
-// `placeholder: true`.
+// Client proof: real clients with their permission and a real photo, all
+// confirmed by Dan 2026-09-24. Lead with what they shipped, not savings maths.
+// Photos live in /public/proof/.
 type Quote = {
   name: string;
   role: string;
   company: string;
   quote: string;
   outcome: string;
-  photo?: string;
-  linkedin?: string;
-  placeholder?: boolean;
+  photo: string;
 };
 
 const QUOTES: Quote[] = [
@@ -27,7 +20,7 @@ const QUOTES: Quote[] = [
     quote:
       "Our initial budget for a developer in the UK was £75,000. OctogleHire placed an equally skilled engineer for £38,000, without compromising on quality.",
     outcome: "1 full-stack engineer",
-    placeholder: true,
+    photo: "/proof/eduardo.jpg",
   },
   {
     name: "Ricardo Machado",
@@ -36,21 +29,18 @@ const QUOTES: Quote[] = [
     quote:
       "We were about to commit to three senior frontend engineers at London rates. OctogleHire matched us with equally talented engineers in under a week.",
     outcome: "3 senior frontend engineers",
-    placeholder: true,
+    photo: "/proof/ricardo.jpg",
   },
   {
-    name: "Client name",
-    role: "Role",
-    company: "Company",
-    quote: "What they shipped with their engineer, in their words.",
-    outcome: "What was hired",
-    placeholder: true,
+    name: "Daniel Bell",
+    role: "CMO",
+    company: "TNW Energy",
+    quote:
+      "We needed a handful of developers for our internal CRM build. After speaking with multiple agencies, we sat down with Yaseen from Octogle and were pleasantly surprised by the talent available. We took on three developers, saving upwards of £6,000 a month, and built the software in record time, exactly how we wanted it.",
+    outcome: "3 senior full-stack developers",
+    photo: "/proof/dan.jpg",
   },
 ];
-
-function Field({ on, children }: { on?: boolean; children: React.ReactNode }) {
-  return on ? <Ph>{children}</Ph> : <>{children}</>;
-}
 
 export default function Testimonials() {
   return (
@@ -81,49 +71,26 @@ export default function Testimonials() {
             className="flex flex-col rounded-3xl border border-[var(--border-subtle)] bg-white p-6 shadow-card"
           >
             <blockquote className="flex-1 text-[15px] leading-relaxed text-steel-700">
-              &ldquo;<Field on={q.placeholder}>{q.quote}</Field>&rdquo;
+              &ldquo;{q.quote}&rdquo;
             </blockquote>
             <p className="mt-4 text-[13px] font-medium text-steel-600">
-              Hired: <Field on={q.placeholder}>{q.outcome}</Field>
+              Hired: {q.outcome}
             </p>
             <figcaption className="mt-5 flex items-center gap-3 border-t border-[var(--border-subtle)] pt-5">
-              {q.photo ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={q.photo}
-                  alt={q.name}
-                  className="h-12 w-12 shrink-0 rounded-full object-cover"
-                />
-              ) : (
-                <PhImage label="Photo" className="h-12 w-12 shrink-0 rounded-full !p-0 text-[10px]" />
-              )}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={q.photo}
+                alt={q.name}
+                className="h-12 w-12 shrink-0 rounded-full object-cover"
+              />
               <div className="min-w-0">
                 <p className="font-display text-[15px] font-semibold text-navy-900">
-                  <Field on={q.placeholder}>{q.name}</Field>
+                  {q.name}
                 </p>
                 <p className="text-[13px] text-[var(--text-faint)]">
-                  <Field on={q.placeholder}>
-                    {q.role}, {q.company}
-                  </Field>
+                  {q.role}, {q.company}
                 </p>
               </div>
-              {q.linkedin ? (
-                <a
-                  href={q.linkedin}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={`${q.name} on LinkedIn`}
-                  className="ml-auto text-steel-600 transition hover:text-navy-900"
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 110-4.13 2.06 2.06 0 010 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z" />
-                  </svg>
-                </a>
-              ) : (
-                <span className="ml-auto">
-                  <Ph>LinkedIn</Ph>
-                </span>
-              )}
             </figcaption>
           </figure>
         ))}

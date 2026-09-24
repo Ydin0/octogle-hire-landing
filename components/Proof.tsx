@@ -51,18 +51,38 @@ export function TrustBadges() {
         href={ISO_URL}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center gap-2 text-[14px] font-medium text-steel-700 transition hover:text-navy-900"
+        aria-label="ISO 27001 certified, view certificate"
+        className="inline-flex items-center gap-2.5 text-navy-900 transition hover:opacity-80"
       >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
-          <path
-            d="M12 3l7 3v5.5c0 4.3-3 8.2-7 9.5-4-1.3-7-5.2-7-9.5V6l7-3z"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinejoin="round"
-          />
-          <path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        {/* Same globe mark as the octoglehire.com badge, as vector. */}
+        <svg width="34" height="34" viewBox="0 0 64 64" fill="none" aria-hidden className="text-[#3f3f55]">
+          {/* Cut the globe lines out of the "ISO" band, so it works on any background. */}
+          <mask id="iso-band">
+            <rect width="64" height="64" fill="white" />
+            <rect x="0" y="24" width="64" height="16" fill="black" />
+          </mask>
+          <g mask="url(#iso-band)" stroke="currentColor" strokeWidth="2.2">
+            <circle cx="32" cy="32" r="29" strokeWidth="2.6" />
+            <ellipse cx="32" cy="32" rx="13" ry="29" />
+            <path d="M32 3v58M9 15h46M9 49h46" />
+          </g>
+          <path d="M4 23h56M4 41h56" stroke="currentColor" strokeWidth="2.2" />
+          <text
+            x="32"
+            y="37.5"
+            textAnchor="middle"
+            fontFamily="system-ui, sans-serif"
+            fontSize="13"
+            fontWeight="500"
+            fill="currentColor"
+          >
+            ISO
+          </text>
         </svg>
-        ISO 27001 certified
+        <span className="leading-tight">
+          <span className="block font-display text-[15px] font-semibold">ISO 27001</span>
+          <span className="block text-[13px] text-steel-600">Certified</span>
+        </span>
       </a>
     </div>
   );
