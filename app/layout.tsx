@@ -10,13 +10,13 @@ const CLARITY_ID = "yi3brud3l6";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://try.octoglehire.com"),
-  title: "Octogle Hire | A senior engineer embedded in your team, from £1,500/mo",
+  title: "Octogle Hire | A full-time engineer embedded in your team, from £1,500/mo",
   description:
-    "The same senior developer UK companies pay £99,768 a year for, from £1,500 a month. Embedded in your team: your product, your repo, your ownership. Three profiles in 48 hours, no placement fee.",
+    "Full-time engineers embedded in your team, from £1,500 a month. Juniors to seniors at a fraction of a UK hire. Your repo, your ownership. Three profiles in 48 hours, no placement fee.",
   openGraph: {
-    title: "Octogle Hire | A senior embedded engineer from £1,500/mo",
+    title: "Octogle Hire | An embedded engineer from £1,500/mo",
     description:
-      "Same work as a £99,768/yr UK senior dev, from £1,500 a month. Three profiles in 48 hours, no placement fee.",
+      "Full-time engineers from £1,500 a month, a fraction of a UK hire. Three profiles in 48 hours, no placement fee.",
     url: "https://try.octoglehire.com",
     siteName: "Octogle Hire",
     locale: "en_GB",

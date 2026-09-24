@@ -5,7 +5,7 @@ import { useState } from "react";
 const FAQS = [
   {
     q: "Why is it so much cheaper than a local hire?",
-    a: "Our engineers work from our own office in India, so you're not paying UK payroll, NI, benefits, and overhead on top of a salary. Same senior work, embedded in your team. You do the maths on the two numbers above.",
+    a: "Our engineers work from our own office in India, so you're not paying UK payroll, NI, benefits, and overhead on top of a salary. Same level of work, embedded in your team. The price table above shows the difference at each level.",
   },
   {
     q: "Is this outsourcing or freelancers?",

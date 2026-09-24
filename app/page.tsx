@@ -1,10 +1,10 @@
-import Image from "next/image";
 import { FunnelProvider, CtaButton, InlineStart } from "@/components/Funnel";
 import Faq from "@/components/Faq";
 import Testimonials from "@/components/Testimonials";
+import Engineers from "@/components/Engineers";
+import Pricing from "@/components/Pricing";
+import { TrustBadges, LogoStrip } from "@/components/Proof";
 import StickyCta from "@/components/StickyCta";
-import before from "@/public/before.jpg";
-import after from "@/public/after.jpg";
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
@@ -34,7 +34,7 @@ export default function Page() {
   return (
     <FunnelProvider>
       {/* Header */}
-      <header className="mx-auto flex max-w-content items-center justify-between px-5 py-6 sm:px-8">
+      <header className="mx-auto flex max-w-content items-center justify-between px-5 py-4 sm:px-8 sm:py-6">
         <div className="flex items-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -48,8 +48,9 @@ export default function Page() {
       </header>
 
       <main className="overflow-x-hidden pb-28 lg:pb-0">
-        {/* Hero */}
-        <section className="mx-auto max-w-content px-5 pt-6 sm:px-8 sm:pt-10">
+        {/* Hero: headline, the first question and third-party proof all on
+            the first mobile screen. Detail moves below. */}
+        <section className="mx-auto max-w-content px-5 pt-2 sm:px-8 sm:pt-8">
           <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border-default)] bg-white/70 px-4 py-2">
             <span className="h-2 w-2 rounded-full bg-sky-500" />
             <span className="text-[14px] font-medium text-steel-700">
@@ -57,212 +58,177 @@ export default function Page() {
             </span>
           </div>
 
-          <h1 className="mt-7 font-display text-[clamp(2.6rem,8vw,5.1rem)] font-semibold leading-[1.02] tracking-[-0.02em] text-navy-900">
-            A senior engineer, embedded in your team.
-            <br />
+          <h1 className="mt-5 font-display text-[clamp(2.3rem,7.5vw,4.8rem)] font-semibold leading-[1.02] tracking-[-0.02em] text-navy-900">
+            A full-time engineer, embedded in your team.{" "}
             <span className="headline-gradient">From £1,500 a month.</span>
           </h1>
 
-          <p className="mt-6 max-w-2xl text-[clamp(1.05rem,2.4vw,1.35rem)] leading-relaxed text-steel-700">
-            The same senior developer UK companies pay{" "}
-            <span className="strike">£99,768</span> a year for. In your repo, on
-            your standups, shipping your product from week one. Not a freelancer.
-            Not an agency.
-          </p>
-
-          <p className="mt-4 max-w-2xl text-[15px] leading-relaxed text-steel-600">
-            Full time, from interns to senior developers, in our fully managed
-            in-person office and working inside your repo. Not a freelancer
-            marketplace. That is why it costs a fraction of a local hire.
-          </p>
-
-          {/* Compare cards */}
-          <div className="mt-10 grid gap-4 sm:grid-cols-2">
-            <div className="rounded-3xl border border-[var(--border-subtle)] bg-white p-6 shadow-card sm:p-7">
-              <p className="text-[14px] font-medium text-steel-600">
-                Local UK senior, fully loaded
-              </p>
-              <p className="mt-3 font-display text-[40px] font-semibold leading-none text-navy-900">
-                £8,314
-                <span className="text-[20px] font-medium text-steel-600">
-                  /mo
-                </span>
-              </p>
-              <p className="mt-2 text-[14px] text-[var(--text-faint)]">
-                £99,768 a year
-              </p>
-            </div>
-            <div className="relative rounded-3xl border border-sky-500/45 bg-white p-6 shadow-glow sm:p-7">
-              <p className="text-[14px] font-medium text-steel-600">
-                Octogle engineer, embedded
-              </p>
-              <p className="mt-3 font-display text-[40px] font-semibold leading-none text-navy-900">
-                £1,500
-                <span className="text-[20px] font-medium text-steel-600">
-                  /mo
-                </span>
-              </p>
-              <p className="mt-2 text-[14px] text-[var(--text-faint)]">
-                from £18,000 a year
-              </p>
-            </div>
-          </div>
-
-          <p className="mt-6 text-[15px] font-medium text-steel-700">
-            Save up to{" "}
-            <span className="text-navy-900">£81,768 a year</span>. No placement
-            fee.
+          <p className="mt-4 max-w-2xl text-[clamp(1.02rem,2.3vw,1.3rem)] leading-relaxed text-steel-700">
+            In your repo, on your standups, shipping from week one. Juniors to
+            seniors, at a fraction of a UK hire.
           </p>
 
           {/* Embedded first question: one tap starts the funnel */}
-          <div className="mt-8 rounded-3xl border border-[var(--border-default)] bg-ice-100/50 p-5 shadow-card sm:p-6">
+          <div
+            id="start"
+            className="mt-6 rounded-3xl border border-[var(--border-default)] bg-ice-100/50 p-5 shadow-card sm:p-6"
+          >
             <InlineStart />
             <p className="mt-4 text-[14px] text-[var(--text-faint)]">
-              Pick one to see three engineers we&apos;d put on it. Profiles in 48
-              hours, no placement fee, no commitment to view them.
+              See three engineers we&apos;d put on it within 48 hours. No
+              placement fee. Not right? We swap them.
             </p>
           </div>
 
-          {/* Trust bar */}
-          <div className="mt-6">
-            <p className="text-[13px] font-medium text-steel-700">
-              40+ engineers placed. Founders at{" "}
-              <span className="text-navy-900">
-                TNW, Hireflow, Hyrra, 1VA, Beekey, Gecko, Leadey and Corpwise
-              </span>
-              .
-            </p>
+          <div className="mt-5">
+            <TrustBadges />
           </div>
         </section>
 
-        {/* The two ways this goes */}
-        <section className="mx-auto mt-24 max-w-content px-5 sm:px-8">
-          <Eyebrow>The two ways this goes</Eyebrow>
-          <h2 className="max-w-3xl font-display text-[clamp(1.9rem,4.5vw,2.9rem)] font-semibold leading-[1.08] tracking-[-0.01em] text-navy-900">
-            You can keep building it yourself. Or you can ship it.
-          </h2>
-
-          <div className="mt-10 grid gap-5 lg:grid-cols-2">
-            {/* BEFORE */}
-            <div className="overflow-hidden rounded-3xl border border-[var(--border-subtle)] bg-white shadow-card">
-              <div className="relative aspect-[16/11] w-full">
-                <Image
-                  src={before}
-                  alt="A founder coding alone late at night"
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 550px"
-                  className="object-cover"
-                  placeholder="blur"
-                />
-                <span className="eyebrow absolute left-4 top-4 rounded-full bg-navy-900/80 px-3 py-1 text-[11px] font-medium text-white backdrop-blur">
-                  Before
-                </span>
-              </div>
-              <div className="p-6 sm:p-7">
-                <h3 className="font-display text-[20px] font-semibold text-navy-900">
-                  You, at 1am, prompting Claude Code.
-                </h3>
-                <p className="mt-2 text-[15px] leading-relaxed text-steel-700">
-                  Every bug is yours. Every deploy is yours. The roadmap waits
-                  while you debug. Customers wait while you build.
-                </p>
-                <ul className="mt-4 space-y-2 text-[14px] text-steel-700">
-                  {[
-                    "One person",
-                    "Nights and weekends",
-                    "Nothing ships while you sell",
-                  ].map((t) => (
-                    <li key={t} className="flex items-center gap-2">
-                      <span className="h-1.5 w-1.5 rounded-full bg-[var(--text-faint)]" />
-                      {t}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-
-            {/* AFTER */}
-            <div className="overflow-hidden rounded-3xl border border-sky-500/40 bg-white shadow-glow">
-              <div className="relative aspect-[16/11] w-full">
-                <Image
-                  src={after}
-                  alt="A founder running the business while an engineer ships"
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 550px"
-                  className="object-cover"
-                  placeholder="blur"
-                />
-                <span className="eyebrow absolute left-4 top-4 rounded-full bg-sky-500/90 px-3 py-1 text-[11px] font-medium text-white backdrop-blur">
-                  After
-                </span>
-              </div>
-              <div className="p-6 sm:p-7">
-                <h3 className="font-display text-[20px] font-semibold text-navy-900">
-                  You, running the business. An engineer shipping it.
-                </h3>
-                <p className="mt-2 text-[15px] leading-relaxed text-steel-700">
-                  A senior developer embedded in your team from week one, on
-                  your standups, in your repo. You scale the SaaS. They build
-                  it.
-                </p>
-                <ul className="mt-4 space-y-2 text-[14px] text-steel-700">
-                  {[
-                    "From £1,500 a month",
-                    "Profiles in 48 hours",
-                    "Your repo, your ownership",
-                  ].map((t) => (
-                    <li key={t} className="flex items-center gap-2">
-                      <Check />
-                      {t}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </div>
+        {/* Client logos */}
+        <section className="mx-auto mt-14 max-w-content px-5 sm:px-8">
+          <LogoStrip />
         </section>
 
-        {/* Proof */}
+        {/* The engineers */}
         <section className="mx-auto mt-24 max-w-content px-5 sm:px-8">
-          <Eyebrow>The numbers founders walked away with</Eyebrow>
+          <Eyebrow>Who you&apos;d get</Eyebrow>
           <h2 className="max-w-3xl font-display text-[clamp(1.9rem,4.5vw,2.9rem)] font-semibold leading-[1.08] tracking-[-0.01em] text-navy-900">
-            Real teams. Real engineers. Real money saved.
+            Real engineers. You see them before you commit.
           </h2>
           <p className="mt-4 max-w-2xl text-[17px] leading-relaxed text-steel-700">
-            Same senior work, a fraction of the local cost. Here is what that
-            looked like for four of them.
+            Full time, from our own office, on one client at a time. Every
+            engineer is a graduate of one of India&apos;s top tech universities
+            and builds with Claude Code. Here are a few of the team right now.
           </p>
-          <Testimonials />
+          <Engineers />
         </section>
 
-        {/* Not a marketplace */}
+        {/* Client proof */}
+        <section className="mx-auto mt-24 max-w-content px-5 sm:px-8">
+          <Eyebrow>What clients say</Eyebrow>
+          <h2 className="max-w-3xl font-display text-[clamp(1.9rem,4.5vw,2.9rem)] font-semibold leading-[1.08] tracking-[-0.01em] text-navy-900">
+            Founders who stopped building it alone.
+          </h2>
+          <Testimonials />
+          <div className="mt-6">
+            <TrustBadges />
+          </div>
+        </section>
+
+        {/* Pricing */}
+        <section className="mx-auto mt-24 max-w-content px-5 sm:px-8">
+          <Eyebrow>What it costs</Eyebrow>
+          <h2 className="max-w-3xl font-display text-[clamp(1.9rem,4.5vw,2.9rem)] font-semibold leading-[1.08] tracking-[-0.01em] text-navy-900">
+            One monthly price. No placement fee.
+          </h2>
+          <p className="mt-4 max-w-2xl text-[17px] leading-relaxed text-steel-700">
+            Pick the level you need. Same engineer, full time, for a fraction of
+            what the same level costs to hire in the UK.
+          </p>
+          <Pricing />
+        </section>
+
+        {/* The company */}
+        <section className="mx-auto mt-24 max-w-content px-5 sm:px-8">
+          <Eyebrow>Who we are</Eyebrow>
+          <h2 className="max-w-3xl font-display text-[clamp(1.9rem,4.5vw,2.9rem)] font-semibold leading-[1.08] tracking-[-0.01em] text-navy-900">
+            A real company, with a real office.
+          </h2>
+          <p className="mt-4 max-w-2xl text-[17px] leading-relaxed text-steel-700">
+            Not a marketplace and not a middleman. Our engineers are our team,
+            working together from our own office every day.
+          </p>
+
+          <div className="mt-10 grid gap-4 sm:grid-cols-3">
+            {[
+              {
+                t: "60-person engineering office",
+                b: "Our own delivery office in India. Managed, in person, every day.",
+              },
+              {
+                t: "Headquartered in Dubai",
+                b: "Office 2020, Parklane Tower, Business Bay.",
+              },
+              {
+                t: "ISO 27001 certified",
+                b: "Independently audited information security. Your code and data are handled to that standard.",
+              },
+            ].map((c) => (
+              <div
+                key={c.t}
+                className="rounded-3xl border border-[var(--border-subtle)] bg-white p-6 shadow-card"
+              >
+                <h3 className="font-display text-[17px] font-semibold text-navy-900">
+                  {c.t}
+                </h3>
+                <p className="mt-1.5 text-[15px] leading-relaxed text-steel-700">
+                  {c.b}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-4 flex flex-col gap-5 rounded-3xl border border-[var(--border-subtle)] bg-white p-6 shadow-card sm:flex-row sm:items-center">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/proof/yaseen.jpg"
+              alt="Yaseen Deen, founder of Octogle"
+              className="h-20 w-20 shrink-0 rounded-2xl object-cover"
+            />
+            <div>
+              <p className="font-display text-[17px] font-semibold text-navy-900">
+                Yaseen Deen, Founder
+              </p>
+              <p className="mt-1 max-w-2xl text-[15px] leading-relaxed text-steel-700">
+                From the UK, with deep ties in India. Yaseen built our 60-person
+                engineering office in India and runs Octogle from Dubai, helping
+                companies around the world get better development for less.
+              </p>
+              <a
+                href="https://www.linkedin.com/in/yaseen-deen-52249219b/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2 inline-block text-[14px] font-medium text-steel-600 underline underline-offset-4 transition hover:text-navy-900"
+              >
+                Yaseen on LinkedIn
+              </a>
+            </div>
+          </div>
+        </section>
+
+        {/* Risk reversal */}
         <section className="mx-auto mt-24 max-w-content px-5 sm:px-8">
           <Eyebrow>Before you assume the catch</Eyebrow>
           <h2 className="max-w-3xl font-display text-[clamp(1.9rem,4.5vw,2.9rem)] font-semibold leading-[1.08] tracking-[-0.01em] text-navy-900">
-            It&apos;s not a marketplace, and it&apos;s not a gamble.
+            Nothing to lose by looking.
           </h2>
-          <p className="mt-4 max-w-2xl text-[17px] leading-relaxed text-steel-700">
-            This is one engineer from our own office, working inside your
-            company, on your standups, on one client at a time.
-          </p>
 
-          <div className="mt-10 grid gap-4 sm:grid-cols-2">
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {[
               {
-                t: "They work from our office, every day",
-                b: "Not a freelancer juggling five clients. Full time, your product, your hours.",
+                t: "See three profiles first",
+                b: "You choose who you work with. No commitment to view them.",
+              },
+              {
+                t: "Not right? We swap them, no fee",
+                b: "If the fit is wrong, we put someone else on it.",
               },
               {
                 t: "Your repo, your ownership",
                 b: 'Everything they build is yours. No handover, no lock-in, no "then they were gone".',
               },
               {
-                t: "On your standups, in your timezone",
-                b: "Embedded in your team, not emailing a spec across the world and hoping.",
+                t: "One client at a time",
+                b: "Not a freelancer juggling five clients. Full time, your product, on your standups.",
               },
               {
-                t: "Not right? Swap them, no fee",
-                b: "You see three profiles first. You decide. Nothing to lose by looking.",
+                t: "Monthly, no lock-in",
+                b: "Rolling monthly contract with 14 days' notice.",
+              },
+              {
+                t: "IP and NDA in writing",
+                b: "All IP is yours, confirmed in our NDA and standard contract.",
               },
             ].map((c) => (
               <div
