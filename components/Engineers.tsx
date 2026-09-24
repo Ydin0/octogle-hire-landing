@@ -19,12 +19,12 @@ type Engineer = {
 
 const ENGINEERS: Engineer[] = [
   {
-    name: "First name",
-    role: "Senior Full-Stack",
+    photo: "/engineers/priya.jpg",
+    name: "Priya",
+    role: "Full-Stack Engineer",
     years: "7 yrs",
-    stack: ["React", "Node", "Postgres"],
-    previously: "Previous company",
-    placeholder: true,
+    stack: [],
+    previously: "B2B SaaS platforms",
   },
   {
     name: "First name",
@@ -62,7 +62,7 @@ export default function Engineers() {
               <img
                 src={e.photo}
                 alt={e.name}
-                className="aspect-[4/3] w-full object-cover"
+                className="aspect-[4/3] w-full object-cover object-[center_40%]"
               />
             ) : (
               <PhImage
@@ -85,16 +85,18 @@ export default function Engineers() {
                   {e.role} · {e.years}
                 </Field>
               </p>
-              <div className="mt-4 flex flex-wrap gap-2">
-                {e.stack.map((s) => (
-                  <span
-                    key={s}
-                    className="rounded-full border border-[var(--border-default)] bg-ice-100/60 px-3 py-1 text-[13px] font-medium text-steel-700"
-                  >
-                    {s}
-                  </span>
-                ))}
-              </div>
+              {e.stack.length > 0 && (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {e.stack.map((s) => (
+                    <span
+                      key={s}
+                      className="rounded-full border border-[var(--border-default)] bg-ice-100/60 px-3 py-1 text-[13px] font-medium text-steel-700"
+                    >
+                      {s}
+                    </span>
+                  ))}
+                </div>
+              )}
               <p className="mt-4 text-[14px] text-[var(--text-faint)]">
                 Previously: <Field on={e.placeholder}>{e.previously}</Field>
               </p>
