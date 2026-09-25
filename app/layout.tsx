@@ -7,6 +7,7 @@ const META_PIXEL_ID = "1614640659743336";
 const LEADPIPE_SRC =
   "https://leadpipe.aws53.cloud/p/ae6e8671-549b-4d7b-9445-3b01ce023379.js";
 const CLARITY_ID = "yi3brud3l6";
+const GOOGLE_ADS_ID = "AW-18440423872";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://try.octoglehire.com"),
@@ -43,6 +44,21 @@ export default function RootLayout({
     >
       <body>
         {children}
+
+        {/* Google tag (Google Ads). Plain <script> tags, not next/script:
+            Google's tag detection reads the initial HTML, and afterInteractive
+            injects after hydration, so it would report "no Google tag found".
+            Config only here; the lead conversion fires in Funnel.tsx. */}
+        <script
+          async
+          src={`https://www.googletagmanager.com/gtag/js?id=${GOOGLE_ADS_ID}`}
+        />
+        <script
+          id="gtag-init"
+          dangerouslySetInnerHTML={{
+            __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${GOOGLE_ADS_ID}');`,
+          }}
+        />
 
         {/* Meta Pixel */}
         <Script id="meta-pixel" strategy="afterInteractive">
