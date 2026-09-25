@@ -19,6 +19,25 @@ const CALENDAR_URL =
 const LOCATION_TAG = "landing page -dan";
 
 type Fbq = (...args: unknown[]) => void;
+// Google Ads "Submit lead form" conversion (tag loaded in app/layout.tsx).
+const GOOGLE_ADS_LEAD_CONVERSION = "AW-18440423872/1XedCIbikPscEMCTitlE";
+
+type Gtag = (...args: unknown[]) => void;
+function trackGoogleAdsLead(transactionId: string) {
+  const gtag = (window as unknown as { gtag?: Gtag }).gtag;
+  if (typeof gtag !== "function") return;
+  try {
+    gtag("event", "conversion", {
+      send_to: GOOGLE_ADS_LEAD_CONVERSION,
+      value: 1.0,
+      currency: "AED",
+      transaction_id: transactionId,
+    });
+  } catch {
+    // Analytics must never break the funnel.
+  }
+}
+
 function track(event: string, params?: object, opts?: object) {
   const fbq = (window as unknown as { fbq?: Fbq }).fbq;
   if (typeof fbq === "function") fbq("track", event, params || {}, opts || {});
@@ -145,6 +164,9 @@ function QuizModal({
   const [enrich, setEnrich] = useState<Record<string, string>>({});
   const eventId = useRef("lead_" + crypto.randomUUID());
   const scheduled = useRef(false);
+  // One Google Ads lead conversion per visitor, even if they go Back and
+  // continue again (transaction_id also dedupes on Google's side).
+  const googleLeadSent = useRef(false);
 
   // Lock scroll + escape to close + Schedule pixel from calendar postMessage.
   useEffect(() => {
@@ -245,6 +267,10 @@ function QuizModal({
       { content_category: build },
       { eventID: eventId.current },
     );
+    if (!googleLeadSent.current) {
+      googleLeadSent.current = true;
+      trackGoogleAdsLead(eventId.current);
+    }
     // Partial capture: send contact details now, before the company step.
     void postLead(true);
     setStep(3);
