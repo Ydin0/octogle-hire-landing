@@ -6,6 +6,12 @@ import { useEffect } from "react";
 // mirroring the original booked.html. PageView is already fired by the root layout.
 export default function ScheduleTracker() {
   useEffect(() => {
+    // Already counted in the funnel modal (same visit): don't double count.
+    try {
+      if (sessionStorage.getItem("ogh_schedule_sent")) return;
+    } catch {
+      /* storage blocked: fall through and count it here */
+    }
     const fire = () => {
       const fbq = (window as unknown as { fbq?: (...a: unknown[]) => void }).fbq;
       if (typeof fbq !== "function") return false;
