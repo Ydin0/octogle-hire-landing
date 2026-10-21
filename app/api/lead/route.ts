@@ -1,10 +1,17 @@
 import { NextResponse } from "next/server";
 
-// Leadey inbound webhook for the "OctogleHire — Inbound — Landing Page" campaign.
-// Env override so the token can be rotated without a code change.
-const WEBHOOK_URL =
-  process.env.LEADEY_LP_WEBHOOK_URL ??
-  "https://backend.leadey.ai/webhooks/funnels/funnel_mtukds7fvcp7yz/leads?token=whk_mtukds7l2028s9";
+/*
+ * Leadey inbound webhook for the "Website Leads" campaign — the same campaign
+ * www.octoglehire.com feeds, so landing-page leads get the same follow-up
+ * workflows (email + SMS + call tasks) instead of landing nowhere.
+ *
+ * The previous hardcoded URL pointed at the "OctogleHire — Inbound — Landing
+ * Page" campaign (funnel_mtukds7fvcp7yz), which no longer exists in Leadey, so
+ * every landing-page lead was silently lost. The URL carries a secret token,
+ * so it lives in the environment, not in code: copy it from Leadey →
+ * Website Leads → Inbound webhook.
+ */
+const WEBHOOK_URL = process.env.LEADEY_WEBSITE_LEADS_WEBHOOK_URL;
 
 /**
  * Server-side relay from the funnel to Leadey.
@@ -19,6 +26,11 @@ const WEBHOOK_URL =
  * blanks `company` when it equals the person's name, so we disambiguate that.
  */
 export async function POST(req: Request) {
+  if (!WEBHOOK_URL) {
+    console.error("[lead] LEADEY_WEBSITE_LEADS_WEBHOOK_URL is not set; lead not delivered");
+    return NextResponse.json({ ok: false, error: "lead destination not configured" }, { status: 500 });
+  }
+
   let body: Record<string, unknown>;
   try {
     body = await req.json();
@@ -44,6 +56,12 @@ export async function POST(req: Request) {
     firstName: firstName || undefined,
     lastName: rest.join(" ") || undefined,
     company: company || undefined,
+    // Keys the Website Leads field map understands, so these leads are
+    // labelled and routed like the main site's (developer follow-up flow).
+    lead_source: "Landing Page",
+    demand_type: "Engineering",
+    service: "Hire engineers",
+    source_page: str(body.page) || undefined,
   };
 
   try {
