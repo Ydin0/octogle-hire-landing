@@ -1,57 +1,65 @@
 // Ad-matched heroes. The headline has to repeat the promise of the ad that was
-// clicked, so someone who tapped "Quoted £200k?" sees £200k in the first
-// three seconds. Everything below the hero stays the same, so a variant test
-// only ever changes the one thing.
+// clicked, so the first three seconds confirm the visitor is in the right
+// place. Everything below the hero is identical, so a variant test only ever
+// changes the one thing.
 //
 // Picked by ?v=<key>, or failing that by matching utm_content (the ad name,
 // sent as utm_content={{ad.name}}), so existing ads match without new links.
 
 export type HeroVariant = {
   key: string;
-  eyebrow: string;
-  /** Plain lead-in, then the gradient punchline. */
-  lead: string;
-  punch: string;
+  /** Who it's for, above the headline. */
+  call: string;
+  head: string;
   sub: string;
 };
 
-const DEFAULT: HeroVariant = {
-  key: "default",
-  eyebrow: "For UK founders building their own software",
-  lead: "A full-time engineer, embedded in your team.",
-  punch: "From £1,500 a month.",
-  sub: "In your repo, on your standups. See three profiles within 48 hours.",
+// "About £61k" is the calculator's own output for the default mid-level case:
+// £44,851 salary + employer NI + pension + a 20% recruiter fee.
+const COST: HeroVariant = {
+  key: "cost",
+  call: "For UK founders paying UK rates for engineering",
+  head: "A full-time engineer for a fraction of a UK hire.",
+  sub: "A UK mid-level developer costs about £61k in year one once you add NI, pension and a recruiter fee (see the calculator). Ours is £2,500 a month and joins your standups.",
 };
 
 export const HERO_VARIANTS: Record<string, HeroVariant> = {
-  default: DEFAULT,
+  cost: COST,
+  quality: {
+    key: "quality",
+    call: "For founders burned by offshore or freelance code",
+    head: "Offshore dev that doesn't fall apart in month three.",
+    sub: "One full-time engineer, one client, managed in person in our own office. Work lands as pull requests your team reviews and merges, in your repo.",
+  },
+  speed: {
+    key: "speed",
+    call: "For teams with a dev role that's been open too long",
+    head: "Three engineers to interview within 48 hours.",
+    sub: "Skip the advert, the agency and the notice period. Full time, rolling monthly. Pick one and they join your standup.",
+  },
   quote: {
     key: "quote",
-    eyebrow: "For UK companies already building a product",
-    lead: "Quoted £200k to build it?",
-    punch: "Put an AI engineer on it from £1,500 a month.",
-    sub: "Full time in your repo, building with Claude Code. See three profiles within 48 hours.",
-  },
-  available: {
-    key: "available",
-    eyebrow: "Engineers available to start now",
-    lead: "Vetted AI engineers, ready to start.",
-    punch: "From £1,500 a month.",
-    sub: "Full time in your repo, building with Claude Code. See three profiles within 48 hours.",
+    call: "For UK companies already building a product",
+    head: "Quoted £200k to build it? Put an engineer on it from £1,500 a month.",
+    sub: "Full time in your repo, building with Claude Code. Your product changes as you build, and that's just the next task, not a new invoice.",
   },
   timeline: {
     key: "timeline",
-    eyebrow: "For UK companies already building a product",
-    lead: "Brief us Monday.",
-    punch: "Three engineer profiles by Wednesday.",
-    sub: "A full-time AI engineer in your repo the week after. From £1,500 a month.",
+    call: "For UK companies already building a product",
+    head: "Brief us Monday. Three engineer profiles by Wednesday.",
+    sub: "A full-time engineer in your repo the week after, from £1,500 a month. No placement fee.",
+  },
+  available: {
+    key: "available",
+    call: "Engineers available to start now",
+    head: "Full-time engineers, ready to start.",
+    sub: "Full time in your repo, building with Claude Code. See three profiles within 48 hours, then pick who starts.",
   },
   prototype: {
     key: "prototype",
-    eyebrow: "For founders who built it with Claude Code or Cursor",
-    lead: "Built it yourself?",
-    punch: "Now make it hold up.",
-    sub: "A full-time AI engineer makes it secure, tested and ready for real users. From £1,500 a month.",
+    call: "For founders who built it with Claude Code or Cursor",
+    head: "Built it yourself? Now make it hold up.",
+    sub: "A full-time engineer makes it secure, tested and ready for real users. From £1,500 a month.",
   },
 };
 
@@ -63,6 +71,9 @@ const AD_NAME_HINTS: [string, string][] = [
   ["timeline", "timeline"],
   ["available", "available"],
   ["prototype", "prototype"],
+  ["quality", "quality"],
+  ["speed", "speed"],
+  ["cost", "cost"],
 ];
 
 export function pickHero(params: {
@@ -77,5 +88,5 @@ export function pickHero(params: {
   for (const [hint, key] of AD_NAME_HINTS) {
     if (ad.includes(hint)) return HERO_VARIANTS[key];
   }
-  return DEFAULT;
+  return COST;
 }
