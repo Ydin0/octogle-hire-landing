@@ -1,4 +1,4 @@
-import { BookForm } from "@/components/Funnel";
+import { CtaButton, FunnelProvider } from "@/components/Funnel";
 import CostCalculator from "@/components/CostCalculator";
 import StickyCta from "@/components/StickyCta";
 import { pickHero } from "@/lib/hero-variants";
@@ -79,7 +79,7 @@ const FAQS = [
   },
   {
     q: "Why is it cheaper than a UK hire?",
-    a: "Our engineers work from our own office in India, and you pay no UK employer NI, pension or recruiter fee. The calculator at the top shows the maths.",
+    a: "Our engineers work from our own office in India, and you pay no UK employer NI, pension or recruiter fee. The calculator above shows the maths.",
   },
   {
     q: "I'm not technical. Can I manage them?",
@@ -114,13 +114,30 @@ export default async function Page({
   const hero = pickHero(await searchParams);
 
   return (
-    <>
+    <FunnelProvider variant={hero.key}>
+      {/* Offer banner: price, speed, risk reversal and the action in one line. */}
+      <div className="bg-navy-900 text-white">
+        <div className="mx-auto flex max-w-content items-center justify-between gap-3 px-5 py-2.5 sm:px-8">
+          <p className="min-w-0 text-[13px] leading-snug sm:text-[14px]">
+            <span className="mr-1.5 inline-flex items-center gap-1.5 rounded-full bg-good/20 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-[#7BE0B4]">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#7BE0B4]" />
+              UK
+            </span>
+            Full-time engineers from <b className="font-semibold">£1,500/mo</b>
+            <span className="hidden sm:inline"> · 3 profiles in 48 hours · No placement fee</span>
+          </p>
+          <CtaButton className="shrink-0 rounded-lg bg-white px-3 py-1.5 text-[13px] font-semibold text-navy-900 transition hover:bg-ice-100">
+            See profiles →
+          </CtaButton>
+        </div>
+      </div>
+
       <header className="mx-auto flex max-w-content items-center justify-between px-5 py-4 sm:px-8">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/octogle-logo.svg" alt="Octogle Hire" width={128} height={30} className="h-[28px] w-auto" />
-        <a href="#book" className="hidden rounded-xl bg-navy-900 px-4 py-2.5 text-[14px] font-medium text-white md:inline-block">
+        <CtaButton className="hidden rounded-xl bg-navy-900 px-4 py-2.5 text-[14px] font-medium text-white md:inline-block">
           Book a call
-        </a>
+        </CtaButton>
       </header>
 
       <main className="overflow-x-hidden pb-24 md:pb-0">
@@ -140,9 +157,9 @@ export default async function Page({
               Junior £1,500 · Mid £2,500 · Senior £4,500
             </p>
 
-            <a href="#book" className={btn + " mt-6 w-full md:w-auto"}>
+            <CtaButton className={btn + " mt-6 w-full md:w-auto"}>
               Book a 15-minute call <span aria-hidden>→</span>
-            </a>
+            </CtaButton>
             <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-[13px] text-steel-700">
               {["No placement fee", "See 3 profiles first", "Free swap", "14 days' notice"].map((t) => (
                 <li key={t} className="flex items-center gap-1.5">
@@ -169,6 +186,45 @@ export default async function Page({
             </figure>
           </div>
 
+          <div className="relative">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/people/founder-phone.webp"
+              alt=""
+              width={900}
+              height={1200}
+              fetchPriority="high"
+              className="aspect-[4/3] w-full rounded-3xl object-cover object-[center_25%] shadow-cta md:aspect-[4/5]"
+            />
+            <div className="absolute bottom-4 left-4 right-4 flex flex-col gap-2 sm:right-auto">
+              <span className="inline-flex items-center gap-2 self-start rounded-2xl bg-white/95 px-3.5 py-2.5 text-[14px] font-semibold text-navy-900 shadow-card backdrop-blur">
+                <span className="grid h-7 w-7 place-items-center rounded-full bg-good/15 text-good">
+                  <Tick />
+                </span>
+                3 engineer profiles in 48 hours
+              </span>
+              <span className="inline-flex items-center gap-2 self-start rounded-2xl bg-white/95 px-3.5 py-2.5 text-[14px] font-semibold text-navy-900 shadow-card backdrop-blur">
+                <span className="grid h-7 w-7 place-items-center rounded-full bg-sky-500/15 font-display text-[13px] text-steel-600">
+                  £
+                </span>
+                From £1,500 a month, no placement fee
+              </span>
+            </div>
+          </div>
+        </section>
+
+        {/* 1b. The maths */}
+        <section className="mx-auto grid max-w-content items-center gap-8 px-5 pb-14 sm:px-8 md:grid-cols-[.9fr_1.1fr]">
+          <div>
+            <H2>Do the maths on a UK hire.</H2>
+            <p className="mt-3 text-[17px] leading-relaxed text-steel-700">
+              Salary is only the start. Add employer NI, pension and a recruiter
+              fee, then compare it with one monthly price.
+            </p>
+            <CtaButton className={btn + " mt-6 hidden md:inline-flex"}>
+              Book a 15-minute call <span aria-hidden>→</span>
+            </CtaButton>
+          </div>
           <CostCalculator />
         </section>
 
@@ -189,9 +245,9 @@ export default async function Page({
                 </div>
               ))}
             </div>
-            <a href="#book" className={btn + " mt-7 w-full md:w-auto"}>
+            <CtaButton className={btn + " mt-7 w-full md:w-auto"}>
               See three engineers in 48 hours <span aria-hidden>→</span>
-            </a>
+            </CtaButton>
           </div>
         </section>
 
@@ -254,18 +310,33 @@ export default async function Page({
           </ol>
         </section>
 
-        {/* 5. The form */}
-        <section id="book" className="scroll-mt-4 bg-navy-900 py-14 text-white">
-          <div className="mx-auto max-w-xl px-5">
-            <h2 className="font-display text-[clamp(1.6rem,4.5vw,2.3rem)] font-semibold leading-[1.1] tracking-[-0.015em]">
-              Book a call. See three engineers within 48 hours.
-            </h2>
-            <div className="mt-6">
-              <BookForm variant={hero.key} />
+        {/* 5. Final CTA */}
+        <section id="final" className="mx-auto max-w-content px-5 sm:px-8">
+          <div className="grid overflow-hidden rounded-[2rem] bg-navy-900 text-white md:grid-cols-[1.2fr_.8fr]">
+            <div className="px-6 py-10 sm:px-10 sm:py-14">
+              <h2 className="font-display text-[clamp(1.7rem,4.5vw,2.5rem)] font-semibold leading-[1.08] tracking-[-0.015em]">
+                Book a call. See three engineers within 48 hours.
+              </h2>
+              <p className="mt-3 max-w-md text-[16px] leading-relaxed text-[#B7D2E1]">
+                15 minutes with Connor. Free to look, no placement fee, rolling
+                monthly with 14 days&apos; notice.
+              </p>
+              <CtaButton className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-white px-7 py-4 font-display text-[17px] font-medium text-navy-900 shadow-cta transition hover:bg-ice-100 sm:w-auto">
+                Book a 15-minute call <span aria-hidden>→</span>
+              </CtaButton>
+              <p className="mt-5 text-[14px] text-[#B7D2E1]">
+                Need SDRs instead? Dedicated SDRs from £1,900 a month. Ask on the call.
+              </p>
             </div>
-            <p className="mt-5 text-[14px] text-[#B7D2E1]">
-              Need SDRs instead? Dedicated SDRs from £1,900 a month. Ask on the call.
-            </p>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/people/founder-laptop.webp"
+              alt=""
+              width={900}
+              height={1200}
+              loading="lazy"
+              className="hidden h-full w-full object-cover object-[center_30%] md:block"
+            />
           </div>
         </section>
 
@@ -297,6 +368,6 @@ export default async function Page({
       </footer>
 
       <StickyCta />
-    </>
+    </FunnelProvider>
   );
 }

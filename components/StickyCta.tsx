@@ -1,18 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { CtaButton } from "./Funnel";
 
-// Mobile only. Price + one button, hidden while the form itself is on screen
-// so it never covers the thing it points to.
+// Mobile only. Price + one button, hidden at the top (the hero has its own
+// button) and over the final CTA band, so two identical buttons never stack.
 export default function StickyCta() {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
-    const book = document.getElementById("book");
+    const final = document.getElementById("final");
     const onScroll = () => {
-      const r = book?.getBoundingClientRect();
-      const formInView = r ? r.top < window.innerHeight && r.bottom > 0 : false;
-      setShow(window.scrollY > 280 && !formInView);
+      const r = final?.getBoundingClientRect();
+      const finalInView = r ? r.top < window.innerHeight && r.bottom > 0 : false;
+      setShow(window.scrollY > 280 && !finalInView);
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -29,12 +30,9 @@ export default function StickyCta() {
         <p className="font-semibold text-navy-900">From £1,500/mo</p>
         <p className="text-[var(--text-faint)]">3 profiles in 48h</p>
       </div>
-      <a
-        href="#book"
-        className="flex-1 rounded-2xl bg-navy-900 px-5 py-3.5 text-center font-display text-[16px] font-medium text-white shadow-cta"
-      >
+      <CtaButton className="flex-1 rounded-2xl bg-navy-900 px-5 py-3.5 text-center font-display text-[16px] font-medium text-white shadow-cta">
         Book a call
-      </a>
+      </CtaButton>
     </div>
   );
 }

@@ -1,6 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { DIAL_CODES, PRIORITY_ISO2, composePhone } from "@/lib/dial-codes";
 
 // Same-origin relay to Leadey (see app/api/lead/route.ts). Posting to Leadey
@@ -116,10 +123,115 @@ function sendLead(body: object) {
   }).catch(() => undefined);
 }
 
+type Ctx = { open: () => void };
+const FunnelCtx = createContext<Ctx | null>(null);
+
 /**
- * The page's only form, inline at #book. Step 1 is two taps (level, start
+ * Holds the booking popup. Every CTA on the page opens it; nothing else
+ * leaves the page.
+ */
+export function FunnelProvider({
+  variant,
+  children,
+}: {
+  variant: string;
+  children: React.ReactNode;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const started = useRef(false);
+  // Opening the popup is the funnel start; count it once per page view.
+  const open = useCallback(() => {
+    if (!started.current) {
+      started.current = true;
+      track("InitiateCheckout", {}, { eventID: "ic_" + crypto.randomUUID() });
+    }
+    setIsOpen(true);
+  }, []);
+  const close = useCallback(() => setIsOpen(false), []);
+
+  // Lock page scroll and close on Escape while the popup is open.
+  useEffect(() => {
+    if (!isOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && close();
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [isOpen, close]);
+
+  return (
+    <FunnelCtx.Provider value={{ open }}>
+      {children}
+      {isOpen && (
+        <div
+          className="overlay-in fixed inset-0 z-50 flex items-end justify-center overflow-y-auto bg-navy-900/55 backdrop-blur-sm sm:items-center sm:p-4"
+          onMouseDown={(e) => e.target === e.currentTarget && close()}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Book a call"
+            className="sheet-in relative w-full max-w-[480px] rounded-t-3xl bg-white shadow-cta sm:my-auto sm:rounded-3xl"
+          >
+            <button
+              type="button"
+              onClick={close}
+              aria-label="Close"
+              className="absolute right-3 top-3 z-10 grid h-9 w-9 place-items-center rounded-full text-steel-600 transition hover:bg-ice-100"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+            </button>
+            <div className="flex items-center gap-3 border-b border-[var(--border-subtle)] px-5 pb-4 pt-5 pr-14">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/people/connor.jpg"
+                alt="Connor Berwick"
+                width={44}
+                height={44}
+                className="h-11 w-11 shrink-0 rounded-full object-cover ring-2 ring-ice-200"
+              />
+              <div>
+                <p className="font-display text-[16px] font-semibold leading-tight text-navy-900">
+                  Book a call. See three engineers within 48 hours.
+                </p>
+                <p className="mt-0.5 text-[13px] text-steel-600">
+                  15 minutes with Connor. Free, no commitment.
+                </p>
+              </div>
+            </div>
+            <BookForm variant={variant} />
+          </div>
+        </div>
+      )}
+    </FunnelCtx.Provider>
+  );
+}
+
+export function CtaButton({
+  className,
+  children,
+}: {
+  className?: string;
+  children: React.ReactNode;
+}) {
+  const ctx = useContext(FunnelCtx);
+  if (!ctx) throw new Error("CtaButton must be used within FunnelProvider");
+  return (
+    <button type="button" onClick={ctx.open} className={className}>
+      {children}
+    </button>
+  );
+}
+
+/**
+ * The page's only form, shown in the popup. Step 1 is two taps (level, start
  * date), step 2 is contact details and fires Lead, then the calendar shows in
- * place. Every CTA on the page scrolls here.
+ * place.
  */
 export function BookForm({ variant }: { variant: string }) {
   const [step, setStep] = useState<1 | 2 | 3>(1);
@@ -129,7 +241,6 @@ export function BookForm({ variant }: { variant: string }) {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const eventId = useRef("lead_" + crypto.randomUUID());
-  const started = useRef(false);
   const scheduled = useRef(false);
   const frameRef = useRef<HTMLIFrameElement>(null);
   const exploring = start === EXPLORING;
@@ -169,13 +280,6 @@ export function BookForm({ variant }: { variant: string }) {
     window.addEventListener("message", onMsg);
     return () => window.removeEventListener("message", onMsg);
   }, [step]);
-
-  // First interaction with the form = funnel start, once.
-  const markStarted = () => {
-    if (started.current) return;
-    started.current = true;
-    track("InitiateCheckout", {}, { eventID: "ic_" + eventId.current });
-  };
 
   const next = () => {
     if (!level || !start) return setError("Pick a level and a start date.");
@@ -233,7 +337,7 @@ export function BookForm({ variant }: { variant: string }) {
   if (step === 3) {
     const first = f.name.trim().split(/\s+/)[0];
     return exploring ? (
-      <div className="rounded-3xl bg-white p-6 text-navy-900 shadow-cta">
+      <div className="p-6 text-navy-900">
         <p className="font-display text-[22px] font-semibold">
           Thanks{first ? `, ${first}` : ""}.
         </p>
@@ -252,7 +356,7 @@ export function BookForm({ variant }: { variant: string }) {
         </a>
       </div>
     ) : (
-      <div className="rounded-3xl bg-white p-4 text-navy-900 shadow-cta sm:p-6">
+      <div className="p-4 text-navy-900 sm:p-5">
         <p className="px-2 font-display text-[20px] font-semibold">
           Last step{first ? `, ${first}` : ""}: pick a time with Connor.
         </p>
@@ -271,10 +375,7 @@ export function BookForm({ variant }: { variant: string }) {
 
   return (
     <div
-      className="rounded-3xl bg-white p-5 text-navy-900 shadow-cta sm:p-6"
-      onFocusCapture={markStarted}
-      onPointerDown={markStarted}
-      onClickCapture={markStarted}
+      className="p-5 pb-[calc(env(safe-area-inset-bottom)+20px)] text-navy-900 sm:p-6"
     >
       <p className="eyebrow text-[11px] text-steel-600">Step {step} of 2</p>
 
