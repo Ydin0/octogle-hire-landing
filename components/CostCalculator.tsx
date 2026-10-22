@@ -39,7 +39,9 @@ export default function CostCalculator() {
 
   const uk = ukYearOne(salary || 0, feePct || 0);
   const octogle = lv.monthly * 12;
-  const diff = uk.total - octogle;
+  const saving = Math.max(0, uk.total - octogle);
+  const pctLess = uk.total > 0 ? Math.round((saving / uk.total) * 100) : 0;
+  const octoglePct = uk.total > 0 ? Math.min(100, (octogle / uk.total) * 100) : 100;
 
   const inputCls =
     "mt-1 w-full rounded-xl border border-[var(--border-default)] bg-ice-100/40 px-3 py-2.5 text-[16px] text-navy-900 outline-none transition focus:border-sky-500 focus:bg-white focus:shadow-glow";
@@ -47,7 +49,7 @@ export default function CostCalculator() {
   return (
     <div className="rounded-3xl border border-[var(--border-subtle)] bg-white p-5 shadow-cta sm:p-6">
       <p className="font-display text-[17px] font-semibold text-navy-900">
-        What a UK hire really costs in year one
+        How much you&apos;d save vs a UK hire
       </p>
 
       <div
@@ -77,7 +79,49 @@ export default function CostCalculator() {
         ))}
       </div>
 
-      <div className="mt-3 grid grid-cols-2 gap-3 text-[13px] font-medium text-steel-700">
+      {/* The saving is the headline; the costs that make it up sit under it. */}
+      <div className="mt-4 rounded-2xl bg-good/10 p-5">
+        <p className="text-[13px] font-medium text-good">You&apos;d save in year one</p>
+        <p
+          key={`${level}-${Math.round(saving)}`}
+          className="calc-pop mt-1 font-display text-[44px] font-semibold leading-none tracking-[-0.02em] text-good"
+        >
+          {gbp(saving)}
+        </p>
+        <p className="mt-2 text-[14px] text-[#1b7a54]">
+          That&apos;s <b className="font-semibold">{gbp(saving / 12)} a month</b>,{" "}
+          <b className="font-semibold">{pctLess}% less</b> than hiring in the UK.
+        </p>
+      </div>
+
+      {/* Side-by-side bars: the gap is the saving. */}
+      <div className="mt-4 space-y-3 text-[13px]">
+        <div>
+          <div className="flex justify-between text-steel-700">
+            <span>UK hire (salary, NI, pension, recruiter fee)</span>
+            <span className="font-semibold text-navy-900">{gbp(uk.total)}</span>
+          </div>
+          <div className="mt-1.5 h-2.5 overflow-hidden rounded-full bg-ice-200">
+            <div className="h-full w-full rounded-full bg-[#c2414b]/80" />
+          </div>
+        </div>
+        <div>
+          <div className="flex justify-between text-steel-700">
+            <span>Octogle Hire, 12 months</span>
+            <span className="font-semibold text-navy-900">{gbp(octogle)}</span>
+          </div>
+          <div className="mt-1.5 h-2.5 overflow-hidden rounded-full bg-ice-200">
+            <div
+              className="h-full rounded-full bg-good transition-[width] duration-700 ease-out"
+              style={{ width: `${octoglePct}%` }}
+            />
+          </div>
+        </div>
+      </div>
+
+      <details className="mt-4 text-[12px] leading-relaxed text-[var(--text-faint)]">
+        <summary className="cursor-pointer">Change salary or recruiter fee</summary>
+        <div className="mt-2 grid grid-cols-2 gap-3 text-[13px] font-medium text-steel-700">
         <label>
           UK salary (£)
           <input
@@ -100,25 +144,7 @@ export default function CostCalculator() {
         </label>
       </div>
 
-      <div className="mt-4 space-y-1.5 text-[14px]">
-        <div className="flex justify-between text-steel-700">
-          <span>UK: salary + NI + pension + fee</span>
-          <span className="font-semibold text-navy-900">{gbp(uk.total)}</span>
-        </div>
-        <div className="flex justify-between text-steel-700">
-          <span>Octogle Hire, 12 months</span>
-          <span className="font-semibold text-navy-900">{gbp(octogle)}</span>
-        </div>
-      </div>
-
-      <div className="mt-3 flex items-end justify-between rounded-2xl bg-good/10 p-4">
-        <span className="text-[14px] font-medium text-good">
-          Year-one difference
-        </span>
-        <span className="font-display text-[30px] font-semibold leading-none text-good">
-          {diff > 0 ? gbp(diff) : "£0"}
-        </span>
-      </div>
+      </details>
 
       <details className="mt-3 text-[12px] leading-relaxed text-[var(--text-faint)]">
         <summary className="cursor-pointer">Breakdown and sources</summary>

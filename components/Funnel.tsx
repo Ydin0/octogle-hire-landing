@@ -197,7 +197,7 @@ export function FunnelProvider({
               />
               <div>
                 <p className="font-display text-[16px] font-semibold leading-tight text-navy-900">
-                  Book a call. See three engineers within 48 hours.
+                  Get three engineer profiles within 48 hours.
                 </p>
                 <p className="mt-0.5 text-[13px] text-steel-600">
                   15 minutes with Connor. Free, no commitment.

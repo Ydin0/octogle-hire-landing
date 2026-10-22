@@ -31,7 +31,7 @@ export default function StickyCta() {
         <p className="text-[var(--text-faint)]">3 profiles in 48h</p>
       </div>
       <CtaButton className="flex-1 rounded-2xl bg-navy-900 px-5 py-3.5 text-center font-display text-[16px] font-medium text-white shadow-cta">
-        Book a call
+        Get engineers now
       </CtaButton>
     </div>
   );

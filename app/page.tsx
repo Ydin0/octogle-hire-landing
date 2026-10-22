@@ -1,6 +1,7 @@
 import { CtaButton, FunnelProvider } from "@/components/Funnel";
 import CostCalculator from "@/components/CostCalculator";
 import StickyCta from "@/components/StickyCta";
+import HowItWorks from "@/components/HowItWorks";
 import { pickHero } from "@/lib/hero-variants";
 
 // One job: book a 15-minute call. Order follows the 2026-10-23 structure:
@@ -18,35 +19,40 @@ const ISO_URL =
 const OBJECTIONS = [
   {
     said: "entirely re-write a lot of their work",
+    cost: "You pay for the build twice: once to write it, again to fix it.",
     answer: "Work happens in your repo,",
     detail: "where your team can see and review every change.",
   },
   {
     said: "herding cats 16 hours/day",
+    cost: "You end up project-managing instead of running the business.",
     answer: "Managed in person",
     detail: "in our own office, every day. You set priorities, we handle the rest.",
   },
   {
     said: "exorbitant markup (~50% ...)",
+    cost: "A chunk of every invoice never reaches the engineer.",
     answer: "One published monthly price.",
     detail: "No placement fee, no hidden extras.",
   },
   {
     said: "Nobody owns your delivery",
+    cost: "When it breaks, everyone points at someone else.",
     answer: "One engineer, one client.",
     detail: "Full time on your product, not juggling five others.",
   },
   {
     said: "3-6 month contracts minimum",
+    cost: "You're locked in long after you know it isn't working.",
     answer: "Rolling monthly,",
     detail: "14 days' notice. Your code and IP, confirmed in writing.",
   },
 ];
 
 const ENGINEERS = [
-  { photo: "/engineers/priya.jpg", name: "Priya", role: "Full-stack · 7 yrs", stack: "TypeScript, React, Node.js, AWS" },
-  { photo: "/engineers/rohit.jpg", name: "Rohit", role: "Backend · 5 yrs", stack: "Python, Django, PostgreSQL, AWS" },
-  { photo: "/engineers/prasanna.jpg", name: "Prasanna", role: "AI / ML · 17 yrs", stack: "Python, LLMs, RAG, FastAPI" },
+  { photo: "/engineers/priya.jpg", name: "Priya", role: "Full-stack engineer · 7 years", stack: "TypeScript, React, Node.js, AWS" },
+  { photo: "/engineers/rohit.jpg", name: "Rohit", role: "Backend engineer · 5 years", stack: "Python, Django, PostgreSQL, AWS" },
+  { photo: "/engineers/prasanna.jpg", name: "Prasanna", role: "AI / ML engineer · 17 years", stack: "Python, LLMs, RAG, FastAPI" },
 ];
 
 const QUOTES = [
@@ -66,11 +72,6 @@ const QUOTES = [
   },
 ];
 
-const STEPS = [
-  "15-minute call: your stack, the level you need, your start date.",
-  "Three real profiles within 48 hours. Interview who you like.",
-  "They join your repo and standups. One monthly invoice.",
-];
 
 const FAQS = [
   {
@@ -117,7 +118,7 @@ export default async function Page({
     <FunnelProvider variant={hero.key}>
       {/* Offer banner: price, speed, risk reversal and the action in one line. */}
       <div className="bg-navy-900 text-white">
-        <div className="mx-auto flex max-w-content items-center justify-between gap-3 px-5 py-2.5 sm:px-8">
+        <div className="mx-auto flex max-w-content items-center justify-center gap-3 px-5 py-2.5 text-center sm:px-8">
           <p className="min-w-0 text-[13px] leading-snug sm:text-[14px]">
             <span className="mr-1.5 inline-flex items-center gap-1.5 rounded-full bg-good/20 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-[#7BE0B4]">
               <span className="h-1.5 w-1.5 rounded-full bg-[#7BE0B4]" />
@@ -126,18 +127,12 @@ export default async function Page({
             Full-time engineers from <b className="font-semibold">£1,500/mo</b>
             <span className="hidden sm:inline"> · 3 profiles in 48 hours · No placement fee</span>
           </p>
-          <CtaButton className="shrink-0 rounded-lg bg-white px-3 py-1.5 text-[13px] font-semibold text-navy-900 transition hover:bg-ice-100">
-            See profiles →
-          </CtaButton>
         </div>
       </div>
 
       <header className="mx-auto flex max-w-content items-center justify-between px-5 py-4 sm:px-8">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/octogle-logo.svg" alt="Octogle Hire" width={128} height={30} className="h-[28px] w-auto" />
-        <CtaButton className="hidden rounded-xl bg-navy-900 px-4 py-2.5 text-[14px] font-medium text-white md:inline-block">
-          Book a call
-        </CtaButton>
       </header>
 
       <main className="overflow-x-hidden pb-24 md:pb-0">
@@ -150,18 +145,11 @@ export default async function Page({
             </h1>
             <p className="mt-4 text-[17px] leading-relaxed text-steel-700">{hero.sub}</p>
 
-            <p className="mt-5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[14px] text-steel-600">
-              <span className="rounded-full border border-[var(--border-default)] bg-white px-3 py-1 font-semibold text-navy-900">
-                From £1,500/mo
-              </span>
-              Junior £1,500 · Mid £2,500 · Senior £4,500
-            </p>
-
-            <CtaButton className={btn + " mt-6 w-full md:w-auto"}>
-              Book a 15-minute call <span aria-hidden>→</span>
+            <CtaButton className={btn + " mt-7 w-full md:w-auto"}>
+              Get engineers now <span aria-hidden>→</span>
             </CtaButton>
             <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-[13px] text-steel-700">
-              {["No placement fee", "See 3 profiles first", "Free swap", "14 days' notice"].map((t) => (
+              {["No placement fee", "Profiles in 48 hours", "14 days' notice"].map((t) => (
                 <li key={t} className="flex items-center gap-1.5">
                   <Tick />
                   {t}
@@ -169,7 +157,7 @@ export default async function Page({
               ))}
             </ul>
 
-            <figure className="mt-6 flex items-start gap-3 rounded-2xl border border-[var(--border-subtle)] bg-white/70 p-4">
+            <figure className="mt-8 flex items-start gap-3 border-l-2 border-sky-500/40 pl-4">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/proof/eduardo.jpg" alt="Eduardo Middleton" width={40} height={40} className="h-10 w-10 shrink-0 rounded-full object-cover" />
               <div>
@@ -189,86 +177,142 @@ export default async function Page({
           <CostCalculator />
         </section>
 
-        {/* 2. Objections in buyer words */}
-        <section className="bg-white py-14">
+        {/* 2. The pain, in founders' own words, then the fix */}
+        <section className="bg-white py-16">
           <div className="mx-auto max-w-content px-5 sm:px-8">
-            <H2>What founders say goes wrong, and what we do instead.</H2>
+            <p className="eyebrow text-[11px] font-medium text-[#c2414b]">Sound familiar?</p>
+            <H2>Offshore and freelance dev usually goes wrong the same five ways.</H2>
             <p className="mt-2 text-[13px] text-[var(--text-faint)]">
               Quotes are from public posts by founders about offshore and freelance dev. Not our clients.
             </p>
-            <div className="mt-7 divide-y divide-[var(--border-subtle)] overflow-hidden rounded-3xl border border-[var(--border-subtle)]">
+
+            <div className="mt-8 space-y-3">
               {OBJECTIONS.map((o) => (
-                <div key={o.said} className="grid gap-1.5 p-5 md:grid-cols-2 md:gap-6">
-                  <p className="text-[15px] italic text-steel-600">&ldquo;{o.said}&rdquo;</p>
-                  <p className="text-[15px] text-navy-900">
-                    <b className="font-semibold">{o.answer}</b> {o.detail}
-                  </p>
+                <div
+                  key={o.said}
+                  className="grid overflow-hidden rounded-3xl border border-[var(--border-subtle)] md:grid-cols-[1.15fr_auto_1fr]"
+                >
+                  <div className="flex gap-3.5 bg-[#fdf2f3] p-5 sm:p-6">
+                    <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[#c2414b] text-white" aria-hidden>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                        <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" />
+                      </svg>
+                    </span>
+                    <div>
+                      <p className="font-display text-[clamp(1.15rem,2.6vw,1.45rem)] font-semibold leading-snug text-[#7f1d24]">
+                        &ldquo;{o.said}&rdquo;
+                      </p>
+                      <p className="mt-1.5 text-[14.5px] leading-snug text-[#9b2c33]">{o.cost}</p>
+                    </div>
+                  </div>
+                  <div className="hidden items-center bg-white px-3 text-steel-500 md:flex" aria-hidden>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                      <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
+                  <div className="flex gap-3.5 bg-white p-5 sm:p-6">
+                    <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full bg-good text-white" aria-hidden>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                        <path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </span>
+                    <p className="text-[15.5px] leading-relaxed text-navy-900">
+                      <b className="font-semibold">{o.answer}</b> {o.detail}
+                    </p>
+                  </div>
                 </div>
               ))}
             </div>
-            <CtaButton className={btn + " mt-7 w-full md:w-auto"}>
-              See three engineers in 48 hours <span aria-hidden>→</span>
-            </CtaButton>
+
+            <div className="mt-8 flex flex-col items-start gap-3 sm:flex-row sm:items-center">
+              <CtaButton className={btn + " w-full sm:w-auto"}>
+                Get engineers now <span aria-hidden>→</span>
+              </CtaButton>
+              <p className="text-[14px] text-steel-600">Free to look. No placement fee.</p>
+            </div>
           </div>
         </section>
 
         {/* 3. Proof where doubt peaks */}
         <section className="mx-auto max-w-content px-5 py-14 sm:px-8">
           <H2>Real engineers, real clients, a real office.</H2>
-          <div className="mt-7 grid gap-4 md:grid-cols-3">
-            <div className="divide-y divide-[var(--border-subtle)] rounded-3xl border border-[var(--border-subtle)] bg-white shadow-card">
-              {ENGINEERS.map((e) => (
-                <div key={e.name} className="flex items-center gap-3 p-4">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={e.photo} alt={e.name} width={52} height={52} loading="lazy" className="h-[52px] w-[52px] shrink-0 rounded-2xl object-cover object-[center_35%]" />
-                  <div className="min-w-0">
-                    <p className="font-display text-[15px] font-semibold text-navy-900">
-                      {e.name} <span className="font-normal text-steel-600">· {e.role}</span>
-                    </p>
-                    <p className="truncate text-[13px] text-steel-700">{e.stack}</p>
-                  </div>
-                </div>
-              ))}
-              <p className="p-4 text-[13px] text-steel-600">
-                Full time, one client at a time. Every engineer builds with Claude Code.
-              </p>
-            </div>
 
+          {/* The people you'd actually get, big enough to see. */}
+          <div className="mt-7 grid gap-4 sm:grid-cols-3">
+            {ENGINEERS.map((e) => (
+              <div
+                key={e.name}
+                className="overflow-hidden rounded-3xl border border-[var(--border-subtle)] bg-white shadow-card"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={e.photo}
+                  alt={e.name}
+                  width={800}
+                  height={1071}
+                  loading="lazy"
+                  className="aspect-[4/3] w-full object-cover object-[center_40%]"
+                />
+                <div className="p-5">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="font-display text-[18px] font-semibold text-navy-900">{e.name}</p>
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-good/10 px-2.5 py-1 text-[12px] font-medium text-good">
+                      <span className="h-1.5 w-1.5 rounded-full bg-good" />
+                      Available
+                    </span>
+                  </div>
+                  <p className="mt-0.5 text-[14px] text-steel-600">{e.role}</p>
+                  <p className="mt-3 text-[14px] text-navy-900">{e.stack}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="mt-4 text-[14px] text-steel-600">
+            Full time, one client at a time. Every engineer builds with Claude Code.
+          </p>
+
+          {/* Client voice beside the office: same height, no dead space. */}
+          <div className="mt-8 grid gap-4 md:grid-cols-2">
             {QUOTES.slice(1).map((q) => (
-              <figure key={q.name} className="flex flex-col rounded-3xl border border-[var(--border-subtle)] bg-white p-5 shadow-card">
-                <blockquote className="flex-1 text-[15px] leading-relaxed text-navy-900">&ldquo;{q.quote}&rdquo;</blockquote>
-                <figcaption className="mt-4 flex items-center gap-3">
+              <figure
+                key={q.name}
+                className="flex flex-col justify-between rounded-3xl bg-navy-900 p-6 text-white sm:p-8"
+              >
+                <blockquote className="font-display text-[clamp(1.15rem,2.4vw,1.4rem)] font-medium leading-snug">
+                  &ldquo;{q.quote}&rdquo;
+                </blockquote>
+                <figcaption className="mt-6 flex items-center gap-3">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={q.photo} alt={q.name} width={40} height={40} loading="lazy" className="h-10 w-10 rounded-full object-cover" />
+                  <img src={q.photo} alt={q.name} width={44} height={44} loading="lazy" className="h-11 w-11 rounded-full object-cover" />
                   <div>
-                    <p className="text-[14px] font-semibold text-navy-900">{q.name}</p>
-                    <p className="text-[13px] text-[var(--text-faint)]">{q.role}</p>
+                    <p className="text-[15px] font-semibold">{q.name}</p>
+                    <p className="text-[13px] text-[#B7D2E1]">{q.role}</p>
                   </div>
                 </figcaption>
               </figure>
             ))}
 
-            <figure className="overflow-hidden rounded-3xl border border-[var(--border-subtle)] bg-white shadow-card">
+            <figure className="relative min-h-[260px] overflow-hidden rounded-3xl">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/office/floor.jpg" alt="The Octogle engineering office in India" width={768} height={1024} loading="lazy" className="h-56 w-full object-cover md:h-[calc(100%-56px)]" />
-              <figcaption className="p-4 text-[13px] text-steel-600">
-                Our own engineering office in India. Managed in person, every day.
+              <img
+                src="/office/floor.jpg"
+                alt="The Octogle engineering office in India"
+                width={768}
+                height={1024}
+                loading="lazy"
+                className="absolute inset-0 h-full w-full object-cover object-[center_60%]"
+              />
+              <figcaption className="absolute inset-x-3 bottom-3 rounded-2xl bg-white/95 px-4 py-3 text-[14px] text-navy-900 shadow-card backdrop-blur">
+                <b className="font-semibold">Our own office in India.</b> Managed in person, every day.
               </figcaption>
             </figure>
           </div>
         </section>
 
-        {/* 4. How it works */}
-        <section className="mx-auto max-w-content px-5 pb-14 sm:px-8">
+        {/* 4. How it works (animated) */}
+        <section className="mx-auto max-w-content px-5 pb-16 sm:px-8">
           <H2>How it works</H2>
-          <ol className="mt-6 grid gap-3 md:grid-cols-3">
-            {STEPS.map((s, i) => (
-              <li key={s} className="flex gap-3 rounded-2xl border border-[var(--border-subtle)] bg-white p-4 text-[15px] text-navy-900">
-                <span className="font-display font-semibold text-sky-600">{i + 1}.</span>
-                {s}
-              </li>
-            ))}
-          </ol>
+          <HowItWorks />
         </section>
 
         {/* 5. Final CTA */}
@@ -276,14 +320,14 @@ export default async function Page({
           <div className="overflow-hidden rounded-[2rem] bg-navy-900 text-white">
             <div className="px-6 py-10 sm:px-10 sm:py-14">
               <h2 className="font-display text-[clamp(1.7rem,4.5vw,2.5rem)] font-semibold leading-[1.08] tracking-[-0.015em]">
-                Book a call. See three engineers within 48 hours.
+                See three engineers within 48 hours.
               </h2>
               <p className="mt-3 max-w-md text-[16px] leading-relaxed text-[#B7D2E1]">
                 15 minutes with Connor. Free to look, no placement fee, rolling
                 monthly with 14 days&apos; notice.
               </p>
               <CtaButton className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-white px-7 py-4 font-display text-[17px] font-medium text-navy-900 shadow-cta transition hover:bg-ice-100 sm:w-auto">
-                Book a 15-minute call <span aria-hidden>→</span>
+                Get engineers now <span aria-hidden>→</span>
               </CtaButton>
               <p className="mt-5 text-[14px] text-[#B7D2E1]">
                 Need SDRs instead? Dedicated SDRs from £1,900 a month. Ask on the call.

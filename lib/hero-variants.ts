@@ -20,7 +20,7 @@ const COST: HeroVariant = {
   key: "cost",
   call: "For UK founders paying UK rates for engineering",
   head: "A full-time engineer for a fraction of a UK hire.",
-  sub: "A UK mid-level developer costs about £61k in year one once you add NI, pension and a recruiter fee (see the calculator). Ours is £2,500 a month and joins your standups.",
+  sub: "A UK mid-level developer costs about £61k in year one with NI, pension and a recruiter fee. Ours is £2,500 a month, full time, in your standups.",
 };
 
 export const HERO_VARIANTS: Record<string, HeroVariant> = {
