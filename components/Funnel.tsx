@@ -76,6 +76,14 @@ const START_OPTIONS = [
 // Not ready to start: no calendar, a nurture message instead. Exploring leads
 // were the biggest source of "Not a Fit" calls.
 const EXPLORING = "Just exploring";
+// Leadey's Timeline custom field is a select; send its exact option labels
+// or the value is dropped.
+const LEADEY_TIMELINE: Record<string, string> = {
+  "As soon as possible": "ASAP",
+  "Within a month": "2–4 weeks",
+  "In 1 to 3 months": "1–3 months",
+  "Just exploring": "Just exploring",
+};
 
 // Business email is the only form field that predicts a deal, so we nudge
 // (never block) toward it and tag every lead with which it was.
@@ -323,8 +331,9 @@ export function BookForm({ variant }: { variant: string }) {
       email_type: isFreeEmail(f.email) ? "free" : "work",
       phone,
       seniority: level,
-      timeline: start,
-      nurture: exploring || undefined,
+      timeline: LEADEY_TIMELINE[start] ?? start,
+      // Text field in Leadey: "Yes" reads cleanly on the lead and filters easily.
+      nurture: exploring ? "Yes" : undefined,
       status: "partial",
       captured_step: 2,
       location: LOCATION_TAG,
