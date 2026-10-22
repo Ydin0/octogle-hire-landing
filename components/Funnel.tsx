@@ -14,7 +14,7 @@ import { DIAL_CODES, PRIORITY_ISO2, composePhone } from "@/lib/dial-codes";
 // directly with no-cors dropped every lead.
 const LEAD_ENDPOINT = "/api/lead";
 const CALENDAR_URL =
-  "https://app.leadey.ai/book/octogle-hire-connor-lp-mcjcg2?embed=1";
+  "https://app.leadey.ai/book/introduction-call-with-connor-6ibd7u?embed=1";
 const LOCATION_TAG = "landing page -dan";
 const LEADEY_ORIGIN = "https://app.leadey.ai";
 // Same id app/layout.tsx initialises the pixel with; re-init only adds
