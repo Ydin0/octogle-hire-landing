@@ -5,7 +5,7 @@ import { useState } from "react";
 const FAQS = [
   {
     q: "Why is it so much cheaper than a local hire?",
-    a: "Our engineers work from our own office in India, so you're not paying UK payroll, NI, benefits, and overhead on top of a salary. Same level of work, embedded in your team. The price table above shows the difference at each level.",
+    a: "Our engineers work from our own office in India, so you're not paying UK payroll, NI, benefits, and overhead on top of a salary. Same level of work, embedded in your team. The prices above show the difference at each level.",
   },
   {
     q: "Is this outsourcing or freelancers?",
@@ -16,16 +16,8 @@ const FAQS = [
     a: "You see three profiles before anything starts, so you choose. If it isn't working, we swap them. No placement fee either way.",
   },
   {
-    q: "How fast can someone actually start?",
-    a: "Profiles in 48 hours. Once you pick, they're embedded in your team from week one.",
-  },
-  {
     q: "Who owns the code?",
     a: "You do. They work in your repo from day one, and all IP is yours, confirmed in our NDA and standard contract.",
-  },
-  {
-    q: "Can I stop?",
-    a: "Yes. It's a rolling monthly contract with 14 days' notice. No lock-in.",
   },
   {
     q: "Is my code and data secure?",

@@ -20,7 +20,7 @@ const DEFAULT: HeroVariant = {
   eyebrow: "For UK founders building their own software",
   lead: "A full-time engineer, embedded in your team.",
   punch: "From £1,500 a month.",
-  sub: "In your repo, on your standups, shipping from week one. Three engineer profiles in your inbox within 48 hours. No placement fee.",
+  sub: "In your repo, on your standups. See three profiles within 48 hours.",
 };
 
 export const HERO_VARIANTS: Record<string, HeroVariant> = {
@@ -30,28 +30,28 @@ export const HERO_VARIANTS: Record<string, HeroVariant> = {
     eyebrow: "For UK companies already building a product",
     lead: "Quoted £200k to build it?",
     punch: "Put an AI engineer on it from £1,500 a month.",
-    sub: "Full time in your repo, building with Claude Code. Three engineer profiles in your inbox within 48 hours. No placement fee.",
+    sub: "Full time in your repo, building with Claude Code. See three profiles within 48 hours.",
   },
   available: {
     key: "available",
     eyebrow: "Engineers available to start now",
     lead: "Vetted AI engineers, ready to start.",
     punch: "From £1,500 a month.",
-    sub: "Full time in your repo, building with Claude Code. See three profiles within 48 hours, then pick who starts. No placement fee.",
+    sub: "Full time in your repo, building with Claude Code. See three profiles within 48 hours.",
   },
   timeline: {
     key: "timeline",
     eyebrow: "For UK companies already building a product",
     lead: "Brief us Monday.",
     punch: "Three engineer profiles by Wednesday.",
-    sub: "A full-time AI engineer in your repo the week after, from £1,500 a month. No placement fee, no recruiter fee.",
+    sub: "A full-time AI engineer in your repo the week after. From £1,500 a month.",
   },
   prototype: {
     key: "prototype",
     eyebrow: "For founders who built it with Claude Code or Cursor",
     lead: "Built it yourself?",
     punch: "Now make it hold up.",
-    sub: "An AI engineer, full time in your repo, makes it secure, tested and ready for real users. From £1,500 a month.",
+    sub: "A full-time AI engineer makes it secure, tested and ready for real users. From £1,500 a month.",
   },
 };
 
