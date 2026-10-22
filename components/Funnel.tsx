@@ -5,7 +5,6 @@ import {
   useCallback,
   useContext,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
@@ -15,14 +14,43 @@ import { DIAL_CODES, PRIORITY_ISO2, composePhone } from "@/lib/dial-codes";
 // directly with no-cors dropped every lead.
 const LEAD_ENDPOINT = "/api/lead";
 const CALENDAR_URL =
-  "https://app.leadey.ai/book/octogle-hire-connor-lp-mcjcg2?embed=1";
+  "https://app.leadey.ai/book/introduction-call-with-connor-6ibd7u?embed=1";
 const LOCATION_TAG = "landing page -dan";
-
-type Fbq = (...args: unknown[]) => void;
+const LEADEY_ORIGIN = "https://app.leadey.ai";
+// Same id app/layout.tsx initialises the pixel with; re-init only adds
+// Advanced Matching data, it never creates a second pixel.
+const META_PIXEL_ID = "1614640659743336";
+// Shared with /booked so a booking is only ever counted once per visitor.
+const SCHEDULE_SENT_KEY = "ogh_schedule_sent";
 // Google Ads "Submit lead form" conversion (tag loaded in app/layout.tsx).
 const GOOGLE_ADS_LEAD_CONVERSION = "AW-18440423872/1XedCIbikPscEMCTitlE";
 
+type Fbq = (...args: unknown[]) => void;
 type Gtag = (...args: unknown[]) => void;
+
+function track(event: string, params?: object, opts?: object) {
+  const fbq = (window as unknown as { fbq?: Fbq }).fbq;
+  if (typeof fbq === "function") fbq("track", event, params || {}, opts || {});
+}
+
+/**
+ * Re-init the pixel with Advanced Matching so Meta can match the Lead to a
+ * person (email, phone, name). fbevents.js hashes these client-side; they must
+ * never go in event params. Call right before the conversion event.
+ */
+function setAdvancedMatching(user: { name: string; email: string; phone: string }) {
+  const fbq = (window as unknown as { fbq?: Fbq }).fbq;
+  if (typeof fbq !== "function") return;
+  const parts = user.name.trim().split(/\s+/).filter(Boolean);
+  const data: Record<string, string> = {};
+  if (user.email.trim()) data.em = user.email.trim().toLowerCase();
+  if (parts[0]) data.fn = parts[0].toLowerCase();
+  if (parts.length > 1) data.ln = parts.slice(1).join(" ").toLowerCase();
+  const digits = user.phone.replace(/\D/g, "");
+  if (digits) data.ph = digits;
+  fbq("init", META_PIXEL_ID, data);
+}
+
 function trackGoogleAdsLead(transactionId: string) {
   const gtag = (window as unknown as { gtag?: Gtag }).gtag;
   if (typeof gtag !== "function") return;
@@ -38,94 +66,69 @@ function trackGoogleAdsLead(transactionId: string) {
   }
 }
 
-function track(event: string, params?: object, opts?: object) {
-  const fbq = (window as unknown as { fbq?: Fbq }).fbq;
-  if (typeof fbq === "function") fbq("track", event, params || {}, opts || {});
-}
-
-const BUILD_OPTIONS = ["SaaS", "Website", "Ecom store", "App"];
-
-// Post-contact qualifier: quick taps we send back to Leadey as enrichment so
-// the team can walk into the call with the right profiles + budget in mind.
-const ENRICH_QUESTIONS: { key: string; q: string; opts: string[] }[] = [
-  { key: "seniority", q: "Level you need", opts: ["Intern", "Junior", "Mid", "Senior", "A mix"] },
-  { key: "budget", q: "Monthly budget", opts: ["£1.5k to £3k", "£3k to £5k", "£5k+", "Not sure yet"] },
-  { key: "timeline", q: "When to start", opts: ["ASAP", "2 to 4 weeks", "Just exploring"] },
+const LEVEL_OPTIONS = ["Junior", "Mid-level", "Senior", "Not sure yet"];
+const START_OPTIONS = [
+  "As soon as possible",
+  "Within a month",
+  "In 1 to 3 months",
+  "Just exploring",
 ];
+// Not ready to start: no calendar, a nurture message instead. Exploring leads
+// were the biggest source of "Not a Fit" calls.
+const EXPLORING = "Just exploring";
 
-type Ctx = { open: (build?: string) => void };
-const FunnelCtx = createContext<Ctx | null>(null);
+// Business email is the only form field that predicts a deal, so we nudge
+// (never block) toward it and tag every lead with which it was.
+const FREE_EMAIL_DOMAINS = new Set([
+  "gmail.com", "googlemail.com", "hotmail.com", "hotmail.co.uk", "outlook.com",
+  "outlook.co.uk", "live.com", "live.co.uk", "msn.com", "yahoo.com",
+  "yahoo.co.uk", "icloud.com", "me.com", "aol.com", "proton.me",
+  "protonmail.com", "btinternet.com", "sky.com", "gmx.com", "mail.com",
+]);
+const isFreeEmail = (email: string) =>
+  FREE_EMAIL_DOMAINS.has(email.trim().toLowerCase().split("@")[1] ?? "");
+const emailOk = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
 
-export function useFunnel() {
-  const ctx = useContext(FunnelCtx);
-  if (!ctx) throw new Error("useFunnel must be used within FunnelProvider");
-  return ctx;
+// Campaign attribution, read from the landing URL so every lead in Leadey can
+// be tied back to the ad (utm_content = ad name) and the hero it saw.
+const ATTRIBUTION_KEYS = [
+  "utm_source",
+  "utm_medium",
+  "utm_campaign",
+  "utm_content",
+  "utm_term",
+  "campaign_id",
+  "adset_id",
+  "ad_id",
+  "fbclid",
+] as const;
+
+function readAttribution(): Record<string, string> {
+  const params = new URLSearchParams(window.location.search);
+  const out: Record<string, string> = {};
+  for (const k of ATTRIBUTION_KEYS) {
+    const val = params.get(k)?.trim();
+    if (val) out[k] = val.slice(0, 200);
+  }
+  return out;
 }
 
-export function FunnelProvider({ children }: { children: React.ReactNode }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [initialBuild, setInitialBuild] = useState<string | undefined>();
-
-  const open = useCallback((build?: string) => {
-    track("InitiateCheckout", {}, { eventID: "ic_" + Date.now() });
-    setInitialBuild(build);
-    setIsOpen(true);
-  }, []);
-
-  const value = useMemo(() => ({ open }), [open]);
-
-  return (
-    <FunnelCtx.Provider value={value}>
-      {children}
-      {isOpen && (
-        <QuizModal
-          initialBuild={initialBuild}
-          onClose={() => setIsOpen(false)}
-        />
-      )}
-    </FunnelCtx.Provider>
-  );
-}
-
-export function CtaButton({
-  className,
-  children,
-}: {
-  className?: string;
-  children: React.ReactNode;
-}) {
-  const { open } = useFunnel();
-  return (
-    <button type="button" onClick={() => open()} className={className}>
-      {children}
-    </button>
-  );
-}
-
-// Embedded first question, rendered directly on the page. Tapping an option
-// opens the modal already at the contact step, so starting the funnel costs
-// a single tap instead of "open a form".
-export function InlineStart({ className }: { className?: string }) {
-  const { open } = useFunnel();
-  return (
-    <div className={className}>
-      <p className="mb-3 font-display text-[17px] font-semibold text-navy-900">
-        What are you building?
-      </p>
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {BUILD_OPTIONS.map((o) => (
-          <button
-            key={o}
-            type="button"
-            onClick={() => open(o)}
-            className="rounded-2xl border border-navy-900/15 bg-white px-4 py-4 text-center font-display text-[16px] font-medium text-navy-900 shadow-card transition hover:border-sky-500 hover:bg-sky-500/5 hover:shadow-glow focus:outline-none focus-visible:border-sky-500"
-          >
-            {o}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
+/**
+ * The calendar URL with what the visitor already told us, so the booking page
+ * doesn't ask again: name, email, the form answers as notes, and the campaign
+ * UTMs (the same params Leadey's embed.js sends).
+ */
+function bookingSrc(p: { name: string; email: string; notes: string }) {
+  const url = new URL(CALENDAR_URL);
+  if (p.name) url.searchParams.set("name", p.name);
+  if (p.email) url.searchParams.set("email", p.email);
+  if (p.notes) url.searchParams.set("notes", p.notes);
+  const page = new URLSearchParams(window.location.search);
+  for (const k of ["source", "medium", "campaign", "term", "content"]) {
+    const v = page.get(`utm_${k}`);
+    if (v) url.searchParams.set(`utm_${k}`, v);
+  }
+  return url.toString();
 }
 
 // keepalive so the request survives the visitor closing the tab mid-send.
@@ -138,492 +141,394 @@ function sendLead(body: object) {
   }).catch(() => undefined);
 }
 
-const emailOk = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
+type Ctx = { open: () => void };
+const FunnelCtx = createContext<Ctx | null>(null);
 
-function QuizModal({
-  initialBuild,
-  onClose,
+/**
+ * Holds the booking popup. Every CTA on the page opens it; nothing else
+ * leaves the page.
+ */
+export function FunnelProvider({
+  variant,
+  children,
 }: {
-  initialBuild?: string;
-  onClose: () => void;
+  variant: string;
+  children: React.ReactNode;
 }) {
-  const [step, setStep] = useState(initialBuild ? 2 : 1);
-  const [build, setBuild] = useState(initialBuild ?? "");
-  const [f, setF] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    // ISO2 of the selected country prefix; the dial code is prepended to the
-    // number on every send via composePhone().
-    dialCc: "GB",
-    company: "",
-    website: "",
-  });
-  const [error, setError] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const [enrich, setEnrich] = useState<Record<string, string>>({});
-  const eventId = useRef("lead_" + crypto.randomUUID());
-  const scheduled = useRef(false);
-  // One Google Ads lead conversion per visitor, even if they go Back and
-  // continue again (transaction_id also dedupes on Google's side).
-  const googleLeadSent = useRef(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const started = useRef(false);
+  // Opening the popup is the funnel start; count it once per page view.
+  const open = useCallback(() => {
+    if (!started.current) {
+      started.current = true;
+      track("InitiateCheckout", {}, { eventID: "ic_" + crypto.randomUUID() });
+    }
+    setIsOpen(true);
+  }, []);
+  const close = useCallback(() => setIsOpen(false), []);
 
-  // Lock scroll + escape to close + Schedule pixel from calendar postMessage.
+  // Lock page scroll and close on Escape while the popup is open.
   useEffect(() => {
+    if (!isOpen) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    const onMsg = (e: MessageEvent) => {
-      let d = "";
-      try {
-        d = typeof e.data === "string" ? e.data : JSON.stringify(e.data || {});
-      } catch {
-        d = "";
-      }
-      if (/book|confirm|schedul/i.test(d) && !scheduled.current) {
-        scheduled.current = true;
-        track("Schedule", {}, { eventID: "sched_" + eventId.current });
-      }
-    };
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && close();
     window.addEventListener("keydown", onKey);
-    window.addEventListener("message", onMsg);
     return () => {
       document.body.style.overflow = prev;
       window.removeEventListener("keydown", onKey);
-      window.removeEventListener("message", onMsg);
     };
-  }, [onClose]);
+  }, [isOpen, close]);
 
-  const pickBuild = (v: string) => {
-    setBuild(v);
+  return (
+    <FunnelCtx.Provider value={{ open }}>
+      {children}
+      {isOpen && (
+        <div
+          className="overlay-in fixed inset-0 z-50 flex items-end justify-center overflow-y-auto bg-navy-900/55 backdrop-blur-sm sm:items-center sm:p-4"
+          onMouseDown={(e) => e.target === e.currentTarget && close()}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Book a call"
+            className="sheet-in relative w-full max-w-[480px] rounded-t-3xl bg-white shadow-cta sm:my-auto sm:rounded-3xl"
+          >
+            <button
+              type="button"
+              onClick={close}
+              aria-label="Close"
+              className="absolute right-3 top-3 z-10 grid h-9 w-9 place-items-center rounded-full text-steel-600 transition hover:bg-ice-100"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+            </button>
+            <div className="flex items-center gap-3 border-b border-[var(--border-subtle)] px-5 pb-4 pt-5 pr-14">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/people/connor.jpg"
+                alt="Connor Berwick"
+                width={44}
+                height={44}
+                className="h-11 w-11 shrink-0 rounded-full object-cover ring-2 ring-ice-200"
+              />
+              <div>
+                <p className="font-display text-[16px] font-semibold leading-tight text-navy-900">
+                  Get three engineer profiles within 48 hours.
+                </p>
+                <p className="mt-0.5 text-[13px] text-steel-600">
+                  15 minutes with Connor. Free, no commitment.
+                </p>
+              </div>
+            </div>
+            <BookForm variant={variant} />
+          </div>
+        </div>
+      )}
+    </FunnelCtx.Provider>
+  );
+}
+
+export function CtaButton({
+  className,
+  children,
+}: {
+  className?: string;
+  children: React.ReactNode;
+}) {
+  const ctx = useContext(FunnelCtx);
+  if (!ctx) throw new Error("CtaButton must be used within FunnelProvider");
+  return (
+    <button type="button" onClick={ctx.open} className={className}>
+      {children}
+    </button>
+  );
+}
+
+/**
+ * The page's only form, shown in the popup. Step 1 is two taps (level, start
+ * date), step 2 is contact details and fires Lead, then the calendar shows in
+ * place.
+ */
+export function BookForm({ variant }: { variant: string }) {
+  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [level, setLevel] = useState("");
+  const [start, setStart] = useState("");
+  const [f, setF] = useState({ name: "", email: "", phone: "", dialCc: "GB" });
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const eventId = useRef("lead_" + crypto.randomUUID());
+  const scheduled = useRef(false);
+  const frameRef = useRef<HTMLIFrameElement>(null);
+  const exploring = start === EXPLORING;
+  const freeEmail = emailOk(f.email) && isFreeEmail(f.email);
+
+  // Leadey's booking iframe posts {channel:"leadey:booking", event, ...} for
+  // everything, including size updates while it loads. Only a real
+  // booking_scheduled from Leadey's origin counts as a Schedule.
+  useEffect(() => {
+    if (step !== 3) return;
+    const onMsg = (e: MessageEvent) => {
+      if (e.origin !== LEADEY_ORIGIN) return;
+      const data = e.data as
+        | { channel?: string; event?: string; height?: number; url?: string }
+        | undefined;
+      if (!data || data.channel !== "leadey:booking") return;
+
+      if (data.event === "resize" && data.height && frameRef.current) {
+        frameRef.current.style.height = `${Math.max(560, data.height)}px`;
+        return;
+      }
+      if (data.event === "booking_scheduled" && !scheduled.current) {
+        scheduled.current = true;
+        try {
+          sessionStorage.setItem(SCHEDULE_SENT_KEY, "1");
+        } catch {
+          /* storage blocked; /booked may count it again, acceptable */
+        }
+        track("Schedule", {}, { eventID: "sched_" + eventId.current });
+        return;
+      }
+      // The iframe can't navigate the top window itself.
+      if (data.event === "redirect" && data.url) {
+        window.location.href = data.url;
+      }
+    };
+    window.addEventListener("message", onMsg);
+    return () => window.removeEventListener("message", onMsg);
+  }, [step]);
+
+  const next = () => {
+    if (!level || !start) return setError("Pick a level and a start date.");
+    setError("");
     setStep(2);
   };
 
-  // Post the lead to Leadey. Fired once at step 3 (partial, so we keep the
-  // contact even if they never finish step 4) and again on final submit with
-  // the same event_id + email so Leadey updates the record instead of
-  // creating a duplicate.
-  const postLead = (partial: boolean) => {
-    const lead = {
-      name: f.name.trim(),
-      email: f.email.trim(),
-      phone: composePhone(f.dialCc, f.phone),
-      company: f.company.trim(),
-      website: f.website.trim(),
-      build,
-      status: partial ? "partial" : "complete",
-      captured_step: partial ? 2 : 3,
-      location: LOCATION_TAG,
-      source: LOCATION_TAG,
-      note: LOCATION_TAG,
-      page: typeof location !== "undefined" ? location.href : "",
-      submitted_at: new Date().toISOString(),
-      event_id: eventId.current,
-    };
-    return sendLead(lead);
-  };
-
-  // Send the post-contact qualifier answers back to Leadey against the SAME
-  // lead (same event_id + email), as a note so the team gets the extra context
-  // on the existing lead rather than a new record.
-  const postEnrichment = (answers: Record<string, string>) => {
-    const summary = ENRICH_QUESTIONS.filter((q) => answers[q.key])
-      .map((q) => `${q.q}: ${answers[q.key]}`)
-      .join("; ");
-    if (!summary) return Promise.resolve();
-    const payload = {
-      name: f.name.trim(),
-      email: f.email.trim(),
-      phone: composePhone(f.dialCc, f.phone),
-      company: f.company.trim(),
-      website: f.website.trim(),
-      build,
-      ...answers,
-      status: "enriched",
-      location: LOCATION_TAG,
-      source: LOCATION_TAG,
-      note: "Landing page qualifier: " + summary,
-      page: typeof location !== "undefined" ? location.href : "",
-      submitted_at: new Date().toISOString(),
-      event_id: eventId.current,
-    };
-    return sendLead(payload);
-  };
-
-  const finishQualifier = () => {
-    void postEnrichment(enrich);
-    setStep(5);
-  };
-
-  const contactNext = () => {
-    if (!f.name.trim()) return setError("Add your name.");
-    if (!emailOk(f.email)) return setError("Add a valid work email.");
-    if (f.phone.trim().length < 6) return setError("Add a phone number.");
+  const submit = async () => {
+    if (f.name.trim().length < 2) return setError("Add your name.");
+    if (!emailOk(f.email)) return setError("Add a valid email.");
     setError("");
-    track(
-      "Lead",
-      { content_category: build },
-      { eventID: eventId.current },
-    );
-    if (!googleLeadSent.current) {
-      googleLeadSent.current = true;
-      trackGoogleAdsLead(eventId.current);
-    }
-    // Partial capture: send contact details now, before the company step.
-    void postLead(true);
+    setSubmitting(true);
+    const phone = f.phone.trim() ? composePhone(f.dialCc, f.phone) : "";
+
+    setAdvancedMatching({ name: f.name, email: f.email, phone });
+    track("Lead", { content_category: level }, { eventID: eventId.current });
+    trackGoogleAdsLead(eventId.current);
+
+    // status "partial" is the step at which /api/lead sends the CAPI Lead.
+    await sendLead({
+      name: f.name.trim(),
+      email: f.email.trim(),
+      email_type: isFreeEmail(f.email) ? "free" : "work",
+      phone,
+      seniority: level,
+      timeline: start,
+      nurture: exploring || undefined,
+      status: "partial",
+      captured_step: 2,
+      location: LOCATION_TAG,
+      source: LOCATION_TAG,
+      note: `Landing page: Level: ${level}; Start: ${start}${
+        exploring ? "; exploring, nurture (no calendar shown)" : ""
+      }`,
+      page: location.href,
+      submitted_at: new Date().toISOString(),
+      event_id: eventId.current,
+      hero_variant: variant,
+      ...readAttribution(),
+    });
+    setSubmitting(false);
     setStep(3);
   };
 
-  const submit = async () => {
-    if (!f.company.trim()) return setError("Add your company.");
-    setError("");
-    setSubmitting(true);
-    await postLead(false);
-    track(
-      "SubmitApplication",
-      { content_category: build },
-      { eventID: "app_" + eventId.current },
-    );
-    setSubmitting(false);
-    setStep(4);
-  };
+  const chip = (active: boolean) =>
+    "rounded-xl border px-3 py-3 text-center text-[15px] font-medium leading-tight transition " +
+    (active
+      ? "border-navy-900 bg-navy-900 text-white"
+      : "border-[var(--border-default)] bg-white text-navy-900 hover:border-sky-500");
+  const inputCls =
+    "mt-1 w-full rounded-xl border border-[var(--border-default)] bg-ice-100/40 px-4 py-3 text-[16px] text-navy-900 outline-none transition placeholder:text-[var(--text-faint)] focus:border-sky-500 focus:bg-white focus:shadow-glow";
+  const primary =
+    "mt-5 w-full rounded-2xl bg-navy-900 px-6 py-4 font-display text-[17px] font-medium text-white shadow-cta transition hover:bg-navy-800 disabled:opacity-60";
 
-  const progress = step >= 3 ? 100 : (step / 3) * 100;
-  const stepLabel =
-    step <= 3 ? `Step ${step} of 3` : step === 4 ? "Almost there" : "Done";
+  if (step === 3) {
+    const first = f.name.trim().split(/\s+/)[0];
+    return exploring ? (
+      <div className="p-6 text-navy-900">
+        <p className="font-display text-[22px] font-semibold">
+          Thanks{first ? `, ${first}` : ""}.
+        </p>
+        <p className="mt-2 text-[15px] leading-relaxed text-steel-700">
+          We&apos;ll email you how it works and the price at each level. When
+          you&apos;re ready to start, book a call and we&apos;ll have three
+          profiles ready.
+        </p>
+        <a
+          href={CALENDAR_URL.replace("?embed=1", "")}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-4 inline-block text-[14px] font-medium text-steel-600 underline underline-offset-4 hover:text-navy-900"
+        >
+          Ready now? Book a call
+        </a>
+      </div>
+    ) : (
+      <div className="p-4 text-navy-900 sm:p-5">
+        <p className="px-2 font-display text-[20px] font-semibold">
+          Last step{first ? `, ${first}` : ""}: pick a time with Connor.
+        </p>
+        <p className="mt-1 px-2 text-[14px] text-steel-700">
+          15 minutes. Three profiles within 48 hours of the call.
+        </p>
+        <iframe
+          ref={frameRef}
+          src={bookingSrc({
+            name: f.name.trim(),
+            email: f.email.trim(),
+            notes: `Level: ${level}. Start: ${start}.${
+              f.phone.trim() ? ` Mobile: ${composePhone(f.dialCc, f.phone)}.` : ""
+            }`,
+          })}
+          title="Book a call with Connor"
+          className="mt-3 h-[560px] w-full rounded-2xl border border-[var(--border-subtle)]"
+        />
+      </div>
+    );
+  }
 
   return (
     <div
-      className="overlay-in fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-navy-900/45 p-4 backdrop-blur-sm sm:items-center"
-      onMouseDown={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
+      className="p-5 pb-[calc(env(safe-area-inset-bottom)+20px)] text-navy-900 sm:p-6"
     >
-      <div className="sheet-in my-auto w-full max-w-[460px] rounded-3xl bg-white p-6 shadow-cta sm:p-7">
-        <div className="mb-4 flex items-center justify-between">
-          <span className="eyebrow text-[11px] text-steel-600">{stepLabel}</span>
+      <p className="eyebrow text-[11px] text-steel-600">Step {step} of 2</p>
+
+      {step === 1 ? (
+        <>
+          <p className="mt-3 text-[15px] font-semibold">Level you need</p>
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            {LEVEL_OPTIONS.map((o) => (
+              <button
+                key={o}
+                type="button"
+                aria-pressed={level === o}
+                onClick={() => setLevel(o)}
+                className={chip(level === o)}
+              >
+                {o}
+              </button>
+            ))}
+          </div>
+          <p className="mt-5 text-[15px] font-semibold">When do you want them to start?</p>
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            {START_OPTIONS.map((o) => (
+              <button
+                key={o}
+                type="button"
+                aria-pressed={start === o}
+                onClick={() => setStart(o)}
+                className={chip(start === o)}
+              >
+                {o}
+              </button>
+            ))}
+          </div>
+          {error && <ErrorLine>{error}</ErrorLine>}
+          <button type="button" onClick={next} className={primary}>
+            Next
+          </button>
+        </>
+      ) : (
+        <form
+          noValidate
+          onSubmit={(e) => {
+            e.preventDefault();
+            void submit();
+          }}
+        >
           <button
             type="button"
-            onClick={onClose}
-            aria-label="Close"
-            className="grid h-7 w-7 place-items-center rounded-full text-steel-600 transition hover:bg-[rgba(66,110,140,.08)]"
+            onClick={() => setStep(1)}
+            className="mt-2 inline-flex rounded-full bg-ice-100 px-3 py-1.5 text-[13px] font-medium text-steel-700 hover:text-navy-900"
           >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M6 6l12 12M18 6L6 18"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-            </svg>
+            {level} · {start} · Edit
           </button>
-        </div>
-
-        <div className="mb-6 h-1 w-full overflow-hidden rounded-full bg-[rgba(66,110,140,.12)]">
-          <div
-            className="h-full rounded-full bg-navy-900 transition-[width] duration-300"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-
-        {step === 1 && (
-          <Step title="What are you building?">
-            <div className="grid grid-cols-2 gap-3">
-              {BUILD_OPTIONS.map((o) => (
-                <OptionButton key={o} onClick={() => pickBuild(o)}>
-                  {o}
-                </OptionButton>
-              ))}
-            </div>
-          </Step>
-        )}
-
-        {step === 2 && (
-          <Step title="Where do we send the three profiles?">
-            <div className="space-y-3">
-              <Field
-                label="Name"
+          <div className="mt-4 space-y-3">
+            <label className="block text-[14px] font-medium text-steel-700">
+              Name
+              <input
+                autoComplete="name"
                 value={f.name}
-                onChange={(v) => setF({ ...f, name: v })}
+                onChange={(e) => setF({ ...f, name: e.target.value })}
+                className={inputCls}
                 autoFocus
               />
-              <Field
-                label="Work email"
+            </label>
+            <label className="block text-[14px] font-medium text-steel-700">
+              Work email
+              <input
                 type="email"
+                autoComplete="email"
+                placeholder="you@company.co.uk"
                 value={f.email}
-                onChange={(v) => setF({ ...f, email: v })}
+                onChange={(e) => setF({ ...f, email: e.target.value })}
+                className={inputCls}
               />
-              <label className="block">
-                <span className="mb-1.5 block text-[13px] font-medium text-steel-700">
-                  Phone
+              {freeEmail && (
+                <span className="mt-1.5 block text-[12.5px] font-normal text-steel-600">
+                  Got a company email? Profiles go out faster to a work address.
                 </span>
-                <div className="flex gap-2">
-                  <select
-                    aria-label="Country dialling code"
-                    value={f.dialCc}
-                    onChange={(e) => setF({ ...f, dialCc: e.target.value })}
-                    className="w-[132px] shrink-0 rounded-xl border border-[var(--border-default)] bg-ice-100/40 px-2 py-3 text-[16px] text-navy-900 outline-none transition focus:border-sky-500 focus:bg-white focus:shadow-glow"
-                  >
-                    <optgroup label="Common">
-                      {PRIORITY_ISO2.map((iso) => {
-                        const c = DIAL_CODES.find((d) => d.iso2 === iso);
-                        return c ? (
-                          <option key={`pri-${c.iso2}`} value={c.iso2}>
-                            {c.flag} {c.dial} {c.name}
-                          </option>
-                        ) : null;
-                      })}
-                    </optgroup>
-                    <optgroup label="All countries">
-                      {DIAL_CODES.map((c) => (
-                        <option key={c.iso2} value={c.iso2}>
-                          {c.flag} {c.dial} {c.name}
+              )}
+            </label>
+            <label className="block text-[14px] font-medium text-steel-700">
+              Mobile <span className="font-normal text-[var(--text-faint)]">(optional, for a quick call back)</span>
+              <div className="mt-1 flex gap-2">
+                <select
+                  aria-label="Country dialling code"
+                  value={f.dialCc}
+                  onChange={(e) => setF({ ...f, dialCc: e.target.value })}
+                  className="w-[116px] shrink-0 rounded-xl border border-[var(--border-default)] bg-ice-100/40 px-2 py-3 text-[16px] text-navy-900 outline-none focus:border-sky-500"
+                >
+                  <optgroup label="Common">
+                    {PRIORITY_ISO2.map((iso) => {
+                      const c = DIAL_CODES.find((d) => d.iso2 === iso);
+                      return c ? (
+                        <option key={`pri-${c.iso2}`} value={c.iso2}>
+                          {c.flag} {c.dial}
                         </option>
-                      ))}
-                    </optgroup>
-                  </select>
-                  <input
-                    type="tel"
-                    inputMode="tel"
-                    autoComplete="tel"
-                    placeholder="7737 000000"
-                    value={f.phone}
-                    onChange={(e) => setF({ ...f, phone: e.target.value })}
-                    className="w-full min-w-0 rounded-xl border border-[var(--border-default)] bg-ice-100/40 px-4 py-3 text-[16px] text-navy-900 outline-none transition placeholder:text-[var(--text-faint)] focus:border-sky-500 focus:bg-white focus:shadow-glow"
-                  />
-                </div>
-              </label>
-            </div>
-            {error && <ErrorLine>{error}</ErrorLine>}
-            <PrimaryButton onClick={contactNext}>Continue</PrimaryButton>
-            <FootRow onBack={() => setStep(1)} hint="One more step." />
-          </Step>
-        )}
-
-        {step === 3 && (
-          <Step title="And the company we're building for?">
-            <div className="space-y-3">
-              <Field
-                label="Company"
-                value={f.company}
-                onChange={(v) => setF({ ...f, company: v })}
-                autoFocus
-              />
-              <Field
-                label="Website (optional)"
-                type="url"
-                placeholder="https://"
-                value={f.website}
-                onChange={(v) => setF({ ...f, website: v })}
-              />
-            </div>
-            {error && <ErrorLine>{error}</ErrorLine>}
-            <PrimaryButton onClick={submit} disabled={submitting}>
-              {submitting ? "Sending…" : "Send me the three profiles"}
-            </PrimaryButton>
-            <FootRow
-              onBack={() => setStep(2)}
-              hint="No placement fee. No commitment to hire."
-            />
-          </Step>
-        )}
-
-        {step === 4 && (
-          <div>
-            <h3 className="font-display text-[24px] font-semibold leading-[1.14] text-navy-900">
-              Got it. Your three profiles are being put together now.
-            </h3>
-            <p className="mt-2 text-[15px] leading-relaxed text-steel-700">
-              Two quick things so we match them to you. Optional.
-            </p>
-
-            <div className="mt-5 space-y-5">
-              {ENRICH_QUESTIONS.map((q) => (
-                <div key={q.key}>
-                  <p className="mb-2 text-[13px] font-medium text-steel-700">
-                    {q.q}
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {q.opts.map((o) => {
-                      const active = enrich[q.key] === o;
-                      return (
-                        <button
-                          key={o}
-                          type="button"
-                          onClick={() =>
-                            setEnrich((e) => ({ ...e, [q.key]: o }))
-                          }
-                          className={
-                            "rounded-full border px-3.5 py-2 text-[13px] font-medium transition " +
-                            (active
-                              ? "border-sky-500 bg-sky-500/10 text-navy-900 shadow-glow"
-                              : "border-[var(--border-default)] bg-white text-steel-700 hover:border-sky-500")
-                          }
-                        >
-                          {o}
-                        </button>
-                      );
+                      ) : null;
                     })}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <PrimaryButton onClick={finishQualifier}>
-              Continue to booking
-            </PrimaryButton>
-            <button
-              type="button"
-              onClick={finishQualifier}
-              className="mt-3 w-full text-center text-[13px] font-medium text-[var(--text-faint)] transition hover:text-steel-700"
-            >
-              Skip
-            </button>
-          </div>
-        )}
-
-        {step === 5 && (
-          <div>
-            <div className="mb-4 grid h-11 w-11 place-items-center rounded-2xl bg-sky-500/15 text-steel-600">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M5 12.5l4.5 4.5L19 7.5"
-                  stroke="currentColor"
-                  strokeWidth="2.4"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+                  </optgroup>
+                  <optgroup label="All countries">
+                    {DIAL_CODES.map((c) => (
+                      <option key={c.iso2} value={c.iso2}>
+                        {c.flag} {c.dial} {c.name}
+                      </option>
+                    ))}
+                  </optgroup>
+                </select>
+                <input
+                  type="tel"
+                  inputMode="tel"
+                  autoComplete="tel-national"
+                  placeholder="7700 900123"
+                  value={f.phone}
+                  onChange={(e) => setF({ ...f, phone: e.target.value })}
+                  className="w-full min-w-0 rounded-xl border border-[var(--border-default)] bg-ice-100/40 px-4 py-3 text-[16px] text-navy-900 outline-none placeholder:text-[var(--text-faint)] focus:border-sky-500 focus:bg-white"
                 />
-              </svg>
-            </div>
-            <h3 className="font-display text-[26px] font-semibold leading-[1.12] text-navy-900">
-              Got it. Profiles are on their way within 48 hours.
-            </h3>
-            <p className="mt-2 text-[15px] leading-relaxed text-steel-700">
-              Want to skip the wait? Book 15 minutes with Connor and we&apos;ll
-              walk through the three engineers together.
-            </p>
-            <div className="mt-4 overflow-hidden rounded-2xl border border-[var(--border-subtle)]">
-              <iframe
-                src={CALENDAR_URL}
-                title="Book a call with Connor"
-                className="h-[520px] w-full"
-                loading="lazy"
-              />
-            </div>
+              </div>
+            </label>
           </div>
-        )}
-      </div>
-    </div>
-  );
-}
+          {error && <ErrorLine>{error}</ErrorLine>}
+          <button type="submit" disabled={submitting} className={primary}>
+            {submitting ? "Sending…" : exploring ? "Send me the details" : "Book my call"}
+          </button>
+        </form>
+      )}
 
-function Step({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div>
-      <h3 className="mb-5 font-display text-[26px] font-semibold leading-[1.1] text-navy-900">
-        {title}
-      </h3>
-      {children}
-    </div>
-  );
-}
-
-function OptionButton({
-  onClick,
-  children,
-}: {
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="rounded-2xl border border-[var(--border-default)] bg-white px-4 py-5 text-left font-display text-[17px] font-medium text-navy-900 transition hover:border-sky-500 hover:bg-sky-500/5 hover:shadow-glow focus:outline-none focus-visible:border-sky-500"
-    >
-      {children}
-    </button>
-  );
-}
-
-function Field({
-  label,
-  value,
-  onChange,
-  type = "text",
-  placeholder,
-  autoFocus,
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  type?: string;
-  placeholder?: string;
-  autoFocus?: boolean;
-}) {
-  return (
-    <label className="block">
-      <span className="mb-1.5 block text-[13px] font-medium text-steel-700">
-        {label}
-      </span>
-      <input
-        type={type}
-        value={value}
-        placeholder={placeholder}
-        autoFocus={autoFocus}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-xl border border-[var(--border-default)] bg-ice-100/40 px-4 py-3 text-[16px] text-navy-900 outline-none transition placeholder:text-[var(--text-faint)] focus:border-sky-500 focus:bg-white focus:shadow-glow"
-      />
-    </label>
-  );
-}
-
-function PrimaryButton({
-  onClick,
-  disabled,
-  children,
-}: {
-  onClick: () => void;
-  disabled?: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      className="mt-5 w-full rounded-2xl bg-navy-900 px-6 py-4 font-display text-[16px] font-medium text-white shadow-cta transition hover:bg-navy-800 disabled:opacity-60"
-    >
-      {children}
-    </button>
-  );
-}
-
-function FootRow({
-  onBack,
-  hint,
-}: {
-  onBack: () => void;
-  hint?: string;
-}) {
-  return (
-    <div className="mt-4 flex items-center justify-between text-[13px]">
-      <button
-        type="button"
-        onClick={onBack}
-        className="font-medium text-steel-700 transition hover:text-navy-900"
-      >
-        Back
-      </button>
-      {hint && <span className="text-[var(--text-faint)]">{hint}</span>}
+      <p className="mt-3 text-center text-[12.5px] text-[var(--text-faint)]">
+        No placement fee · Free swap · Rolling monthly
+      </p>
     </div>
   );
 }
