@@ -53,7 +53,12 @@ const ENGINEERS = [
   { photo: "/engineers/priya.jpg", name: "Priya", role: "Full-stack engineer · 7 years", stack: "TypeScript, React, Node.js, AWS" },
   { photo: "/engineers/rohit.jpg", name: "Rohit", role: "Backend engineer · 5 years", stack: "Python, Django, PostgreSQL, AWS" },
   { photo: "/engineers/prasanna.jpg", name: "Prasanna", role: "AI / ML engineer · 17 years", stack: "Python, LLMs, RAG, FastAPI" },
-];
+  // Added 2026-10-23; Dan confirmed these are Octogle engineers. Details are
+  // pending: `todo` cards render their text as loud placeholders until filled.
+  { photo: "/engineers/engineer-4.webp", name: "Name", role: "Role · years", stack: "Stack", todo: true },
+  { photo: "/engineers/engineer-5.webp", name: "Name", role: "Role · years", stack: "Stack", todo: true },
+  { photo: "/engineers/engineer-6.webp", name: "Name", role: "Role · years", stack: "Stack", todo: true },
+] as { photo: string; name: string; role: string; stack: string; todo?: boolean }[];
 
 const QUOTES = [
   {
@@ -241,28 +246,28 @@ export default async function Page({
           <div className="mt-7 grid gap-4 sm:grid-cols-3">
             {ENGINEERS.map((e) => (
               <div
-                key={e.name}
+                key={e.photo}
                 className="overflow-hidden rounded-3xl border border-[var(--border-subtle)] bg-white shadow-card"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={e.photo}
-                  alt={e.name}
+                  alt={e.todo ? "Octogle engineer" : e.name}
                   width={800}
                   height={1071}
                   loading="lazy"
-                  className="aspect-[4/3] w-full object-cover object-[center_40%]"
+                  className={"aspect-[4/3] w-full object-cover " + (e.todo ? "object-[center_20%]" : "object-[center_40%]")}
                 />
                 <div className="p-5">
                   <div className="flex items-center justify-between gap-3">
-                    <p className="font-display text-[18px] font-semibold text-navy-900">{e.name}</p>
+                    <p className={"font-display text-[18px] font-semibold text-navy-900" + (e.todo ? " rounded border border-dashed border-[#c2414b] bg-[#fff5f3] px-1 !text-[#9b2c33]" : "")}>{e.name}</p>
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-good/10 px-2.5 py-1 text-[12px] font-medium text-good">
                       <span className="h-1.5 w-1.5 rounded-full bg-good" />
                       Available
                     </span>
                   </div>
-                  <p className="mt-0.5 text-[14px] text-steel-600">{e.role}</p>
-                  <p className="mt-3 text-[14px] text-navy-900">{e.stack}</p>
+                  <p className={"mt-0.5 inline-block text-[14px] text-steel-600" + (e.todo ? " rounded border border-dashed border-[#c2414b] bg-[#fff5f3] px-1 !text-[#9b2c33]" : "")}>{e.role}</p>
+                  <p className={"mt-3 inline-block text-[14px] text-navy-900" + (e.todo ? " rounded border border-dashed border-[#c2414b] bg-[#fff5f3] px-1 !text-[#9b2c33]" : "")}>{e.stack}</p>
                 </div>
               </div>
             ))}
