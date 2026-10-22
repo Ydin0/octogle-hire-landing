@@ -113,6 +113,24 @@ function readAttribution(): Record<string, string> {
   return out;
 }
 
+/**
+ * The calendar URL with what the visitor already told us, so the booking page
+ * doesn't ask again: name, email, the form answers as notes, and the campaign
+ * UTMs (the same params Leadey's embed.js sends).
+ */
+function bookingSrc(p: { name: string; email: string; notes: string }) {
+  const url = new URL(CALENDAR_URL);
+  if (p.name) url.searchParams.set("name", p.name);
+  if (p.email) url.searchParams.set("email", p.email);
+  if (p.notes) url.searchParams.set("notes", p.notes);
+  const page = new URLSearchParams(window.location.search);
+  for (const k of ["source", "medium", "campaign", "term", "content"]) {
+    const v = page.get(`utm_${k}`);
+    if (v) url.searchParams.set(`utm_${k}`, v);
+  }
+  return url.toString();
+}
+
 // keepalive so the request survives the visitor closing the tab mid-send.
 function sendLead(body: object) {
   return fetch(LEAD_ENDPOINT, {
@@ -365,7 +383,13 @@ export function BookForm({ variant }: { variant: string }) {
         </p>
         <iframe
           ref={frameRef}
-          src={CALENDAR_URL}
+          src={bookingSrc({
+            name: f.name.trim(),
+            email: f.email.trim(),
+            notes: `Level: ${level}. Start: ${start}.${
+              f.phone.trim() ? ` Mobile: ${composePhone(f.dialCc, f.phone)}.` : ""
+            }`,
+          })}
           title="Book a call with Connor"
           className="mt-3 h-[560px] w-full rounded-2xl border border-[var(--border-subtle)]"
         />
