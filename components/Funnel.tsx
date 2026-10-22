@@ -17,8 +17,32 @@ const LEAD_ENDPOINT = "/api/lead";
 const CALENDAR_URL =
   "https://app.leadey.ai/book/octogle-hire-connor-lp-mcjcg2?embed=1";
 const LOCATION_TAG = "landing page -dan";
+const LEADEY_ORIGIN = "https://app.leadey.ai";
+// Same id app/layout.tsx initialises the pixel with; re-init only adds
+// Advanced Matching data, it never creates a second pixel.
+const META_PIXEL_ID = "1614640659743336";
+// Shared with /booked so a booking is only ever counted once per visitor.
+const SCHEDULE_SENT_KEY = "ogh_schedule_sent";
 
 type Fbq = (...args: unknown[]) => void;
+/**
+ * Re-init the pixel with Advanced Matching so Meta can match the Lead to a
+ * person (email, phone, name). fbevents.js hashes these client-side; they must
+ * never go in event params. Call right before the conversion event.
+ */
+function setAdvancedMatching(user: { name: string; email: string; phone: string }) {
+  const fbq = (window as unknown as { fbq?: Fbq }).fbq;
+  if (typeof fbq !== "function") return;
+  const parts = user.name.trim().split(/\s+/).filter(Boolean);
+  const data: Record<string, string> = {};
+  if (user.email.trim()) data.em = user.email.trim().toLowerCase();
+  if (parts[0]) data.fn = parts[0].toLowerCase();
+  if (parts.length > 1) data.ln = parts.slice(1).join(" ").toLowerCase();
+  const digits = user.phone.replace(/\D/g, "");
+  if (digits) data.ph = digits;
+  fbq("init", META_PIXEL_ID, data);
+}
+
 // Google Ads "Submit lead form" conversion (tag loaded in app/layout.tsx).
 const GOOGLE_ADS_LEAD_CONVERSION = "AW-18440423872/1XedCIbikPscEMCTitlE";
 
@@ -164,6 +188,7 @@ function QuizModal({
   const [enrich, setEnrich] = useState<Record<string, string>>({});
   const eventId = useRef("lead_" + crypto.randomUUID());
   const scheduled = useRef(false);
+  const frameRef = useRef<HTMLIFrameElement>(null);
   // One Google Ads lead conversion per visitor, even if they go Back and
   // continue again (transaction_id also dedupes on Google's side).
   const googleLeadSent = useRef(false);
@@ -175,16 +200,34 @@ function QuizModal({
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
+    // Leadey's booking iframe posts {channel:"leadey:booking", event, ...}
+    // for EVERYTHING, including size updates while it loads. The old handler
+    // matched /book/ against the whole message, so every calendar view fired
+    // Schedule. Only a real booking_scheduled from Leadey's origin counts.
     const onMsg = (e: MessageEvent) => {
-      let d = "";
-      try {
-        d = typeof e.data === "string" ? e.data : JSON.stringify(e.data || {});
-      } catch {
-        d = "";
+      if (e.origin !== LEADEY_ORIGIN) return;
+      const data = e.data as
+        | { channel?: string; event?: string; height?: number; url?: string }
+        | undefined;
+      if (!data || data.channel !== "leadey:booking") return;
+
+      if (data.event === "resize" && data.height && frameRef.current) {
+        frameRef.current.style.height = `${Math.max(520, data.height)}px`;
+        return;
       }
-      if (/book|confirm|schedul/i.test(d) && !scheduled.current) {
+      if (data.event === "booking_scheduled" && !scheduled.current) {
         scheduled.current = true;
+        try {
+          sessionStorage.setItem(SCHEDULE_SENT_KEY, "1");
+        } catch {
+          /* storage blocked; /booked may count it again, acceptable */
+        }
         track("Schedule", {}, { eventID: "sched_" + eventId.current });
+        return;
+      }
+      // The iframe can't navigate the top window itself.
+      if (data.event === "redirect" && data.url) {
+        window.location.href = data.url;
       }
     };
     window.addEventListener("keydown", onKey);
@@ -262,6 +305,11 @@ function QuizModal({
     if (!emailOk(f.email)) return setError("Add a valid work email.");
     if (f.phone.trim().length < 6) return setError("Add a phone number.");
     setError("");
+    setAdvancedMatching({
+      name: f.name,
+      email: f.email,
+      phone: composePhone(f.dialCc, f.phone),
+    });
     track(
       "Lead",
       { content_category: build },
@@ -506,6 +554,7 @@ function QuizModal({
             </p>
             <div className="mt-4 overflow-hidden rounded-2xl border border-[var(--border-subtle)]">
               <iframe
+                ref={frameRef}
                 src={CALENDAR_URL}
                 title="Book a call with Connor"
                 className="h-[520px] w-full"
