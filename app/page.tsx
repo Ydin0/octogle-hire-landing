@@ -186,45 +186,6 @@ export default async function Page({
             </figure>
           </div>
 
-          <div className="relative">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/people/founder-phone.webp"
-              alt=""
-              width={900}
-              height={1200}
-              fetchPriority="high"
-              className="aspect-[4/3] w-full rounded-3xl object-cover object-[center_25%] shadow-cta md:aspect-[4/5]"
-            />
-            <div className="absolute bottom-4 left-4 right-4 flex flex-col gap-2 sm:right-auto">
-              <span className="inline-flex items-center gap-2 self-start rounded-2xl bg-white/95 px-3.5 py-2.5 text-[14px] font-semibold text-navy-900 shadow-card backdrop-blur">
-                <span className="grid h-7 w-7 place-items-center rounded-full bg-good/15 text-good">
-                  <Tick />
-                </span>
-                3 engineer profiles in 48 hours
-              </span>
-              <span className="inline-flex items-center gap-2 self-start rounded-2xl bg-white/95 px-3.5 py-2.5 text-[14px] font-semibold text-navy-900 shadow-card backdrop-blur">
-                <span className="grid h-7 w-7 place-items-center rounded-full bg-sky-500/15 font-display text-[13px] text-steel-600">
-                  £
-                </span>
-                From £1,500 a month, no placement fee
-              </span>
-            </div>
-          </div>
-        </section>
-
-        {/* 1b. The maths */}
-        <section className="mx-auto grid max-w-content items-center gap-8 px-5 pb-14 sm:px-8 md:grid-cols-[.9fr_1.1fr]">
-          <div>
-            <H2>Do the maths on a UK hire.</H2>
-            <p className="mt-3 text-[17px] leading-relaxed text-steel-700">
-              Salary is only the start. Add employer NI, pension and a recruiter
-              fee, then compare it with one monthly price.
-            </p>
-            <CtaButton className={btn + " mt-6 hidden md:inline-flex"}>
-              Book a 15-minute call <span aria-hidden>→</span>
-            </CtaButton>
-          </div>
           <CostCalculator />
         </section>
 
@@ -312,7 +273,7 @@ export default async function Page({
 
         {/* 5. Final CTA */}
         <section id="final" className="mx-auto max-w-content px-5 sm:px-8">
-          <div className="grid overflow-hidden rounded-[2rem] bg-navy-900 text-white md:grid-cols-[1.2fr_.8fr]">
+          <div className="overflow-hidden rounded-[2rem] bg-navy-900 text-white">
             <div className="px-6 py-10 sm:px-10 sm:py-14">
               <h2 className="font-display text-[clamp(1.7rem,4.5vw,2.5rem)] font-semibold leading-[1.08] tracking-[-0.015em]">
                 Book a call. See three engineers within 48 hours.
@@ -328,15 +289,6 @@ export default async function Page({
                 Need SDRs instead? Dedicated SDRs from £1,900 a month. Ask on the call.
               </p>
             </div>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/people/founder-laptop.webp"
-              alt=""
-              width={900}
-              height={1200}
-              loading="lazy"
-              className="hidden h-full w-full object-cover object-[center_30%] md:block"
-            />
           </div>
         </section>
 
