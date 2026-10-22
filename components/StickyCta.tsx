@@ -29,10 +29,10 @@ export default function StickyCta() {
       }`}
     >
       <CtaButton className="flex w-full items-center justify-center gap-2 rounded-2xl bg-navy-900 px-6 py-4 font-display text-[16px] font-medium text-white shadow-cta">
-        See 3 engineers <span aria-hidden>→</span> 48 hours
+        Get 3 engineer profiles <span aria-hidden>→</span>
       </CtaButton>
       <p className="mt-2 text-center text-[12px] text-[var(--text-faint)]">
-        No placement fee · No commitment to view
+        Free · Profiles in 48 hours · No placement fee
       </p>
     </div>
   );

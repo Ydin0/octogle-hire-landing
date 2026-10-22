@@ -67,17 +67,57 @@ function track(event: string, params?: object, opts?: object) {
   if (typeof fbq === "function") fbq("track", event, params || {}, opts || {});
 }
 
-const BUILD_OPTIONS = ["SaaS", "Website", "Ecom store", "App"];
+// First tap: how far along the product is. It qualifies as well as starts the
+// funnel: idea-stage leads were the biggest source of "Not a Fit" on calls, so
+// they get a nurture path instead of Connor's calendar.
+export const STAGE_OPTIONS = [
+  "Just an idea",
+  "Designs or spec",
+  "Prototype built",
+  "Live with users",
+] as const;
+const IDEA_STAGE = STAGE_OPTIONS[0];
 
-// Post-contact qualifier: quick taps we send back to Leadey as enrichment so
-// the team can walk into the call with the right profiles + budget in mind.
-const ENRICH_QUESTIONS: { key: string; q: string; opts: string[] }[] = [
-  { key: "seniority", q: "Level you need", opts: ["Intern", "Junior", "Mid", "Senior", "A mix"] },
-  { key: "budget", q: "Monthly budget", opts: ["£1.5k to £3k", "£3k to £5k", "£5k+", "Not sure yet"] },
-  { key: "timeline", q: "When to start", opts: ["ASAP", "2 to 4 weeks", "Just exploring"] },
-];
+const LEVEL_OPTIONS = ["Junior", "Mid-level", "Senior", "Not sure"];
 
-type Ctx = { open: (build?: string) => void };
+// Free-mail domains. Business email is the only form field that predicts a
+// deal, so we nudge (not block) toward it and tag every lead with which it was.
+const FREE_EMAIL_DOMAINS = new Set([
+  "gmail.com", "googlemail.com", "hotmail.com", "hotmail.co.uk", "outlook.com",
+  "outlook.co.uk", "live.com", "live.co.uk", "msn.com", "yahoo.com",
+  "yahoo.co.uk", "icloud.com", "me.com", "aol.com", "proton.me",
+  "protonmail.com", "btinternet.com", "sky.com", "gmx.com", "mail.com",
+]);
+const isFreeEmail = (email: string) =>
+  FREE_EMAIL_DOMAINS.has(email.trim().toLowerCase().split("@")[1] ?? "");
+
+// Campaign attribution, read from the landing URL so every lead in Leadey can
+// be tied back to the ad (utm_content = ad name) and the hero it saw.
+const ATTRIBUTION_KEYS = [
+  "utm_source",
+  "utm_medium",
+  "utm_campaign",
+  "utm_content",
+  "utm_term",
+  "campaign_id",
+  "adset_id",
+  "ad_id",
+  "fbclid",
+  "v",
+] as const;
+
+function readAttribution(): Record<string, string> {
+  if (typeof window === "undefined") return {};
+  const params = new URLSearchParams(window.location.search);
+  const out: Record<string, string> = {};
+  for (const k of ATTRIBUTION_KEYS) {
+    const val = params.get(k)?.trim();
+    if (val) out[k === "v" ? "hero_variant" : k] = val.slice(0, 200);
+  }
+  return out;
+}
+
+type Ctx = { open: (stage?: string) => void };
 const FunnelCtx = createContext<Ctx | null>(null);
 
 export function useFunnel() {
@@ -86,13 +126,20 @@ export function useFunnel() {
   return ctx;
 }
 
-export function FunnelProvider({ children }: { children: React.ReactNode }) {
+export function FunnelProvider({
+  variant,
+  children,
+}: {
+  /** Which ad-matched hero the visitor saw; sent with the lead. */
+  variant?: string;
+  children: React.ReactNode;
+}) {
   const [isOpen, setIsOpen] = useState(false);
-  const [initialBuild, setInitialBuild] = useState<string | undefined>();
+  const [initialStage, setInitialStage] = useState<string | undefined>();
 
-  const open = useCallback((build?: string) => {
+  const open = useCallback((stage?: string) => {
     track("InitiateCheckout", {}, { eventID: "ic_" + Date.now() });
-    setInitialBuild(build);
+    setInitialStage(stage);
     setIsOpen(true);
   }, []);
 
@@ -103,7 +150,8 @@ export function FunnelProvider({ children }: { children: React.ReactNode }) {
       {children}
       {isOpen && (
         <QuizModal
-          initialBuild={initialBuild}
+          initialStage={initialStage}
+          variant={variant}
           onClose={() => setIsOpen(false)}
         />
       )}
@@ -134,15 +182,15 @@ export function InlineStart({ className }: { className?: string }) {
   return (
     <div className={className}>
       <p className="mb-3 font-display text-[17px] font-semibold text-navy-900">
-        What are you building?
+        Where&apos;s your product at?
       </p>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {BUILD_OPTIONS.map((o) => (
+        {STAGE_OPTIONS.map((o) => (
           <button
             key={o}
             type="button"
             onClick={() => open(o)}
-            className="rounded-2xl border border-navy-900/15 bg-white px-4 py-4 text-center font-display text-[16px] font-medium text-navy-900 shadow-card transition hover:border-sky-500 hover:bg-sky-500/5 hover:shadow-glow focus:outline-none focus-visible:border-sky-500"
+            className="rounded-2xl border border-navy-900/15 bg-white px-3 py-4 text-center font-display text-[16px] font-medium leading-tight text-navy-900 shadow-card transition hover:border-sky-500 hover:bg-sky-500/5 hover:shadow-glow focus:outline-none focus-visible:border-sky-500"
           >
             {o}
           </button>
@@ -165,14 +213,16 @@ function sendLead(body: object) {
 const emailOk = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
 
 function QuizModal({
-  initialBuild,
+  initialStage,
+  variant,
   onClose,
 }: {
-  initialBuild?: string;
+  initialStage?: string;
+  variant?: string;
   onClose: () => void;
 }) {
-  const [step, setStep] = useState(initialBuild ? 2 : 1);
-  const [build, setBuild] = useState(initialBuild ?? "");
+  const [step, setStep] = useState(initialStage ? 2 : 1);
+  const [stage, setStage] = useState(initialStage ?? "");
   const [f, setF] = useState({
     name: "",
     email: "",
@@ -181,17 +231,19 @@ function QuizModal({
     // number on every send via composePhone().
     dialCc: "GB",
     company: "",
-    website: "",
+    building: "",
+    level: "",
   });
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [enrich, setEnrich] = useState<Record<string, string>>({});
   const eventId = useRef("lead_" + crypto.randomUUID());
   const scheduled = useRef(false);
   const frameRef = useRef<HTMLIFrameElement>(null);
   // One Google Ads lead conversion per visitor, even if they go Back and
   // continue again (transaction_id also dedupes on Google's side).
   const googleLeadSent = useRef(false);
+  const isIdea = stage === IDEA_STAGE;
+  const freeEmail = emailOk(f.email) && isFreeEmail(f.email);
 
   // Lock scroll + escape to close + Schedule pixel from calendar postMessage.
   useEffect(() => {
@@ -201,9 +253,8 @@ function QuizModal({
       if (e.key === "Escape") onClose();
     };
     // Leadey's booking iframe posts {channel:"leadey:booking", event, ...}
-    // for EVERYTHING, including size updates while it loads. The old handler
-    // matched /book/ against the whole message, so every calendar view fired
-    // Schedule. Only a real booking_scheduled from Leadey's origin counts.
+    // for EVERYTHING, including size updates while it loads. Only a real
+    // booking_scheduled from Leadey's origin counts as a Schedule.
     const onMsg = (e: MessageEvent) => {
       if (e.origin !== LEADEY_ORIGIN) return;
       const data = e.data as
@@ -239,70 +290,50 @@ function QuizModal({
     };
   }, [onClose]);
 
-  const pickBuild = (v: string) => {
-    setBuild(v);
+  const pickStage = (v: string) => {
+    setStage(v);
     setStep(2);
   };
 
-  // Post the lead to Leadey. Fired once at step 3 (partial, so we keep the
-  // contact even if they never finish step 4) and again on final submit with
-  // the same event_id + email so Leadey updates the record instead of
+  // Post the lead to Leadey. Fired once at the contact step (partial, so we
+  // keep the contact even if they never finish) and again on the details step
+  // with the same event_id + email, so Leadey updates the record instead of
   // creating a duplicate.
   const postLead = (partial: boolean) => {
-    const lead = {
+    const summary = [
+      `Stage: ${stage}`,
+      f.level && `Level: ${f.level}`,
+      f.building.trim() && `Building: ${f.building.trim()}`,
+      isIdea && "Idea stage: nurture, no calendar shown",
+    ]
+      .filter(Boolean)
+      .join("; ");
+    return sendLead({
       name: f.name.trim(),
       email: f.email.trim(),
+      email_type: isFreeEmail(f.email) ? "free" : "work",
       phone: composePhone(f.dialCc, f.phone),
       company: f.company.trim(),
-      website: f.website.trim(),
-      build,
+      stage,
+      build: f.building.trim(),
+      seniority: f.level || undefined,
+      nurture: isIdea || undefined,
       status: partial ? "partial" : "complete",
       captured_step: partial ? 2 : 3,
       location: LOCATION_TAG,
       source: LOCATION_TAG,
-      note: LOCATION_TAG,
+      note: `Landing page: ${summary}`,
       page: typeof location !== "undefined" ? location.href : "",
       submitted_at: new Date().toISOString(),
       event_id: eventId.current,
-    };
-    return sendLead(lead);
-  };
-
-  // Send the post-contact qualifier answers back to Leadey against the SAME
-  // lead (same event_id + email), as a note so the team gets the extra context
-  // on the existing lead rather than a new record.
-  const postEnrichment = (answers: Record<string, string>) => {
-    const summary = ENRICH_QUESTIONS.filter((q) => answers[q.key])
-      .map((q) => `${q.q}: ${answers[q.key]}`)
-      .join("; ");
-    if (!summary) return Promise.resolve();
-    const payload = {
-      name: f.name.trim(),
-      email: f.email.trim(),
-      phone: composePhone(f.dialCc, f.phone),
-      company: f.company.trim(),
-      website: f.website.trim(),
-      build,
-      ...answers,
-      status: "enriched",
-      location: LOCATION_TAG,
-      source: LOCATION_TAG,
-      note: "Landing page qualifier: " + summary,
-      page: typeof location !== "undefined" ? location.href : "",
-      submitted_at: new Date().toISOString(),
-      event_id: eventId.current,
-    };
-    return sendLead(payload);
-  };
-
-  const finishQualifier = () => {
-    void postEnrichment(enrich);
-    setStep(5);
+      hero_variant: variant,
+      ...readAttribution(),
+    });
   };
 
   const contactNext = () => {
-    if (!f.name.trim()) return setError("Add your name.");
-    if (!emailOk(f.email)) return setError("Add a valid work email.");
+    if (!f.name.trim()) return setError("Add your first name.");
+    if (!emailOk(f.email)) return setError("Add a valid email.");
     if (f.phone.trim().length < 6) return setError("Add a phone number.");
     setError("");
     setAdvancedMatching({
@@ -310,28 +341,25 @@ function QuizModal({
       email: f.email,
       phone: composePhone(f.dialCc, f.phone),
     });
-    track(
-      "Lead",
-      { content_category: build },
-      { eventID: eventId.current },
-    );
+    track("Lead", { content_category: stage }, { eventID: eventId.current });
     if (!googleLeadSent.current) {
       googleLeadSent.current = true;
       trackGoogleAdsLead(eventId.current);
     }
-    // Partial capture: send contact details now, before the company step.
+    // Partial capture: send contact details now, before the details step.
     void postLead(true);
     setStep(3);
   };
 
   const submit = async () => {
-    if (!f.company.trim()) return setError("Add your company.");
+    if (f.building.trim().length < 3)
+      return setError("Tell us in a line what you're building.");
     setError("");
     setSubmitting(true);
     await postLead(false);
     track(
       "SubmitApplication",
-      { content_category: build },
+      { content_category: stage },
       { eventID: "app_" + eventId.current },
     );
     setSubmitting(false);
@@ -340,7 +368,7 @@ function QuizModal({
 
   const progress = step >= 3 ? 100 : (step / 3) * 100;
   const stepLabel =
-    step <= 3 ? `Step ${step} of 3` : step === 4 ? "Almost there" : "Done";
+    step <= 3 ? `Step ${step} of 3` : isIdea ? "Done" : "Last step";
 
   return (
     <div
@@ -369,18 +397,20 @@ function QuizModal({
           </button>
         </div>
 
-        <div className="mb-6 h-1 w-full overflow-hidden rounded-full bg-[rgba(66,110,140,.12)]">
-          <div
-            className="h-full rounded-full bg-navy-900 transition-[width] duration-300"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
+        {step <= 3 && (
+          <div className="mb-6 h-1 w-full overflow-hidden rounded-full bg-[rgba(66,110,140,.12)]">
+            <div
+              className="h-full rounded-full bg-navy-900 transition-[width] duration-300"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        )}
 
         {step === 1 && (
-          <Step title="What are you building?">
+          <Step title="Where's your product at?">
             <div className="grid grid-cols-2 gap-3">
-              {BUILD_OPTIONS.map((o) => (
-                <OptionButton key={o} onClick={() => pickBuild(o)}>
+              {STAGE_OPTIONS.map((o) => (
+                <OptionButton key={o} onClick={() => pickStage(o)}>
                   {o}
                 </OptionButton>
               ))}
@@ -389,23 +419,30 @@ function QuizModal({
         )}
 
         {step === 2 && (
-          <Step title="Where do we send the three profiles?">
+          <Step title="Where do we send your three profiles?">
             <div className="space-y-3">
               <Field
-                label="Name"
+                label="First name"
                 value={f.name}
+                autoComplete="given-name"
                 onChange={(v) => setF({ ...f, name: v })}
                 autoFocus
               />
               <Field
                 label="Work email"
                 type="email"
+                autoComplete="email"
                 value={f.email}
                 onChange={(v) => setF({ ...f, email: v })}
+                hint={
+                  freeEmail
+                    ? "Got a company email? Shortlists go out faster to a work address."
+                    : undefined
+                }
               />
               <label className="block">
                 <span className="mb-1.5 block text-[13px] font-medium text-steel-700">
-                  Phone
+                  Mobile, so we can call you about the shortlist
                 </span>
                 <div className="flex gap-2">
                   <select
@@ -435,8 +472,8 @@ function QuizModal({
                   <input
                     type="tel"
                     inputMode="tel"
-                    autoComplete="tel"
-                    placeholder="7737 000000"
+                    autoComplete="tel-national"
+                    placeholder="7700 900123"
                     value={f.phone}
                     onChange={(e) => setF({ ...f, phone: e.target.value })}
                     className="w-full min-w-0 rounded-xl border border-[var(--border-default)] bg-ice-100/40 px-4 py-3 text-[16px] text-navy-900 outline-none transition placeholder:text-[var(--text-faint)] focus:border-sky-500 focus:bg-white focus:shadow-glow"
@@ -445,112 +482,104 @@ function QuizModal({
               </label>
             </div>
             {error && <ErrorLine>{error}</ErrorLine>}
-            <PrimaryButton onClick={contactNext}>Continue</PrimaryButton>
-            <FootRow onBack={() => setStep(1)} hint="One more step." />
-          </Step>
-        )}
-
-        {step === 3 && (
-          <Step title="And the company we're building for?">
-            <div className="space-y-3">
-              <Field
-                label="Company"
-                value={f.company}
-                onChange={(v) => setF({ ...f, company: v })}
-                autoFocus
-              />
-              <Field
-                label="Website (optional)"
-                type="url"
-                placeholder="https://"
-                value={f.website}
-                onChange={(v) => setF({ ...f, website: v })}
-              />
-            </div>
-            {error && <ErrorLine>{error}</ErrorLine>}
-            <PrimaryButton onClick={submit} disabled={submitting}>
-              {submitting ? "Sending…" : "Send me the three profiles"}
-            </PrimaryButton>
+            <PrimaryButton onClick={contactNext}>Get my 3 profiles</PrimaryButton>
             <FootRow
-              onBack={() => setStep(2)}
-              hint="No placement fee. No commitment to hire."
+              onBack={() => setStep(1)}
+              hint="Free. No placement fee."
             />
           </Step>
         )}
 
-        {step === 4 && (
+        {step === 3 && (
+          <Step title="Last thing: what are we building?">
+            <div className="space-y-3">
+              <Field
+                label="What are you building? (one line)"
+                placeholder="e.g. a booking app for physio clinics"
+                value={f.building}
+                onChange={(v) => setF({ ...f, building: v })}
+                autoFocus
+              />
+              <Field
+                label="Company (optional)"
+                autoComplete="organization"
+                value={f.company}
+                onChange={(v) => setF({ ...f, company: v })}
+              />
+              <div>
+                <p className="mb-2 text-[13px] font-medium text-steel-700">
+                  Level you need (optional)
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {LEVEL_OPTIONS.map((o) => {
+                    const active = f.level === o;
+                    return (
+                      <button
+                        key={o}
+                        type="button"
+                        aria-pressed={active}
+                        onClick={() => setF({ ...f, level: active ? "" : o })}
+                        className={
+                          "rounded-full border px-3.5 py-2 text-[13px] font-medium transition " +
+                          (active
+                            ? "border-sky-500 bg-sky-500/10 text-navy-900 shadow-glow"
+                            : "border-[var(--border-default)] bg-white text-steel-700 hover:border-sky-500")
+                        }
+                      >
+                        {o}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+            {error && <ErrorLine>{error}</ErrorLine>}
+            <PrimaryButton onClick={submit} disabled={submitting}>
+              {submitting
+                ? "Sending…"
+                : isIdea
+                  ? "Send it over"
+                  : "Next: pick a time"}
+            </PrimaryButton>
+            <FootRow
+              onBack={() => setStep(2)}
+              hint="We use this to pick the right three."
+            />
+          </Step>
+        )}
+
+        {step === 4 && isIdea && (
           <div>
-            <h3 className="font-display text-[24px] font-semibold leading-[1.14] text-navy-900">
-              Got it. Your three profiles are being put together now.
+            <DoneTick />
+            <h3 className="font-display text-[26px] font-semibold leading-[1.12] text-navy-900">
+              Thanks, {f.name.trim().split(/\s+/)[0] || "got it"}.
             </h3>
             <p className="mt-2 text-[15px] leading-relaxed text-steel-700">
-              Two quick things so we match them to you. Optional.
+              We&apos;ll email you how it works and what it costs at each level.
+              When you&apos;re ready to start building, book a call and
+              we&apos;ll have three profiles ready.
             </p>
-
-            <div className="mt-5 space-y-5">
-              {ENRICH_QUESTIONS.map((q) => (
-                <div key={q.key}>
-                  <p className="mb-2 text-[13px] font-medium text-steel-700">
-                    {q.q}
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {q.opts.map((o) => {
-                      const active = enrich[q.key] === o;
-                      return (
-                        <button
-                          key={o}
-                          type="button"
-                          onClick={() =>
-                            setEnrich((e) => ({ ...e, [q.key]: o }))
-                          }
-                          className={
-                            "rounded-full border px-3.5 py-2 text-[13px] font-medium transition " +
-                            (active
-                              ? "border-sky-500 bg-sky-500/10 text-navy-900 shadow-glow"
-                              : "border-[var(--border-default)] bg-white text-steel-700 hover:border-sky-500")
-                          }
-                        >
-                          {o}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <PrimaryButton onClick={finishQualifier}>
-              Continue to booking
-            </PrimaryButton>
-            <button
-              type="button"
-              onClick={finishQualifier}
-              className="mt-3 w-full text-center text-[13px] font-medium text-[var(--text-faint)] transition hover:text-steel-700"
+            <a
+              href={CALENDAR_URL.replace("?embed=1", "")}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 inline-block text-[14px] font-medium text-steel-600 underline underline-offset-4 transition hover:text-navy-900"
             >
-              Skip
-            </button>
+              Ready now? Book a call
+            </a>
           </div>
         )}
 
-        {step === 5 && (
+        {step === 4 && !isIdea && (
           <div>
-            <div className="mb-4 grid h-11 w-11 place-items-center rounded-2xl bg-sky-500/15 text-steel-600">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M5 12.5l4.5 4.5L19 7.5"
-                  stroke="currentColor"
-                  strokeWidth="2.4"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </div>
+            <DoneTick />
             <h3 className="font-display text-[26px] font-semibold leading-[1.12] text-navy-900">
-              Got it. Profiles are on their way within 48 hours.
+              Last step: pick a time with Connor.
             </h3>
             <p className="mt-2 text-[15px] leading-relaxed text-steel-700">
-              Want to skip the wait? Book 15 minutes with Connor and we&apos;ll
-              walk through the three engineers together.
+              A quick call so the three profiles match what you&apos;re
+              building, with exact pricing. They land in your inbox within 48
+              hours.
             </p>
             <div className="mt-4 overflow-hidden rounded-2xl border border-[var(--border-subtle)]">
               <iframe
@@ -558,12 +587,27 @@ function QuizModal({
                 src={CALENDAR_URL}
                 title="Book a call with Connor"
                 className="h-[520px] w-full"
-                loading="lazy"
               />
             </div>
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+function DoneTick() {
+  return (
+    <div className="mb-4 grid h-11 w-11 place-items-center rounded-2xl bg-sky-500/15 text-steel-600">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <path
+          d="M5 12.5l4.5 4.5L19 7.5"
+          stroke="currentColor"
+          strokeWidth="2.4"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
     </div>
   );
 }
@@ -610,6 +654,8 @@ function Field({
   type = "text",
   placeholder,
   autoFocus,
+  autoComplete,
+  hint,
 }: {
   label: string;
   value: string;
@@ -617,6 +663,9 @@ function Field({
   type?: string;
   placeholder?: string;
   autoFocus?: boolean;
+  autoComplete?: string;
+  /** Soft guidance under the input; never blocks submit. */
+  hint?: string;
 }) {
   return (
     <label className="block">
@@ -628,9 +677,13 @@ function Field({
         value={value}
         placeholder={placeholder}
         autoFocus={autoFocus}
+        autoComplete={autoComplete}
         onChange={(e) => onChange(e.target.value)}
         className="w-full rounded-xl border border-[var(--border-default)] bg-ice-100/40 px-4 py-3 text-[16px] text-navy-900 outline-none transition placeholder:text-[var(--text-faint)] focus:border-sky-500 focus:bg-white focus:shadow-glow"
       />
+      {hint && (
+        <span className="mt-1.5 block text-[12.5px] text-steel-600">{hint}</span>
+      )}
     </label>
   );
 }

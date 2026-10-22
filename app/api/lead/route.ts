@@ -84,7 +84,7 @@ async function sendCapiLead(
         action_source: "website",
         event_source_url: page,
         user_data: userData,
-        custom_data: { content_category: body.build },
+        custom_data: { content_category: body.stage ?? body.build },
       },
     ],
   };

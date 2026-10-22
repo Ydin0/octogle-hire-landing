@@ -20,6 +20,18 @@ const FAQS = [
     a: "Profiles in 48 hours. Once you pick, they're embedded in your team from week one.",
   },
   {
+    q: "Who owns the code?",
+    a: "You do. They work in your repo from day one, and all IP is yours, confirmed in our NDA and standard contract.",
+  },
+  {
+    q: "Can I stop?",
+    a: "Yes. It's a rolling monthly contract with 14 days' notice. No lock-in.",
+  },
+  {
+    q: "Is my code and data secure?",
+    a: "We're ISO 27001 certified: our information security is independently audited, and your code and data are handled to that standard. The certificate is linked at the top of this page.",
+  },
+  {
     q: "I already paid an agency and got burned.",
     a: "A build quote runs £50,000 to £200,000, they hand you a repo, then they're gone. Here the engineer just works for you, ongoing, and everything stays yours.",
   },
