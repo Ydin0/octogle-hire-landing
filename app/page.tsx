@@ -55,6 +55,13 @@ const ENGINEERS = [
   { photo: "/engineers/prasanna.jpg", name: "Prasanna", role: "AI / ML engineer · 17 years", stack: "Python, LLMs, RAG, FastAPI" },
 ];
 
+// Published tiers, signed off by Dan 2026-09-24.
+const TIERS = [
+  { level: "Junior", note: "1 to 3 years", price: "£1,500" },
+  { level: "Mid-level", note: "3 to 6 years", price: "£2,500" },
+  { level: "Senior", note: "6+ years", price: "£4,500" },
+];
+
 const QUOTES = [
   {
     quote:
@@ -80,7 +87,7 @@ const FAQS = [
   },
   {
     q: "Why is it cheaper than a UK hire?",
-    a: "Our engineers work from our own office in India, and you pay no UK employer NI, pension or recruiter fee. The calculator above shows the maths.",
+    a: "Our engineers work from our own office in India, and you pay no UK employer NI, pension or recruiter fee. The calculator on this page shows the maths.",
   },
   {
     q: "I'm not technical. Can I manage them?",
@@ -116,7 +123,8 @@ export default async function Page({
 
   return (
     <FunnelProvider variant={hero.key}>
-      {/* Offer banner: price, speed, risk reversal and the action in one line. */}
+      {/* Offer banner: speed and risk reversal. No price: the ads don't lead
+          on it, so the first screen doesn't either. */}
       <div className="bg-navy-900 text-white">
         <div className="mx-auto flex max-w-content items-center justify-center gap-3 px-5 py-2.5 text-center sm:px-8">
           <p className="min-w-0 text-[13px] leading-snug sm:text-[14px]">
@@ -124,8 +132,8 @@ export default async function Page({
               <span className="h-1.5 w-1.5 rounded-full bg-[#7BE0B4]" />
               UK
             </span>
-            Full-time engineers from <b className="font-semibold">£1,500/mo</b>
-            <span className="hidden sm:inline"> · 3 profiles in 48 hours · No placement fee</span>
+            <b className="font-semibold">3 engineer profiles in 48 hours</b>
+            <span className="hidden sm:inline"> · Full time, in your repo · No placement fee</span>
           </p>
         </div>
       </div>
@@ -136,11 +144,15 @@ export default async function Page({
       </header>
 
       <main className="overflow-x-hidden pb-24 md:pb-0">
-        {/* 1. Hero: promise, price, the maths */}
-        <section className="mx-auto grid max-w-content items-start gap-8 px-5 pb-14 pt-2 sm:px-8 md:grid-cols-[1.1fr_.9fr] md:pt-8">
+        {/* 1. Hero: the ad's promise, who it's for, one button */}
+        <section className="mx-auto grid max-w-content items-start gap-8 px-5 pb-14 pt-2 sm:px-8 md:grid-cols-[1.1fr_.9fr] md:pt-8 [&>*]:min-w-0">
           <div>
-            <p className="text-[14px] font-semibold text-steel-600">{hero.call}</p>
-            <h1 className="mt-2 font-display text-[clamp(2rem,6vw,3.4rem)] font-semibold leading-[1.06] tracking-[-0.02em] text-navy-900">
+            {/* Filter line: qualifies out idea-stage visitors before they click. */}
+            <p className="inline-flex items-center gap-2 rounded-full border border-[var(--border-default)] bg-white px-3.5 py-1.5 text-[13px] font-medium text-steel-700">
+              <span className="h-1.5 w-1.5 rounded-full bg-sky-500" />
+              For companies already building a SaaS or AI product, not ideas.
+            </p>
+            <h1 className="mt-4 font-display text-[clamp(2rem,6vw,3.4rem)] font-semibold leading-[1.06] tracking-[-0.02em] text-navy-900">
               {hero.head}
             </h1>
             <p className="mt-4 text-[17px] leading-relaxed text-steel-700">{hero.sub}</p>
@@ -159,13 +171,13 @@ export default async function Page({
 
             <figure className="mt-8 flex items-start gap-3 border-l-2 border-sky-500/40 pl-4">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/proof/eduardo.jpg" alt="Eduardo Middleton" width={40} height={40} className="h-10 w-10 shrink-0 rounded-full object-cover" />
+              <img src="/proof/ricardo.jpg" alt="Ricardo Machado" width={40} height={40} className="h-10 w-10 shrink-0 rounded-full object-cover" />
               <div>
                 <blockquote className="text-[14px] leading-snug text-navy-900">
-                  &ldquo;Our initial budget for a developer in the UK was £75,000. OctogleHire placed an equally skilled engineer for £38,000.&rdquo;
+                  &ldquo;We were about to commit to three senior frontend engineers at London rates. OctogleHire matched us with equally talented engineers in under a week.&rdquo;
                 </blockquote>
                 <figcaption className="mt-1 text-[12.5px] text-[var(--text-faint)]">
-                  Eduardo Middleton, Founder, 1VA ·{" "}
+                  Ricardo Machado, CEO, Beekey ·{" "}
                   <a href={CLUTCH_URL} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-steel-700">
                     5.0 on Clutch, 12 reviews
                   </a>
@@ -174,7 +186,34 @@ export default async function Page({
             </figure>
           </div>
 
-          <CostCalculator />
+          {/* What you get, previewed: the three real engineers as a shortlist. */}
+          <div className="rounded-3xl border border-[var(--border-subtle)] bg-white p-5 shadow-cta sm:p-6">
+            <div className="flex items-center justify-between">
+              <p className="font-display text-[17px] font-semibold text-navy-900">Your shortlist</p>
+              <span className="rounded-full bg-ice-100 px-2.5 py-1 font-mono text-[11px] text-steel-600">
+                within 48 hours
+              </span>
+            </div>
+            <div className="mt-4 space-y-2.5">
+              {ENGINEERS.map((e) => (
+                <div key={e.name} className="flex items-center gap-3 rounded-2xl border border-[var(--border-subtle)] p-3">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={e.photo} alt={e.name} width={48} height={48} className="h-12 w-12 shrink-0 rounded-xl object-cover object-[center_35%]" />
+                  <div className="min-w-0 flex-1">
+                    <p className="font-display text-[15px] font-semibold text-navy-900">{e.name}</p>
+                    <p className="truncate text-[13px] text-steel-600">{e.role}</p>
+                  </div>
+                  <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-good/10 px-2.5 py-1 text-[12px] font-medium text-good">
+                    <span className="h-1.5 w-1.5 rounded-full bg-good" />
+                    Available
+                  </span>
+                </div>
+              ))}
+            </div>
+            <p className="mt-4 text-[13px] text-steel-600">
+              Stack, experience and what they&apos;ve shipped. Interview who you like.
+            </p>
+          </div>
         </section>
 
         {/* 2. The pain, in founders' own words, then the fix */}
@@ -273,7 +312,7 @@ export default async function Page({
 
           {/* Client voice beside the office: same height, no dead space. */}
           <div className="mt-8 grid gap-4 md:grid-cols-2">
-            {QUOTES.slice(1).map((q) => (
+            {QUOTES.slice(0, 1).map((q) => (
               <figure
                 key={q.name}
                 className="flex flex-col justify-between rounded-3xl bg-navy-900 p-6 text-white sm:p-8"
@@ -307,6 +346,32 @@ export default async function Page({
               </figcaption>
             </figure>
           </div>
+        </section>
+
+        {/* 3b. What it costs: price only once they've seen who they'd get */}
+        <section className="mx-auto grid max-w-content items-center gap-8 px-5 pb-16 sm:px-8 md:grid-cols-[.9fr_1.1fr] [&>*]:min-w-0">
+          <div>
+            <p className="eyebrow text-[11px] font-medium text-steel-500">What it costs</p>
+            <H2>One monthly price. No placement fee.</H2>
+            <div className="mt-6 divide-y divide-[var(--border-subtle)] rounded-3xl border border-[var(--border-subtle)] bg-white shadow-card">
+              {TIERS.map((t) => (
+                <div key={t.level} className="flex items-center justify-between p-4">
+                  <div>
+                    <p className="font-display text-[16px] font-semibold text-navy-900">{t.level}</p>
+                    <p className="text-[13px] text-steel-600">{t.note}</p>
+                  </div>
+                  <p className="font-display text-[22px] font-semibold text-navy-900">
+                    {t.price}
+                    <span className="text-[14px] font-medium text-steel-600">/mo</span>
+                  </p>
+                </div>
+              ))}
+            </div>
+            <p className="mt-3 text-[14px] text-steel-600">
+              Rolling monthly, 14 days&apos; notice. Not right? We swap them, no fee.
+            </p>
+          </div>
+          <CostCalculator />
         </section>
 
         {/* 4. How it works (animated) */}

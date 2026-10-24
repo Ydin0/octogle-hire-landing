@@ -27,8 +27,8 @@ export default function StickyCta() {
       }`}
     >
       <div className="text-[12px] leading-tight">
-        <p className="font-semibold text-navy-900">From £1,500/mo</p>
-        <p className="text-[var(--text-faint)]">3 profiles in 48h</p>
+        <p className="font-semibold text-navy-900">3 profiles in 48h</p>
+        <p className="text-[var(--text-faint)]">No placement fee</p>
       </div>
       <CtaButton className="flex-1 rounded-2xl bg-navy-900 px-5 py-3.5 text-center font-display text-[16px] font-medium text-white shadow-cta">
         Get engineers now
