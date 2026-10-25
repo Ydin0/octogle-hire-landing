@@ -2,6 +2,7 @@ import { CtaButton, FunnelProvider } from "@/components/Funnel";
 import CostCalculator from "@/components/CostCalculator";
 import StickyCta from "@/components/StickyCta";
 import HowItWorks from "@/components/HowItWorks";
+import Benefits from "@/components/Benefits";
 import { pickHero } from "@/lib/hero-variants";
 
 // One job: book a 15-minute call. Order follows the 2026-10-23 structure:
@@ -22,18 +23,6 @@ const OBJECTIONS = [
     cost: "You pay for the build twice: once to write it, again to fix it.",
     answer: "Work happens in your repo,",
     detail: "where your team can see and review every change.",
-  },
-  {
-    said: "herding cats 16 hours/day",
-    cost: "You end up project-managing instead of running the business.",
-    answer: "Managed in person",
-    detail: "in our own office, every day. You set priorities, we handle the rest.",
-  },
-  {
-    said: "exorbitant markup (~50% ...)",
-    cost: "A chunk of every invoice never reaches the engineer.",
-    answer: "One published monthly price.",
-    detail: "No placement fee, no hidden extras.",
   },
   {
     said: "Nobody owns your delivery",
@@ -186,7 +175,8 @@ export default async function Page({
             </figure>
           </div>
 
-          {/* What you get, previewed: the three real engineers as a shortlist. */}
+          {/* Curiosity hook: two real profiles open, the match for *their* build
+              locked until they tell us what they're building. */}
           <div className="rounded-3xl border border-[var(--border-subtle)] bg-white p-5 shadow-cta sm:p-6">
             <div className="flex items-center justify-between">
               <p className="font-display text-[17px] font-semibold text-navy-900">Your shortlist</p>
@@ -195,7 +185,7 @@ export default async function Page({
               </span>
             </div>
             <div className="mt-4 space-y-2.5">
-              {ENGINEERS.map((e) => (
+              {ENGINEERS.slice(0, 2).map((e) => (
                 <div key={e.name} className="flex items-center gap-3 rounded-2xl border border-[var(--border-subtle)] p-3">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={e.photo} alt={e.name} width={48} height={48} className="h-12 w-12 shrink-0 rounded-xl object-cover object-[center_35%]" />
@@ -209,18 +199,48 @@ export default async function Page({
                   </span>
                 </div>
               ))}
+              <div className="relative overflow-hidden rounded-2xl border-2 border-dashed border-sky-500/50 bg-sky-500/[0.04] p-3">
+                <div className="flex items-center gap-3 blur-[5px]" aria-hidden>
+                  <div className="h-12 w-12 shrink-0 rounded-xl bg-gradient-to-br from-sky-300 to-steel-600" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-3 w-24 rounded bg-navy-900/40" />
+                    <div className="h-2.5 w-36 rounded bg-steel-600/30" />
+                  </div>
+                </div>
+                <div className="absolute inset-0 flex items-center justify-center gap-2 px-3 text-center">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden className="shrink-0 text-steel-600">
+                    <rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" strokeWidth="2" />
+                    <path d="M8 11V8a4 4 0 018 0v3" stroke="currentColor" strokeWidth="2" />
+                  </svg>
+                  <p className="text-[13px] font-semibold text-navy-900">Your match for what you&apos;re building</p>
+                </div>
+              </div>
             </div>
-            <p className="mt-4 text-[13px] text-steel-600">
-              Stack, experience and what they&apos;ve shipped. Interview who you like.
-            </p>
+            <CtaButton className="mt-4 w-full rounded-2xl bg-sky-500/15 px-5 py-3 font-display text-[15px] font-semibold text-navy-900 transition hover:bg-sky-500/25">
+              Unlock my shortlist <span aria-hidden>→</span>
+            </CtaButton>
           </div>
+        </section>
+
+        {/* 1b. What changes: benefits shown, not listed */}
+        <section className="mx-auto max-w-content px-5 pb-16 sm:px-8">
+          <p className="eyebrow text-[11px] font-medium text-steel-500">What changes</p>
+          <H2>What you get the week an engineer joins.</H2>
+          <Benefits />
+        </section>
+
+        {/* 1c. How it works (animated) */}
+        <section className="mx-auto max-w-content px-5 pb-16 sm:px-8">
+          <p className="eyebrow text-[11px] font-medium text-steel-500">How it works</p>
+          <H2>From a two-minute form to an engineer in your standup.</H2>
+          <HowItWorks />
         </section>
 
         {/* 2. The pain, in founders' own words, then the fix */}
         <section className="bg-white py-16">
           <div className="mx-auto max-w-content px-5 sm:px-8">
             <p className="eyebrow text-[11px] font-medium text-[#c2414b]">Sound familiar?</p>
-            <H2>Offshore and freelance dev usually goes wrong the same five ways.</H2>
+            <H2>Hired offshore or freelance before? Then you know how this goes.</H2>
             <p className="mt-2 text-[13px] text-[var(--text-faint)]">
               Quotes are from public posts by founders about offshore and freelance dev. Not our clients.
             </p>
@@ -372,12 +392,6 @@ export default async function Page({
             </p>
           </div>
           <CostCalculator />
-        </section>
-
-        {/* 4. How it works (animated) */}
-        <section className="mx-auto max-w-content px-5 pb-16 sm:px-8">
-          <H2>How it works</H2>
-          <HowItWorks />
         </section>
 
         {/* 5. Final CTA */}
