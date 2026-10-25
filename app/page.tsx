@@ -2,6 +2,7 @@ import { CtaButton, FunnelProvider } from "@/components/Funnel";
 import CostCalculator from "@/components/CostCalculator";
 import StickyCta from "@/components/StickyCta";
 import HowItWorks from "@/components/HowItWorks";
+import Benefits from "@/components/Benefits";
 import { pickHero } from "@/lib/hero-variants";
 
 // One job: book a 15-minute call. Order follows the 2026-10-23 structure:
@@ -24,18 +25,6 @@ const OBJECTIONS = [
     detail: "where your team can see and review every change.",
   },
   {
-    said: "herding cats 16 hours/day",
-    cost: "You end up project-managing instead of running the business.",
-    answer: "Managed in person",
-    detail: "in our own office, every day. You set priorities, we handle the rest.",
-  },
-  {
-    said: "exorbitant markup (~50% ...)",
-    cost: "A chunk of every invoice never reaches the engineer.",
-    answer: "One published monthly price.",
-    detail: "No placement fee, no hidden extras.",
-  },
-  {
     said: "Nobody owns your delivery",
     cost: "When it breaks, everyone points at someone else.",
     answer: "One engineer, one client.",
@@ -53,6 +42,13 @@ const ENGINEERS = [
   { photo: "/engineers/priya.jpg", name: "Priya", role: "Full-stack engineer · 7 years", stack: "TypeScript, React, Node.js, AWS" },
   { photo: "/engineers/rohit.jpg", name: "Rohit", role: "Backend engineer · 5 years", stack: "Python, Django, PostgreSQL, AWS" },
   { photo: "/engineers/prasanna.jpg", name: "Prasanna", role: "AI / ML engineer · 17 years", stack: "Python, LLMs, RAG, FastAPI" },
+];
+
+// Published tiers, signed off by Dan 2026-09-24.
+const TIERS = [
+  { level: "Junior", note: "1 to 3 years", price: "£1,500" },
+  { level: "Mid-level", note: "3 to 6 years", price: "£2,500" },
+  { level: "Senior", note: "6+ years", price: "£4,500" },
 ];
 
 const QUOTES = [
@@ -80,7 +76,7 @@ const FAQS = [
   },
   {
     q: "Why is it cheaper than a UK hire?",
-    a: "Our engineers work from our own office in India, and you pay no UK employer NI, pension or recruiter fee. The calculator above shows the maths.",
+    a: "Our engineers work from our own office in India, and you pay no UK employer NI, pension or recruiter fee. The calculator on this page shows the maths.",
   },
   {
     q: "I'm not technical. Can I manage them?",
@@ -116,7 +112,8 @@ export default async function Page({
 
   return (
     <FunnelProvider variant={hero.key}>
-      {/* Offer banner: price, speed, risk reversal and the action in one line. */}
+      {/* Offer banner: speed and risk reversal. No price: the ads don't lead
+          on it, so the first screen doesn't either. */}
       <div className="bg-navy-900 text-white">
         <div className="mx-auto flex max-w-content items-center justify-center gap-3 px-5 py-2.5 text-center sm:px-8">
           <p className="min-w-0 text-[13px] leading-snug sm:text-[14px]">
@@ -124,8 +121,8 @@ export default async function Page({
               <span className="h-1.5 w-1.5 rounded-full bg-[#7BE0B4]" />
               UK
             </span>
-            Full-time engineers from <b className="font-semibold">£1,500/mo</b>
-            <span className="hidden sm:inline"> · 3 profiles in 48 hours · No placement fee</span>
+            <b className="font-semibold">3 engineer profiles in 48 hours</b>
+            <span className="hidden sm:inline"> · Full time, in your repo · No placement fee</span>
           </p>
         </div>
       </div>
@@ -136,11 +133,15 @@ export default async function Page({
       </header>
 
       <main className="overflow-x-hidden pb-24 md:pb-0">
-        {/* 1. Hero: promise, price, the maths */}
-        <section className="mx-auto grid max-w-content items-start gap-8 px-5 pb-14 pt-2 sm:px-8 md:grid-cols-[1.1fr_.9fr] md:pt-8">
+        {/* 1. Hero: the ad's promise, who it's for, one button */}
+        <section className="mx-auto grid max-w-content items-start gap-8 px-5 pb-14 pt-2 sm:px-8 md:grid-cols-[1.1fr_.9fr] md:pt-8 [&>*]:min-w-0">
           <div>
-            <p className="text-[14px] font-semibold text-steel-600">{hero.call}</p>
-            <h1 className="mt-2 font-display text-[clamp(2rem,6vw,3.4rem)] font-semibold leading-[1.06] tracking-[-0.02em] text-navy-900">
+            {/* Filter line: qualifies out idea-stage visitors before they click. */}
+            <p className="inline-flex items-center gap-2 rounded-full border border-[var(--border-default)] bg-white px-3.5 py-1.5 text-[13px] font-medium text-steel-700">
+              <span className="h-1.5 w-1.5 rounded-full bg-sky-500" />
+              For companies already building a SaaS or AI product, not ideas.
+            </p>
+            <h1 className="mt-4 font-display text-[clamp(2rem,6vw,3.4rem)] font-semibold leading-[1.06] tracking-[-0.02em] text-navy-900">
               {hero.head}
             </h1>
             <p className="mt-4 text-[17px] leading-relaxed text-steel-700">{hero.sub}</p>
@@ -159,13 +160,13 @@ export default async function Page({
 
             <figure className="mt-8 flex items-start gap-3 border-l-2 border-sky-500/40 pl-4">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/proof/eduardo.jpg" alt="Eduardo Middleton" width={40} height={40} className="h-10 w-10 shrink-0 rounded-full object-cover" />
+              <img src="/proof/ricardo.jpg" alt="Ricardo Machado" width={40} height={40} className="h-10 w-10 shrink-0 rounded-full object-cover" />
               <div>
                 <blockquote className="text-[14px] leading-snug text-navy-900">
-                  &ldquo;Our initial budget for a developer in the UK was £75,000. OctogleHire placed an equally skilled engineer for £38,000.&rdquo;
+                  &ldquo;We were about to commit to three senior frontend engineers at London rates. OctogleHire matched us with equally talented engineers in under a week.&rdquo;
                 </blockquote>
                 <figcaption className="mt-1 text-[12.5px] text-[var(--text-faint)]">
-                  Eduardo Middleton, Founder, 1VA ·{" "}
+                  Ricardo Machado, CEO, Beekey ·{" "}
                   <a href={CLUTCH_URL} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-steel-700">
                     5.0 on Clutch, 12 reviews
                   </a>
@@ -174,14 +175,72 @@ export default async function Page({
             </figure>
           </div>
 
-          <CostCalculator />
+          {/* Curiosity hook: two real profiles open, the match for *their* build
+              locked until they tell us what they're building. */}
+          <div className="rounded-3xl border border-[var(--border-subtle)] bg-white p-5 shadow-cta sm:p-6">
+            <div className="flex items-center justify-between">
+              <p className="font-display text-[17px] font-semibold text-navy-900">Your shortlist</p>
+              <span className="rounded-full bg-ice-100 px-2.5 py-1 font-mono text-[11px] text-steel-600">
+                within 48 hours
+              </span>
+            </div>
+            <div className="mt-4 space-y-2.5">
+              {ENGINEERS.slice(0, 2).map((e) => (
+                <div key={e.name} className="flex items-center gap-3 rounded-2xl border border-[var(--border-subtle)] p-3">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={e.photo} alt={e.name} width={48} height={48} className="h-12 w-12 shrink-0 rounded-xl object-cover object-[center_35%]" />
+                  <div className="min-w-0 flex-1">
+                    <p className="font-display text-[15px] font-semibold text-navy-900">{e.name}</p>
+                    <p className="truncate text-[13px] text-steel-600">{e.role}</p>
+                  </div>
+                  <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-good/10 px-2.5 py-1 text-[12px] font-medium text-good">
+                    <span className="h-1.5 w-1.5 rounded-full bg-good" />
+                    Available
+                  </span>
+                </div>
+              ))}
+              <div className="relative overflow-hidden rounded-2xl border-2 border-dashed border-sky-500/50 bg-sky-500/[0.04] p-3">
+                <div className="flex items-center gap-3 blur-[5px]" aria-hidden>
+                  <div className="h-12 w-12 shrink-0 rounded-xl bg-gradient-to-br from-sky-300 to-steel-600" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-3 w-24 rounded bg-navy-900/40" />
+                    <div className="h-2.5 w-36 rounded bg-steel-600/30" />
+                  </div>
+                </div>
+                <div className="absolute inset-0 flex items-center justify-center gap-2 px-3 text-center">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden className="shrink-0 text-steel-600">
+                    <rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" strokeWidth="2" />
+                    <path d="M8 11V8a4 4 0 018 0v3" stroke="currentColor" strokeWidth="2" />
+                  </svg>
+                  <p className="text-[13px] font-semibold text-navy-900">Your match for what you&apos;re building</p>
+                </div>
+              </div>
+            </div>
+            <CtaButton className="mt-4 w-full rounded-2xl bg-sky-500/15 px-5 py-3 font-display text-[15px] font-semibold text-navy-900 transition hover:bg-sky-500/25">
+              Unlock my shortlist <span aria-hidden>→</span>
+            </CtaButton>
+          </div>
+        </section>
+
+        {/* 1b. What changes: benefits shown, not listed */}
+        <section className="mx-auto max-w-content px-5 pb-16 sm:px-8">
+          <p className="eyebrow text-[11px] font-medium text-steel-500">What changes</p>
+          <H2>What you get the week an engineer joins.</H2>
+          <Benefits />
+        </section>
+
+        {/* 1c. How it works (animated) */}
+        <section className="mx-auto max-w-content px-5 pb-16 sm:px-8">
+          <p className="eyebrow text-[11px] font-medium text-steel-500">How it works</p>
+          <H2>From a two-minute form to an engineer in your standup.</H2>
+          <HowItWorks />
         </section>
 
         {/* 2. The pain, in founders' own words, then the fix */}
         <section className="bg-white py-16">
           <div className="mx-auto max-w-content px-5 sm:px-8">
             <p className="eyebrow text-[11px] font-medium text-[#c2414b]">Sound familiar?</p>
-            <H2>Offshore and freelance dev usually goes wrong the same five ways.</H2>
+            <H2>Hired offshore or freelance before? Then you know how this goes.</H2>
             <p className="mt-2 text-[13px] text-[var(--text-faint)]">
               Quotes are from public posts by founders about offshore and freelance dev. Not our clients.
             </p>
@@ -273,7 +332,7 @@ export default async function Page({
 
           {/* Client voice beside the office: same height, no dead space. */}
           <div className="mt-8 grid gap-4 md:grid-cols-2">
-            {QUOTES.slice(1).map((q) => (
+            {QUOTES.slice(0, 1).map((q) => (
               <figure
                 key={q.name}
                 className="flex flex-col justify-between rounded-3xl bg-navy-900 p-6 text-white sm:p-8"
@@ -309,10 +368,30 @@ export default async function Page({
           </div>
         </section>
 
-        {/* 4. How it works (animated) */}
-        <section className="mx-auto max-w-content px-5 pb-16 sm:px-8">
-          <H2>How it works</H2>
-          <HowItWorks />
+        {/* 3b. What it costs: price only once they've seen who they'd get */}
+        <section className="mx-auto grid max-w-content items-center gap-8 px-5 pb-16 sm:px-8 md:grid-cols-[.9fr_1.1fr] [&>*]:min-w-0">
+          <div>
+            <p className="eyebrow text-[11px] font-medium text-steel-500">What it costs</p>
+            <H2>One monthly price. No placement fee.</H2>
+            <div className="mt-6 divide-y divide-[var(--border-subtle)] rounded-3xl border border-[var(--border-subtle)] bg-white shadow-card">
+              {TIERS.map((t) => (
+                <div key={t.level} className="flex items-center justify-between p-4">
+                  <div>
+                    <p className="font-display text-[16px] font-semibold text-navy-900">{t.level}</p>
+                    <p className="text-[13px] text-steel-600">{t.note}</p>
+                  </div>
+                  <p className="font-display text-[22px] font-semibold text-navy-900">
+                    {t.price}
+                    <span className="text-[14px] font-medium text-steel-600">/mo</span>
+                  </p>
+                </div>
+              ))}
+            </div>
+            <p className="mt-3 text-[14px] text-steel-600">
+              Rolling monthly, 14 days&apos; notice. Not right? We swap them, no fee.
+            </p>
+          </div>
+          <CostCalculator />
         </section>
 
         {/* 5. Final CTA */}

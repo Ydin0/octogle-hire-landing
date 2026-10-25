@@ -95,7 +95,13 @@ body {
 .hiw-step-2 .hiw-node { transition-delay: 1.1s; }
 .hiw-step-2 .hiw-body { transition-delay: 1.2s; }
 
-/* Step 1: ringing call */
+/* Step 1: brief chips get picked */
+.hiw-pick { transition: background-color 0.3s ease, color 0.3s ease; }
+.hiw:not(.hiw-on) .hiw-pick { background: #f2f9fa; color: #35566e; }
+.hiw-on .hiw-pick { transition-delay: 0.6s; }
+.hiw-on .hiw-pick-2 { transition-delay: 0.9s; }
+
+/* Step 1 (old): ringing call */
 .hiw-ring { opacity: 0; }
 .hiw-on .hiw-ring { animation: hiw-ring 2.4s ease-out 0.6s infinite; }
 .hiw-on .hiw-ring-2 { animation-delay: 1.4s; }
@@ -110,9 +116,9 @@ body {
 /* Step 2: three profiles fan out of one stack */
 .hiw-card { opacity: 0; transform: translateY(16px) scale(0.85); transition: opacity 0.5s ease, transform 0.7s cubic-bezier(0.34, 1.4, 0.64, 1); }
 .hiw-on .hiw-card { opacity: 1; }
-.hiw-on .hiw-card-0 { transform: translateX(-64px) rotate(-8deg); transition-delay: 1.2s; }
+.hiw-on .hiw-card-0 { transform: translateX(-76px) rotate(-8deg); transition-delay: 1.2s; }
 .hiw-on .hiw-card-1 { transform: translateY(-4px); z-index: 1; transition-delay: 1.35s; }
-.hiw-on .hiw-card-2 { transform: translateX(64px) rotate(8deg); transition-delay: 1.5s; }
+.hiw-on .hiw-card-2 { transform: translateX(76px) rotate(8deg); transition-delay: 1.5s; }
 
 /* Step 3: commits land and merge */
 .hiw-commit { opacity: 0; transform: translateX(-18px); transition: opacity 0.5s ease, transform 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
@@ -133,3 +139,41 @@ body {
   100% { transform: none; opacity: 1; }
 }
 @media (prefers-reduced-motion: reduce) { .calc-pop { animation: none; } }
+
+/* Benefits tiles: play once when scrolled into view (.bn-on). */
+.bn-tile { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
+.bn-on .bn-tile { opacity: 1; transform: none; }
+.bn-on .bn-tile-1 { transition-delay: 0.1s; }
+.bn-on .bn-tile-2 { transition-delay: 0.2s; }
+.bn-on .bn-tile-3 { transition-delay: 0.3s; }
+
+.bn-bar { width: 0; transition: width 1.4s cubic-bezier(0.65, 0, 0.35, 1); }
+.bn-on .bn-bar-slow { width: 100%; transition-delay: 0.4s; transition-duration: 2.2s; }
+.bn-on .bn-bar-fast { width: 9%; transition-delay: 0.4s; transition-duration: 0.5s; }
+
+.bn-line { opacity: 0; transform: translateX(-12px); transition: opacity 0.4s ease, transform 0.5s ease; }
+.bn-on .bn-line { opacity: 1; transform: none; }
+.bn-on .bn-line-0 { transition-delay: 0.5s; }
+.bn-on .bn-line-1 { transition-delay: 0.7s; }
+.bn-on .bn-line-2 { transition-delay: 0.9s; }
+.bn-pop { opacity: 0; transform: scale(0.6); transition: opacity 0.4s ease 1.1s, transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 1.1s; }
+.bn-on .bn-pop { opacity: 1; transform: none; }
+
+.bn-day { transform: scaleY(0); transform-origin: bottom; transition: transform 0.5s cubic-bezier(0.34, 1.3, 0.64, 1); }
+.bn-on .bn-day { transform: none; }
+.bn-on .bn-day-0 { transition-delay: 0.5s; }
+.bn-on .bn-day-1 { transition-delay: 0.6s; }
+.bn-on .bn-day-2 { transition-delay: 0.7s; }
+.bn-on .bn-day-3 { transition-delay: 0.8s; }
+.bn-on .bn-day-4 { transition-delay: 0.9s; }
+
+.bn-row { opacity: 0; transform: translateY(10px); transition: opacity 0.4s ease, transform 0.5s ease; }
+.bn-on .bn-row { opacity: 1; transform: none; }
+.bn-on .bn-row-0 { transition-delay: 0.6s; }
+.bn-on .bn-row-1 { transition-delay: 0.8s; }
+.bn-on .bn-row-2 { transition-delay: 1s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .bn-tile, .bn-bar, .bn-line, .bn-pop, .bn-day, .bn-row { transition: none !important; }
+  .bn-bar-slow { width: 100%; } .bn-bar-fast { width: 9%; }
+}

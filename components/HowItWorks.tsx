@@ -10,8 +10,8 @@ import { useEffect, useRef, useState } from "react";
 const STEPS = [
   {
     when: "Today",
-    title: "15-minute call",
-    body: "Your stack, the level you need, your start date.",
+    title: "Tell us what you need",
+    body: "Two taps and your email. Then a 15-minute call with Connor.",
   },
   {
     when: "Within 48 hours",
@@ -25,24 +25,43 @@ const STEPS = [
   },
 ];
 
-function CallVisual() {
+// Step 1: the actual two-tap brief from the popup, as a mini UI.
+function BriefVisual() {
   return (
-    <div className="relative grid h-28 place-items-center">
-      <span className="hiw-ring absolute h-16 w-16 rounded-full border-2 border-sky-500/50" />
-      <span className="hiw-ring hiw-ring-2 absolute h-16 w-16 rounded-full border-2 border-sky-500/40" />
-      <span className="relative grid h-14 w-14 place-items-center rounded-full bg-navy-900 text-white shadow-cta">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
-          <path
-            d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2z"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </span>
-      <span className="hiw-pop absolute right-[18%] top-3 rounded-full bg-white px-2.5 py-1 font-mono text-[11px] font-medium text-steel-600 shadow-card">
-        15:00
-      </span>
+    <div className="flex h-36 items-center justify-center px-3">
+      <div className="w-full max-w-[230px] rounded-2xl border border-[var(--border-subtle)] bg-white p-3 shadow-card">
+        <p className="text-[10px] font-semibold uppercase tracking-wide text-steel-500">Level</p>
+        <div className="mt-1.5 grid grid-cols-3 gap-1">
+          {["Junior", "Mid", "Senior"].map((l) => (
+            <span
+              key={l}
+              className={
+                "rounded-md px-1 py-1 text-center text-[11px] font-medium " +
+                (l === "Mid" ? "hiw-pick bg-navy-900 text-white" : "bg-ice-100 text-steel-700")
+              }
+            >
+              {l}
+            </span>
+          ))}
+        </div>
+        <p className="mt-2.5 text-[10px] font-semibold uppercase tracking-wide text-steel-500">Start</p>
+        <div className="mt-1.5 grid grid-cols-2 gap-1">
+          {["ASAP", "This month"].map((l) => (
+            <span
+              key={l}
+              className={
+                "rounded-md px-1 py-1 text-center text-[11px] font-medium " +
+                (l === "ASAP" ? "hiw-pick hiw-pick-2 bg-navy-900 text-white" : "bg-ice-100 text-steel-700")
+              }
+            >
+              {l}
+            </span>
+          ))}
+        </div>
+        <span className="hiw-pop mt-2.5 block rounded-lg bg-good py-1.5 text-center text-[11px] font-semibold text-white">
+          Sent ✓
+        </span>
+      </div>
     </div>
   );
 }
@@ -51,11 +70,11 @@ const FACES = ["/engineers/priya.jpg", "/engineers/rohit.jpg", "/engineers/prasa
 
 function ProfilesVisual() {
   return (
-    <div className="relative flex h-28 items-center justify-center">
+    <div className="relative flex h-36 items-center justify-center">
       {FACES.map((src, i) => (
         <div
           key={src}
-          className={`hiw-card hiw-card-${i} absolute w-[74px] rounded-2xl border border-[var(--border-subtle)] bg-white p-1.5 shadow-card`}
+          className={`hiw-card hiw-card-${i} absolute w-[88px] rounded-2xl border border-[var(--border-subtle)] bg-white p-1.5 shadow-card`}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -79,7 +98,7 @@ function ProfilesVisual() {
 
 function ShipVisual() {
   return (
-    <div className="flex h-28 flex-col justify-center gap-2 px-1">
+    <div className="flex h-36 flex-col justify-center gap-2 px-2">
       {[
         { msg: "feat: checkout flow", w: "w-[78%]" },
         { msg: "fix: auth redirect", w: "w-[64%]" },
@@ -104,7 +123,7 @@ function ShipVisual() {
   );
 }
 
-const VISUALS = [CallVisual, ProfilesVisual, ShipVisual];
+const VISUALS = [BriefVisual, ProfilesVisual, ShipVisual];
 
 export default function HowItWorks() {
   const ref = useRef<HTMLDivElement>(null);
@@ -137,11 +156,11 @@ export default function HowItWorks() {
         {STEPS.map((s, i) => {
           const Visual = VISUALS[i];
           return (
-            <li key={s.title} className={`hiw-step hiw-step-${i} flex gap-4 md:flex-col md:items-center md:gap-5`}>
+            <li key={s.title} className={`hiw-step hiw-step-${i} flex min-w-0 gap-4 md:flex-col md:items-center md:gap-5`}>
               <span className="hiw-node relative z-10 grid h-10 w-10 shrink-0 place-items-center rounded-full bg-navy-900 font-display text-[15px] font-semibold text-white ring-[6px] ring-ice-100">
                 {i + 1}
               </span>
-              <div className="hiw-body w-full rounded-3xl border border-[var(--border-subtle)] bg-white p-5 shadow-card transition-shadow hover:shadow-glow">
+              <div className="hiw-body w-full min-w-0 rounded-3xl border border-[var(--border-subtle)] bg-white p-5 shadow-card transition-shadow hover:shadow-glow">
                 <div className="rounded-2xl bg-ice-100/70">
                   <Visual />
                 </div>
