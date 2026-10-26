@@ -289,12 +289,13 @@ fbq('set','autoConfig',false,'1614640659743336');fbq('init','1614640659743336');
 
   <!-- COMPARISON (angle-specific) -->
   <section style="padding:clamp(64px,9vw,96px) 20px;background:var(--surface-sunken);border-top:1px solid var(--border-subtle);border-bottom:1px solid var(--border-subtle)">
-    <div class="ogl-shell" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:clamp(36px,5vw,56px);align-items:start">
-      <div style="display:flex;flex-direction:column;gap:16px">
+    <div class="ogl-shell" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr));gap:24px clamp(24px,3vw,32px);align-items:stretch">
+      <div style="grid-column:1/-1;display:flex;flex-direction:column;gap:16px;margin-bottom:16px">
         <span class="ogl-eyebrow">{{ cmp.eyebrow }}</span>
         <h2 style="margin:0;font-family:var(--font-display);font-size:clamp(30px,3.4vw,44px);font-weight:600;line-height:1.1;letter-spacing:-0.025em;color:var(--text-strong);text-wrap:balance">{{ cmp.title }}</h2>
-        <p style="margin:0;max-width:44ch;font-size:17px;line-height:1.625;color:var(--text-body)">{{ cmp.sub }}</p>
-        <div style="margin-top:16px;display:flex;flex-direction:column;gap:22px;padding:28px;border-radius:24px;background:#fff;border:1px solid var(--border-subtle)">
+        <p style="margin:0;max-width:60ch;font-size:17px;line-height:1.625;color:var(--text-body)">{{ cmp.sub }}</p>
+      </div>
+        <div style="display:flex;flex-direction:column;justify-content:space-between;gap:22px;padding:28px;border-radius:24px;background:#fff;border:1px solid var(--border-subtle)">
           <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px">
             <span class="mono-caps" style="font-size:11px;color:var(--text-muted)">Monthly cost for your team</span>
             <div style="display:flex;align-items:center;gap:4px;padding:4px;border-radius:9999px;background:var(--ice-200)">
@@ -328,7 +329,6 @@ fbq('set','autoConfig',false,'1614640659743336');fbq('init','1614640659743336');
           </div>
           <span style="font-size:12px;line-height:1.5;color:var(--text-faint)">{{ rateNote }}</span>
         </div>
-      </div>
       <div style="border-radius:24px;background:#fff;border:1px solid var(--border-subtle);overflow:hidden">
         <sc-if value="{{ notMobile }}" hint-placeholder-val="{{ true }}"><div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);gap:16px;padding:18px 24px;border-bottom:1px solid var(--border-subtle)">
           <span></span>
@@ -408,13 +408,9 @@ fbq('set','autoConfig',false,'1614640659743336');fbq('init','1614640659743336');
         </div>
       </sc-if>
       <sc-if value="{{ notMobile }}" hint-placeholder-val="{{ true }}">
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,500px),1fr));gap:16px">
-        <sc-for list="{{ engineerGroups }}" as="grp" hint-placeholder-count="4">
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:16px">
-            <sc-for list="{{ grp.items }}" as="e" hint-placeholder-count="2">
-              <x-import component-from-global-scope="OctogleHireDesignSystem_2b7531.ProfileCard" image="{{ e.image }}" name="{{ e.name }}" role="{{ e.role }}" location="{{ e.location }}" flag="{{ e.flag }}" stacks="{{ e.stacks }}" available="{{ e.available }}" hint-size="100%,460px"></x-import>
-            </sc-for>
-          </div>
+      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start">
+        <sc-for list="{{ engineers }}" as="e" hint-placeholder-count="3">
+          <x-import component-from-global-scope="OctogleHireDesignSystem_2b7531.ProfileCard" image="{{ e.image }}" name="{{ e.name }}" role="{{ e.role }}" location="{{ e.location }}" flag="{{ e.flag }}" stacks="{{ e.stacks }}" available="{{ e.available }}" hint-size="100%,460px"></x-import>
         </sc-for>
       </div>
       </sc-if>
@@ -760,6 +756,16 @@ class Component extends DCLogic {
         results: [{ n: "3", l: "Senior full-stack developers hired" }, { n: "£12,450/mo", l: "Local cost" }, { n: "£6,200/mo", l: "With Octogle" }],
         before: "Agency quotes", after: "Own internal CRM",
         person: "Daniel Bell", title: "CMO, TNW Energy", photo: "https://pub-5e1782ec30424d44888f039fdf57f458.r2.dev/review-avatars/1780597643044-9492425a-4dbc-4006-845c-8d879cff331a.jpeg" },
+      // Real client stories from octoglehire.com (lib/data/testimonials.ts),
+      // savings computed from their own local vs Octogle monthly rates.
+      beekey: { sector: "Beekey · UK", team: "3 senior frontend engineers", metric: "£205k", metricLabel: "saved per year",
+        short: "\u201cWe were about to commit to three senior frontend engineers at London rates. OctogleHire matched us with equally talented engineers in under a week.\u201d",
+        before: "£28,500/mo at London rates", after: "£11,400/mo with Octogle",
+        person: "Ricardo Machado", title: "CEO, Beekey", photo: "/proof/ricardo.jpg" },
+      onevA: { sector: "1VA · UK", team: "1 full-stack engineer", metric: "£37k", metricLabel: "saved per year",
+        short: "\u201cOur initial budget for a developer in the UK was £75,000. OctogleHire placed an equally skilled engineer for just £38,000, saving us nearly half without compromising on quality.\u201d",
+        before: "£75,000 UK budget", after: "£38,000 with Octogle",
+        person: "Eduardo Middleton", title: "Founder, 1VA", photo: "/proof/eduardo.jpg" },
     };
     const CMP = {
       own: { eyebrow: "Rent vs. own", title: "Subscriptions make you fit their product. Owning flips that.", sub: "Off-the-shelf tools charge more every time you grow, and still can't do the one thing that makes your business different.", left: "Renting SaaS",
@@ -797,9 +803,7 @@ class Component extends DCLogic {
         bg: on ? "var(--ice-050)" : "#fff", border: on ? "var(--border-accent)" : "var(--border-subtle)", tagOpacity: on ? 1 : 0,
         chipBg: on ? "var(--navy-950)" : "#fff", chipFg: on ? "#fff" : "var(--text-strong)", chipBorder: on ? "var(--navy-950)" : "var(--border-default)" }; }),
       featured: CASES.own,
-      // The saas and build cases are placeholders (invented people and numbers):
-      // never shown. Add real ones here once written up with permission.
-      otherCases: [],
+      otherCases: [CASES.beekey, CASES.onevA],
       cmp: CMP[angle],
       ledger: [
         { tool: "CRM", note: "Per seat, 14 seats", cost: cur + "1,260" },
@@ -834,7 +838,7 @@ class Component extends DCLogic {
       saveCaption: save >= 0 ? "Kept in your business" : "Extra investment over 3 years",
       saveLabel: short(Math.abs(save)),
       paybackLabel: payback ? "Owning costs less than renting from month " + payback + ", and the product stays yours." : "At this spend, owning pays off beyond year three. Talk to us about a smaller first build.",
-      engineerGroups: [0, 2].map((i) => ({ items: engineers.slice(i, i + 2) })), engineers,
+      engineers,
       isMobile: !!this.state.mobile, notMobile: !this.state.mobile,
       cmpCols: this.state.mobile ? "1fr" : "minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)", cmpGap: this.state.mobile ? "8px" : "16px",
       resultCols: this.state.mobile ? "1fr" : "repeat(3,minmax(0,1fr))",
