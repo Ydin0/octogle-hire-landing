@@ -7,7 +7,12 @@ const nextConfig = {
   },
   // Preserve the original post-booking URL Leadey redirects to.
   async rewrites() {
-    return [{ source: "/booked.html", destination: "/booked" }];
+    return {
+      // The redesigned landing page is a static Claude Design export in
+      // public/lp.html; serve it at the root. The previous page lives at /v1.
+      beforeFiles: [{ source: "/", destination: "/lp.html" }],
+      afterFiles: [{ source: "/booked.html", destination: "/booked" }],
+    };
   },
 };
 
