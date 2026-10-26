@@ -1,0 +1,59 @@
+/* Octogle brand ramp — light-first. Values copied verbatim from app/globals.css. */
+:root{
+  /* Ice field — the light ground */
+  --ice-000:#FFFFFF;--ice-050:#F6FBFB;--ice-100:#F2F9FA;--ice-200:#ECF7F8;--ice-300:#DCEBF1;--ice-400:#C7DEE8;--ice-500:#C0D9E2;
+  /* Sky → navy — headline gradient ramp */
+  --sky-300:#A4D5ED;--sky-400:#7FC4E2;--sky-500:#66B8D6;--sky-600:#5AA3C4;
+  --steel-500:#4A8DB5;--steel-600:#426E8C;--steel-700:#35566E;
+  --navy-700:#2A4C6E;--navy-800:#1C3350;--navy-900:#100F2F;--navy-950:#0D192D;--navy-1000:#050431;
+  /* Support hues — status only, never decoration */
+  --green-500:#1FA971;--amber-500:#C98A18;--red-500:#D93A3F;--red-600:#B62A2E;
+
+  /* Fields & gradients */
+  --field-light:linear-gradient(165deg,#FFFFFF 0%,#F6FBFB 40%,#ECF7F8 100%);/* @kind color */
+  --field-dark:radial-gradient(90% 70% at 50% 45%,#16214D 0%,#0B093C 45%,#050431 100%);/* @kind color */
+  --gradient-headline:linear-gradient(90deg,#66B8D6 0%,#100F2F 86%,#100F2F 100%);/* @kind color */
+  --gradient-headline-short:linear-gradient(90deg,#7CC6E2 0%,#161B3A 100%);/* @kind color */
+  --gradient-headline-block:linear-gradient(90deg,#4A8DB5 0%,#14203F 62%,#100F2F 100%);/* @kind color */
+
+  /* Semantic surfaces */
+  --surface-page:var(--ice-100);--surface-sunken:var(--ice-200);--surface-card:var(--ice-000);--surface-raised:var(--ice-050);--surface-chip:var(--ice-500);
+  --surface-hover:rgba(66,110,140,0.06);--surface-active:rgba(66,110,140,0.11);--surface-glass:rgba(255,255,255,0.72);
+  /* Semantic text */
+  --text-strong:var(--navy-900);--text-body:var(--steel-600);--text-muted:var(--steel-700);--text-faint:#7E9AAE;--text-accent:var(--sky-500);
+  /* Borders — thin, steel-tinted, never grey */
+  --border-subtle:rgba(66,110,140,0.10);--border-default:rgba(66,110,140,0.16);--border-strong:rgba(66,110,140,0.28);--border-accent:rgba(104,186,217,0.55);
+
+  /* "Pulse" — the sky accent used for active nav, icons, chips */
+  --pulse:var(--sky-500);--pulse-foreground:var(--navy-1000);
+  --pulse-wash:rgba(102,184,214,0.10);--pulse-wash-strong:rgba(102,184,214,0.16);--pulse-border:rgba(102,184,214,0.35);
+  --accent-wash:rgba(104,186,217,0.16);
+  --success-wash:rgba(31,169,113,0.12);--success-border:rgba(31,169,113,0.30);
+  --warning-wash:rgba(201,138,24,0.12);--warning-border:rgba(201,138,24,0.30);
+  --danger-wash:rgba(217,58,63,0.10);--danger-border:rgba(217,58,63,0.35);
+
+  /* shadcn bridge (light) */
+  --background:var(--ice-100);--foreground:var(--navy-900);
+  --card:#FFFFFF;--card-foreground:var(--navy-900);--popover:#FFFFFF;--popover-foreground:var(--navy-900);
+  --primary:var(--navy-950);--primary-foreground:#FFFFFF;
+  --secondary:var(--ice-200);--secondary-foreground:var(--navy-900);
+  --muted:var(--ice-200);--muted-foreground:var(--steel-700);
+  --accent:var(--ice-300);--accent-foreground:var(--navy-900);
+  --destructive:var(--red-500);
+  --border:rgba(66,110,140,0.16);--input:rgba(66,110,140,0.16);--ring:var(--sky-500);
+  --chart-1:var(--sky-500);--chart-2:var(--steel-500);--chart-3:var(--navy-700);--chart-4:var(--green-500);--chart-5:var(--amber-500);
+  --selection:rgba(104,186,217,0.30);
+}
+
+/* Dark scope — opt-in dashboard theme + the always-dark marketing bands (CTA). */
+.dark{
+  --surface-page:var(--navy-950);--surface-sunken:var(--navy-1000);--surface-card:#132441;--surface-raised:#182B4C;--surface-chip:rgba(164,213,237,0.10);
+  --surface-hover:rgba(164,213,237,0.06);--surface-active:rgba(164,213,237,0.11);--surface-glass:rgba(12,25,46,0.66);
+  --text-strong:#EAF5FA;--text-body:#B7D2E1;--text-muted:#8FAEC2;--text-faint:#6B8AA1;--text-accent:var(--sky-400);
+  --border-subtle:rgba(164,213,237,0.10);--border-default:rgba(164,213,237,0.16);--border-strong:rgba(164,213,237,0.28);
+  --background:var(--navy-950);--foreground:#EAF5FA;--card:#132441;--card-foreground:#EAF5FA;--popover:#132441;--popover-foreground:#EAF5FA;
+  --primary:#FFFFFF;--primary-foreground:var(--navy-1000);--secondary:#182B4C;--secondary-foreground:#EAF5FA;
+  --muted:#182B4C;--muted-foreground:#8FAEC2;--accent:#1C3350;--accent-foreground:#EAF5FA;--destructive:#E4595D;
+  --border:rgba(164,213,237,0.16);--input:rgba(164,213,237,0.18);--ring:var(--sky-400);
+  --pulse:var(--sky-400);--pulse-foreground:var(--navy-1000);
+}
