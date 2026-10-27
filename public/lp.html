@@ -621,9 +621,22 @@ const OGH = {
   HEADCOUNT: { "1": 1, "2–3": 3, "4–5": 5, "6+": 6 },
   UTM: ["utm_source","utm_medium","utm_campaign","utm_content","utm_term","campaign_id","adset_id","ad_id","fbclid"],
   fbq(...a) { try { if (typeof window.fbq === "function") window.fbq(...a); } catch (e) {} },
+  // Meta fills {{ad.name}} etc. already URL-encoded, and names with "/", "|"
+  // or spaces can arrive encoded twice ("27%2F10%2F26+-+DEV"). Decode until
+  // stable so Leadey stores the plain ad name.
+  clean(v) {
+    let out = v;
+    for (let i = 0; i < 3; i++) {
+      let next = out;
+      try { next = decodeURIComponent(out.replace(/\+/g, " ")); } catch (e) {}
+      if (next === out) break;
+      out = next;
+    }
+    return out.trim();
+  },
   attribution() {
     const out = {}; const q = new URLSearchParams(window.location.search);
-    for (const k of OGH.UTM) { const v = (q.get(k) || "").trim(); if (v) out[k] = v.slice(0, 200); }
+    for (const k of OGH.UTM) { const v = OGH.clean(q.get(k) || ""); if (v) out[k] = v.slice(0, 200); }
     return out;
   },
   isFree(email) { return OGH.FREE.has((email.split("@")[1] || "").trim().toLowerCase()); },
@@ -634,7 +647,7 @@ const OGH = {
     if (p.company) u.searchParams.set("company", p.company);
     if (p.notes) u.searchParams.set("notes", p.notes.slice(0, 500));
     const q = new URLSearchParams(window.location.search);
-    for (const k of ["source","medium","campaign","term","content"]) { const v = q.get("utm_" + k); if (v) u.searchParams.set("utm_" + k, v); }
+    for (const k of ["source","medium","campaign","term","content"]) { const v = OGH.clean(q.get("utm_" + k) || ""); if (v) u.searchParams.set("utm_" + k, v); }
     return u.toString();
   },
 };
