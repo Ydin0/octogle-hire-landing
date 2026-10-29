@@ -7,6 +7,10 @@ import { NextResponse } from "next/server";
 // repo is public and the URL carries the token. The original lander campaign
 // was deleted in Leadey on ~2026-09-27, which silently 401'd every lead.
 const WEBHOOK_URL = process.env.LEADEY_WEBSITE_LEADS_WEBHOOK_URL;
+// The /us page posts market "us"; those leads go to the "Meta Lead Ads — US"
+// campaign (funnel_muplaf1g9lazl3). Until it's set they fall back to the main
+// webhook with country US, so nothing is lost.
+const US_WEBHOOK_URL = process.env.LEADEY_US_WEBHOOK_URL;
 
 // If Leadey refuses a lead, keep enough in the logs to recover it by hand.
 function logLostLead(reason: string, p: Record<string, unknown>) {
@@ -163,14 +167,17 @@ export async function POST(req: Request) {
         })
       : Promise.resolve();
 
-  if (!WEBHOOK_URL) {
+  const us = body.market === "us";
+  if (us && !US_WEBHOOK_URL) console.warn("[lead] LEADEY_US_WEBHOOK_URL not set, US lead sent to the main webhook");
+  const webhook = (us && US_WEBHOOK_URL) || WEBHOOK_URL;
+  if (!webhook) {
     logLostLead("LEADEY_WEBSITE_LEADS_WEBHOOK_URL not set", payload);
     await capi;
     return NextResponse.json({ ok: false }, { status: 500 });
   }
 
   try {
-    const res = await fetch(WEBHOOK_URL, {
+    const res = await fetch(webhook, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
