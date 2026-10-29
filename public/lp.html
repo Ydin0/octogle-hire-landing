@@ -569,8 +569,8 @@ fbq('set','autoConfig',false,'1614640659743336');fbq('init','1614640659743336');
               <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:12px">
                 <label style="display:flex;flex-direction:column;gap:8px"><span style="font-size:14px;font-weight:500">Full name</span><x-import component-from-global-scope="OctogleHireDesignSystem_2b7531.Input" value="{{ f.name }}" onChange="{{ setName }}" placeholder="Jane Smith" invalid="{{ err.name }}" style="{{ inputStyle }}" hint-size="100%,44px"></x-import></label>
                 <label style="display:flex;flex-direction:column;gap:8px"><span style="font-size:14px;font-weight:500">Work email</span><x-import component-from-global-scope="OctogleHireDesignSystem_2b7531.Input" type="email" value="{{ f.email }}" onChange="{{ setEmail }}" placeholder="jane@company.com" invalid="{{ err.email }}" style="{{ inputStyle }}" hint-size="100%,44px"></x-import></label>
-                <label style="display:flex;flex-direction:column;gap:8px"><span style="font-size:14px;font-weight:500">Company</span><x-import component-from-global-scope="OctogleHireDesignSystem_2b7531.Input" value="{{ f.company }}" onChange="{{ setCompany }}" placeholder="Acme Ltd" style="{{ inputStyle }}" hint-size="100%,44px"></x-import></label>
-                <label style="display:flex;flex-direction:column;gap:8px"><span style="font-size:14px;font-weight:500">Phone <span style="font-weight:400;color:var(--text-faint)">optional</span></span><x-import component-from-global-scope="OctogleHireDesignSystem_2b7531.Input" type="tel" value="{{ f.phone }}" onChange="{{ setPhone }}" placeholder="+44 7700 900000" style="{{ inputStyle }}" hint-size="100%,44px"></x-import></label>
+                <label style="display:flex;flex-direction:column;gap:8px"><span style="font-size:14px;font-weight:500">Company</span><x-import component-from-global-scope="OctogleHireDesignSystem_2b7531.Input" value="{{ f.company }}" onChange="{{ setCompany }}" placeholder="{{ phCompany }}" style="{{ inputStyle }}" hint-size="100%,44px"></x-import></label>
+                <label style="display:flex;flex-direction:column;gap:8px"><span style="font-size:14px;font-weight:500">Phone <span style="font-weight:400;color:var(--text-faint)">optional</span></span><x-import component-from-global-scope="OctogleHireDesignSystem_2b7531.Input" type="tel" value="{{ f.phone }}" onChange="{{ setPhone }}" placeholder="{{ phPhone }}" style="{{ inputStyle }}" hint-size="100%,44px"></x-import></label>
               </div>
               <label style="display:flex;flex-direction:column;gap:8px"><span style="font-size:14px;font-weight:500">Tell us about the project <span style="font-weight:400;color:var(--text-faint)">optional</span></span><x-import component-from-global-scope="OctogleHireDesignSystem_2b7531.Textarea" value="{{ f.notes }}" onChange="{{ setNotes }}" placeholder="{{ hero.formHint }}" hint-size="100%,96px"></x-import></label>
               <sc-if value="{{ hasErr }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px;color:var(--red-600)">Add your name and a valid work email to continue.</span></sc-if>
@@ -620,6 +620,14 @@ const OGH = {
   TIMELINE: { "As soon as possible": "ASAP", "Within a month": "2–4 weeks", "In 1–3 months": "1–3 months", "Just exploring": "Just exploring" },
   HEADCOUNT: { "1": 1, "2–3": 3, "4–5": 5, "6+": 6 },
   UTM: ["utm_source","utm_medium","utm_campaign","utm_content","utm_term","campaign_id","adset_id","ad_id","fbclid"],
+  // try.octoglehire.com/us (or ?market=us) is the US version: $, US hours,
+  // US hiring costs, and leads go to the "Meta Lead Ads — US" campaign.
+  MARKET: (() => {
+    try {
+      const us = window.location.pathname.replace(/\/+$/, "") === "/us" || new URLSearchParams(window.location.search).get("market") === "us";
+      return us ? "us" : "uk";
+    } catch (e) { return "uk"; }
+  })(),
   fbq(...a) { try { if (typeof window.fbq === "function") window.fbq(...a); } catch (e) {} },
   // Meta fills {{ad.name}} etc. already URL-encoded, and names with "/", "|"
   // or spaces can arrive encoded twice ("27%2F10%2F26+-+DEV"). Decode until
@@ -687,6 +695,7 @@ class Component extends DCLogic {
       build: f.notes.trim() || undefined,
       nurture: exploring ? "Yes" : undefined,
       hero_variant: angle,
+      market: OGH.MARKET, country: OGH.MARKET === "us" ? "US" : "GB",
       status: "partial", captured_step: 3,
       location: OGH.TAG, source: OGH.TAG, note,
       page: window.location.href, submitted_at: new Date().toISOString(),
@@ -732,10 +741,12 @@ class Component extends DCLogic {
     if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 72, behavior: "smooth" });
   }
   renderVals() {
-    const cur = this.props.currency ?? "£";
-    const rate = this.props.engineerRate ?? 2500;
+    const US = OGH.MARKET === "us";
+    // US rate card: $2,000 junior, $3,500 mid-level, $5,000 senior.
+    const cur = US ? "$" : this.props.currency ?? "£";
+    const rate = US ? 3500 : this.props.engineerRate ?? 2500;
     const buildMonths = this.props.buildMonths ?? 6;
-    const fromPrice = this.props.fromPrice ?? (cur + "1,500 / month");
+    const fromPrice = US ? "$2,000 / month" : this.props.fromPrice ?? (cur + "1,500 / month");
     const angle = this.state.pick || this.props.angle || "build";
     const fmt = (n) => cur + Math.round(n).toLocaleString("en-GB");
     const short = (n) => n >= 1e6 ? cur + (n / 1e6).toFixed(2) + "M" : cur + Math.round(n / 1000) + "k";
@@ -743,7 +754,7 @@ class Component extends DCLogic {
     const HERO = {
       build: { icon: "users", audience: "For companies building software",
         h1: "Vetted AI engineers, ready to build your product today.",
-        sub: "Fully trained, AI-native engineers who join your team this week and stay for the long run, for a fraction of a UK hire. You own everything they build.",
+        sub: "Fully trained, AI-native engineers who join your team this week and stay for the long run, for a fraction of a " + (US ? "US" : "UK") + " hire. You own everything they build.",
         cardKicker: "Starts", cardTitle: "Shortlist in 48 hours", cardSub: "Interview, pick, start in week one",
         ctaTitle: "Meet your engineers in 48 hours.", formHint: "e.g. Two engineers to speed up our product roadmap" },
       own: { icon: "key-round", audience: "For business owners paying for software",
@@ -780,6 +791,23 @@ class Component extends DCLogic {
         before: "£75,000 UK budget", after: "£38,000 with Octogle",
         person: "Eduardo Middleton", title: "Founder, 1VA", photo: "/proof/eduardo.jpg" },
     };
+    // US page: the same two clients (cleared for paid use), without their
+    // location or £ figures; percentages come from their own local vs Octogle
+    // rates. Leadey stands in for the TNW story: our own team built it.
+    const CASES_US = {
+      beekey: { sector: "Beekey", team: "3 senior frontend engineers", metric: "60%", metricLabel: "lower monthly cost than hiring locally",
+        story: "“We were about to commit to three senior frontend engineers… OctogleHire matched us with equally talented engineers in under a week.”",
+        results: [{ n: "3", l: "Senior frontend engineers" }, { n: "< 1 week", l: "To match all three" }, { n: "60%", l: "Lower monthly cost" }],
+        person: "Ricardo Machado", title: "CEO, Beekey", photo: "/proof/ricardo.jpg" },
+      onevA: { sector: "1VA", team: "1 full-stack engineer", metric: "49%", metricLabel: "below their local hiring budget",
+        short: "“OctogleHire placed an equally skilled engineer… saving us nearly half without compromising on quality.”",
+        before: "Budgeted a local hire", after: "Same skill, 49% less",
+        person: "Eduardo Middleton", title: "Founder, 1VA", photo: "/proof/eduardo.jpg" },
+      leadey: { sector: "Built in-house", team: "Octogle engineering team", metric: "Leadey", metricLabel: "CRM and power dialer",
+        short: "Everyone says they can build it. Our engineering team built and runs Leadey, a full CRM and power dialer that sales teams use every day.",
+        before: "Blank repo", after: "Live, used daily",
+        person: "Octogle engineering", title: "The team behind Leadey", photo: "" },
+    };
     const CMP = {
       own: { eyebrow: "Rent vs. own", title: "Subscriptions make you fit their product. Owning flips that.", sub: "Off-the-shelf tools charge more every time you grow, and still can't do the one thing that makes your business different.", left: "Renting SaaS",
         rows: [{ k: "Fit", l: "You change your process to match the tool", r: "Built around your exact workflow" }, { k: "Cost as you grow", l: "Rises with every seat and price change", r: "Flat — no per-seat fees" }, { k: "Who owns it", l: "The vendor. Cancel and it's gone", r: "You — code, IP and data" }, { k: "Roadmap", l: "Feature requests join a queue", r: "Your priorities, shipped weekly" }, { k: "Company value", l: "A recurring cost on the P&L", r: "An asset on the balance sheet" }] },
@@ -815,8 +843,8 @@ class Component extends DCLogic {
         optBg: on ? "var(--ice-100)" : "#fff",
         bg: on ? "var(--ice-050)" : "#fff", border: on ? "var(--border-accent)" : "var(--border-subtle)", tagOpacity: on ? 1 : 0,
         chipBg: on ? "var(--navy-950)" : "#fff", chipFg: on ? "#fff" : "var(--text-strong)", chipBorder: on ? "var(--navy-950)" : "var(--border-default)" }; }),
-      featured: CASES.own,
-      otherCases: [CASES.beekey, CASES.onevA],
+      featured: US ? CASES_US.beekey : CASES.own,
+      otherCases: US ? [CASES_US.onevA, CASES_US.leadey] : [CASES.beekey, CASES.onevA],
       cmp: CMP[angle],
       ledger: [
         { tool: "CRM", note: "Per seat, 14 seats", cost: cur + "1,260" },
@@ -839,7 +867,8 @@ class Component extends DCLogic {
       ],
       stats: [
         { n: "48h", l: "To your shortlist" }, { n: "1 in 25", l: "Applicants accepted" },
-        { n: "From £1,500", l: "Per engineer, per month" }, { n: "14 days", l: "Notice. Rolling monthly" },
+        { n: "From " + (US ? "$2,000" : "£1,500"), l: "Per engineer, per month" },
+        US ? { n: "US hours", l: "In your standups" } : { n: "14 days", l: "Notice. Rolling monthly" },
       ],
       spend, growth, buildMonths,
       spendLabel: fmt(spend), growthLabel: growth + "%", rateLabel: fmt(rate),
@@ -859,7 +888,7 @@ class Component extends DCLogic {
       steps: [
         { when: "Day 0", t: "Tell us what you're building", d: "A new product, a replacement for tools you rent, or more hands for your roadmap." },
         { when: "Within 48 hours", t: "Meet your shortlist", d: "3–5 pre-vetted engineers matched to your stack. Interview the ones you like." },
-        { when: "Week 1", t: "They join your build", d: "In your standup and your repo, working your hours with timezone overlap." },
+        { when: "Week 1", t: "They join your build", d: US ? "In your standup and your repo, working US hours." : "In your standup and your repo, working your hours with timezone overlap." },
         { when: "Ongoing", t: "Ship, own, scale", d: "Keep shipping with the same engineers. Add or reduce headcount as you need." },
       ],
       assurances: [
@@ -873,17 +902,22 @@ class Component extends DCLogic {
         { q: "Do I own everything that gets built?", a: "Yes. All code, IP and data are assigned to your company. The repository lives in your accounts from day one." },
         { q: "I'm not technical. Can I still do this?", a: "Yes. Tell us what you need in plain terms. We match engineers who can scope the build with you and explain trade-offs clearly." },
         { q: "How fast can someone start?", a: "You meet a shortlist of 3–5 engineers within 48 hours. Most start within a week of your pick." },
-        { q: "What does it cost?", a: "Engineers start from " + fromPrice + " for a junior, £2,500 mid-level and £4,500 senior. One invoice covers salary, contracts and compliance." },
+        US && { q: "What hours do they work?", a: "US hours. Your engineer works your time zone, joins your standups and is online when your team is." },
+        { q: "What does it cost?", a: US ? "Engineers start from $2,000 a month for a junior, $3,500 mid-level and $5,000 senior. One invoice covers salary, contracts and compliance."
+          : "Engineers start from " + fromPrice + " for a junior, £2,500 mid-level and £4,500 senior. One invoice covers salary, contracts and compliance." },
         { q: "What if it isn't working out?", a: "Every placement carries a 14/30-day replacement guarantee. We swap the engineer at no extra cost." },
-      ],
+      ].filter(Boolean),
       inputStyle: { height: 44, fontSize: 15 }, fullWidth: { width: "100%", justifyContent: "space-between", paddingLeft: 24 },
       fullCenter: { width: "100%" },
       ...this.saveVals(angle),
     };
   }
   saveVals(angle) {
-    const c = this.props.rateCurrency ?? "£";
-    const local = this.props.localRate ?? 5080, octo = this.props.octoRate ?? 2500;
+    const US = OGH.MARKET === "us";
+    // US: BLS median software developer salary, $135,980/yr (May 2025),
+    // salary only. Mid-level Octogle engineer at $3,500/month.
+    const c = US ? "$" : this.props.rateCurrency ?? "£";
+    const local = US ? 11330 : this.props.localRate ?? 5080, octo = US ? 3500 : this.props.octoRate ?? 2500;
     const n = this.state.devs ?? 3;
     const f = (v) => c + Math.round(v).toLocaleString("en-GB");
     const yr = (local - octo) * n * 12;
@@ -897,7 +931,8 @@ class Component extends DCLogic {
       octoPct: Math.round((octo / local) * 100) + "%",
       yearlySave: yr >= 1e6 ? c + (yr / 1e6).toFixed(2) + "M" : c + Math.round(yr / 1000) + "k",
       savePct: Math.round((1 - octo / local) * 100) + "%",
-      rateNote: "Mid-level engineer vs. a UK hire’s year-one cost (Reed average salary, employer NI, pension, 20% recruiter fee). Your exact rate card comes with your shortlist.",
+      rateNote: US ? "Mid-level engineer vs. the median US software developer salary ($135,980 a year, US Bureau of Labor Statistics, May 2025), before benefits, payroll tax or recruiter fees. Your exact rate card comes with your shortlist."
+        : "Mid-level engineer vs. a UK hire’s year-one cost (Reed average salary, employer NI, pension, 20% recruiter fee). Your exact rate card comes with your shortlist.",
     };
   }
   formVals(angle) {
@@ -959,6 +994,8 @@ class Component extends DCLogic {
       calSrc: step === 3 ? OGH.calSrc({ name: f.name.trim(), email: f.email.trim(), company: f.company.trim(),
         notes: [f.roles.length && "Skills: " + f.roles.join(", "), f.size && "Engineers: " + f.size, f.start && "Start: " + f.start, f.phone && "Phone: " + f.phone, f.notes].filter(Boolean).join(". ") }) : "",
       calLink: OGH.CAL,
+      phCompany: OGH.MARKET === "us" ? "Acme Inc." : "Acme Ltd",
+      phPhone: OGH.MARKET === "us" ? "+1 (555) 123-4567" : "+44 7700 900000",
     };
   }
 }
