@@ -70,6 +70,7 @@ fbq('set','autoConfig',false,'1614640659743336');fbq('init','1614640659743336');
           <x-import component-from-global-scope="OctogleHireDesignSystem_2b7531.Button" size="xl" chip="{{ true }}" onClick="{{ openDev }}" hint-size="230px,56px">Get a developer now</x-import>
           <x-import component-from-global-scope="OctogleHireDesignSystem_2b7531.Button" size="xl" variant="secondary" icon-left="calendar" onClick="{{ openCall }}" hint-size="190px,56px">Book a call now</x-import>
         </div>
+        <sc-if value="{{ isHire }}" hint-placeholder-val="{{ false }}"><span style="margin-top:-12px;font-size:14px;color:var(--text-muted)">{{ heroMicro }}</span></sc-if>
         <button type="button" onClick="{{ openPlan }}" style="display:flex;align-items:center;gap:14px;width:fit-content;max-width:100%;padding:12px 16px 12px 12px;border-radius:16px;border:1px dashed var(--border-accent);background:rgba(255,255,255,0.7);cursor:pointer;text-align:left;font-family:var(--font-sans)">
           <span style="display:grid;place-items:center;width:36px;height:36px;flex:none;border-radius:10px;background:var(--pulse-wash-strong);color:var(--steel-600)"><x-import component-from-global-scope="OctogleHireDesignSystem_2b7531.Icon" name="file-text" size="{{ 18 }}" hint-size="18px,18px"></x-import></span>
           <span style="display:flex;flex-direction:column;gap:2px"><span style="font-size:15px;font-weight:600;color:var(--text-strong)">Free build plan</span><span style="font-size:13px;color:var(--text-muted)">We analyse what you're building and send a plan for how we'd deliver it.</span></span>
@@ -161,6 +162,56 @@ fbq('set','autoConfig',false,'1614640659743336');fbq('init','1614640659743336');
       </div>
     </div>
   </section>
+
+  <!-- WHAT GOES WRONG (hire angle) -->
+  <sc-if value="{{ isHire }}" hint-placeholder-val="{{ false }}">
+    <section id="wrong" style="padding:clamp(64px,9vw,96px) 20px;background:#fff;border-bottom:1px solid var(--border-subtle)">
+      <div class="ogl-shell" style="display:flex;flex-direction:column;gap:36px">
+        <div style="display:flex;flex-direction:column;gap:16px;max-width:760px">
+          <span class="ogl-eyebrow">Why teams switch</span>
+          <h2 style="margin:0;font-family:var(--font-display);font-size:clamp(30px,3.6vw,48px);font-weight:600;line-height:1.08;letter-spacing:-0.025em;color:var(--text-strong);text-wrap:balance">The usual ways hiring developers goes wrong, and what we do instead.</h2>
+        </div>
+        <div style="border-radius:24px;border:1px solid var(--border-subtle);overflow:hidden;background:#fff">
+          <sc-if value="{{ notMobile }}" hint-placeholder-val="{{ true }}"><div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:16px;padding:16px 24px;background:var(--surface-sunken);border-bottom:1px solid var(--border-subtle)">
+            <span class="mono-caps" style="font-size:11px;color:var(--text-faint)">What goes wrong</span>
+            <span class="mono-caps" style="font-size:11px;color:var(--sky-600)">With Octogle</span>
+          </div></sc-if>
+          <sc-for list="{{ wrong }}" as="w" hint-placeholder-count="5">
+            <div style="display:grid;grid-template-columns:{{ wrongCols }};gap:{{ cmpGap }};padding:20px 24px;border-bottom:1px solid var(--border-subtle);align-items:start">
+              <span style="display:flex;gap:10px;align-items:flex-start;font-size:15px;font-weight:500;color:var(--text-strong)"><span style="display:grid;place-items:center;width:18px;height:18px;flex:none;margin-top:2px;border-radius:9999px;background:rgba(217,58,63,0.10);color:#c2373c"><x-import component-from-global-scope="OctogleHireDesignSystem_2b7531.Icon" name="x" size="{{ 11 }}" stroke-width="{{ 3 }}" hint-size="11px,11px"></x-import></span>{{ w.bad }}</span>
+              <span style="display:flex;gap:10px;align-items:flex-start;font-size:15px;line-height:1.55;color:var(--text-body)"><span style="display:grid;place-items:center;width:18px;height:18px;flex:none;margin-top:2px;border-radius:9999px;background:var(--pulse-wash-strong);color:var(--steel-600)"><x-import component-from-global-scope="OctogleHireDesignSystem_2b7531.Icon" name="check" size="{{ 11 }}" stroke-width="{{ 3 }}" hint-size="11px,11px"></x-import></span>{{ w.fix }}</span>
+            </div>
+          </sc-for>
+        </div>
+        <!-- Weekly output report: shown once Dan confirms every client gets it. -->
+        <sc-if value="{{ showReport }}" hint-placeholder-val="{{ false }}">
+          <figure style="margin:0;display:flex;flex-direction:column;gap:12px;max-width:520px">
+            <div style="display:flex;flex-direction:column;gap:18px;padding:24px;border-radius:24px;background:#fff;border:1px solid var(--border-subtle);box-shadow:0 18px 44px -16px rgba(28,51,80,.22)">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+                <span class="mono-caps" style="font-size:11px;color:var(--text-muted)">Weekly output report · sample</span>
+                <span class="mono-caps" style="font-size:11px;color:var(--text-faint)">From your repo</span>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">
+                <sc-for list="{{ reportKpis }}" as="k" hint-placeholder-count="3">
+                  <span style="display:flex;flex-direction:column;gap:6px;padding:14px 12px;border-radius:14px;background:rgba(104,186,217,0.14);border:1px solid rgba(66,110,140,0.1)">
+                    <span style="font-family:var(--font-display);font-size:22px;font-weight:500;line-height:1;color:var(--text-strong)">{{ k.v }}</span>
+                    <span class="mono-caps" style="font-size:9px;color:var(--steel-600)">{{ k.k }}</span>
+                  </span>
+                </sc-for>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px;padding-top:14px;border-top:1px solid var(--border-subtle)">
+                <span style="font-family:var(--font-display);font-size:15px;font-weight:500;color:var(--text-strong)">Merged this week</span>
+                <sc-for list="{{ reportMerged }}" as="m" hint-placeholder-count="3">
+                  <span style="display:flex;gap:10px;align-items:flex-start;font-size:13px;line-height:1.5;color:var(--text-body)"><span style="width:5px;height:5px;margin-top:7px;flex:none;border-radius:9999px;background:var(--sky-500)"></span>{{ m }}</span>
+                </sc-for>
+              </div>
+            </div>
+            <figcaption style="font-size:13px;color:var(--text-muted)">What you see every week, pulled from your own repository.</figcaption>
+          </figure>
+        </sc-if>
+      </div>
+    </section>
+  </sc-if>
 
   <!-- WHO IT'S FOR -->
   <section id="who" style="padding:clamp(64px,9vw,96px) 20px;background:#fff;border-bottom:1px solid var(--border-subtle)">
@@ -329,6 +380,26 @@ fbq('set','autoConfig',false,'1614640659743336');fbq('init','1614640659743336');
           </div>
           <span style="font-size:12px;line-height:1.5;color:var(--text-faint)">{{ rateNote }}</span>
         </div>
+      <sc-if value="{{ isFees }}" hint-placeholder-val="{{ false }}">
+        <div style="grid-column:1/-1;display:flex;flex-direction:column;gap:12px;min-width:0">
+          <div style="overflow-x:auto;border-radius:24px;background:#fff;border:1px solid var(--border-subtle)">
+            <div style="min-width:680px">
+              <div style="display:grid;grid-template-columns:1.1fr repeat(5,minmax(0,1fr));gap:12px;padding:16px 18px;border-bottom:1px solid var(--border-subtle)">
+                <span></span>
+                <sc-for list="{{ fees.cols }}" as="c" hint-placeholder-count="5"><span class="mono-caps" style="font-size:11px;color:var(--text-faint)">{{ c }}</span></sc-for>
+              </div>
+              <sc-for list="{{ fees.rows }}" as="r" hint-placeholder-count="4">
+                <div style="display:grid;grid-template-columns:1.1fr repeat(5,minmax(0,1fr));gap:12px;padding:16px 18px;border-bottom:1px solid var(--border-subtle);font-size:14px;line-height:1.45">
+                  <span style="font-weight:500;color:var(--text-strong)">{{ r.k }}</span>
+                  <sc-for list="{{ r.v }}" as="v" hint-placeholder-count="5"><span style="color:var(--text-body)">{{ v }}</span></sc-for>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <span style="font-size:12px;line-height:1.5;color:var(--text-faint)">{{ fees.note }}</span>
+        </div>
+      </sc-if>
+      <sc-if value="{{ notFees }}" hint-placeholder-val="{{ true }}">
       <div style="border-radius:24px;background:#fff;border:1px solid var(--border-subtle);overflow:hidden">
         <sc-if value="{{ notMobile }}" hint-placeholder-val="{{ true }}"><div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);gap:16px;padding:18px 24px;border-bottom:1px solid var(--border-subtle)">
           <span></span>
@@ -343,6 +414,7 @@ fbq('set','autoConfig',false,'1614640659743336');fbq('init','1614640659743336');
           </div>
         </sc-for>
       </div>
+      </sc-if>
     </div>
   </section>
 
@@ -607,7 +679,7 @@ fbq('set','autoConfig',false,'1614640659743336');fbq('init','1614640659743336');
   </sc-if>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;angle&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;build&quot;,&quot;own&quot;,&quot;saas&quot;],&quot;default&quot;:&quot;build&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Ad angle (also set via ?angle= in the URL)&quot;},&quot;fromPrice&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;£1,500 / month&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Offer&quot;},&quot;rateCurrency&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;$&quot;,&quot;£&quot;,&quot;€&quot;],&quot;default&quot;:&quot;£&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Cost savings card&quot;},&quot;localRate&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:5080,&quot;min&quot;:2000,&quot;max&quot;:30000,&quot;step&quot;:250,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Cost savings card&quot;},&quot;octoRate&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:2500,&quot;min&quot;:1000,&quot;max&quot;:15000,&quot;step&quot;:250,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Cost savings card&quot;},&quot;currency&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;£&quot;,&quot;$&quot;,&quot;€&quot;],&quot;default&quot;:&quot;£&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Calculator&quot;},&quot;engineerRate&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:2500,&quot;min&quot;:1000,&quot;max&quot;:15000,&quot;step&quot;:250,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Calculator&quot;},&quot;buildMonths&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:6,&quot;min&quot;:2,&quot;max&quot;:18,&quot;step&quot;:1,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Calculator&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;angle&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;build&quot;,&quot;own&quot;,&quot;saas&quot;,&quot;hire&quot;],&quot;default&quot;:&quot;build&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Ad angle (also set via ?angle= in the URL)&quot;},&quot;fromPrice&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;£1,500 / month&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Offer&quot;},&quot;rateCurrency&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;$&quot;,&quot;£&quot;,&quot;€&quot;],&quot;default&quot;:&quot;£&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Cost savings card&quot;},&quot;localRate&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:5080,&quot;min&quot;:2000,&quot;max&quot;:30000,&quot;step&quot;:250,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Cost savings card&quot;},&quot;octoRate&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:2500,&quot;min&quot;:1000,&quot;max&quot;:15000,&quot;step&quot;:250,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Cost savings card&quot;},&quot;currency&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;£&quot;,&quot;$&quot;,&quot;€&quot;],&quot;default&quot;:&quot;£&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Calculator&quot;},&quot;engineerRate&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:2500,&quot;min&quot;:1000,&quot;max&quot;:15000,&quot;step&quot;:250,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Calculator&quot;},&quot;buildMonths&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:6,&quot;min&quot;:2,&quot;max&quot;:18,&quot;step&quot;:1,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Calculator&quot;}}">
 // ---- Lead capture → /api/lead (Leadey relay + CAPI), and Connor's calendar ----
 const OGH = {
   PIXEL: "1614640659743336",
@@ -619,7 +691,7 @@ const OGH = {
   // Leadey custom-field options (Timeline is a select; Headcount is a number).
   TIMELINE: { "As soon as possible": "ASAP", "Within a month": "2–4 weeks", "In 1–3 months": "1–3 months", "Just exploring": "Just exploring" },
   HEADCOUNT: { "1": 1, "2–3": 3, "4–5": 5, "6+": 6 },
-  UTM: ["utm_source","utm_medium","utm_campaign","utm_content","utm_term","campaign_id","adset_id","ad_id","fbclid"],
+  UTM: ["utm_source","utm_medium","utm_campaign","utm_content","utm_term","campaign_id","adset_id","ad_id","fbclid","gclid"],
   // try.octoglehire.com/us (or ?market=us) is the US version: $, US hours,
   // US hiring costs, and leads go to the "Meta Lead Ads — US" campaign.
   MARKET: (() => {
@@ -694,7 +766,7 @@ class Component extends DCLogic {
       timeline: OGH.TIMELINE[f.start],
       build: f.notes.trim() || undefined,
       nurture: exploring ? "Yes" : undefined,
-      hero_variant: angle,
+      hero_variant: this.state.kw ? angle + ":" + this.state.kw : angle,
       market: OGH.MARKET, country: OGH.MARKET === "us" ? "US" : "GB",
       status: "partial", captured_step: 3,
       location: OGH.TAG, source: OGH.TAG, note,
@@ -709,8 +781,12 @@ class Component extends DCLogic {
   setF(k, v) { this.setState((s) => ({ f: { ...s.f, [k]: v } })); }
   componentDidMount() {
     try {
-      const q = new URLSearchParams(window.location.search).get("angle");
-      if (q && ["build", "own", "saas"].includes(q)) this.setState({ pick: q });
+      const qs = new URLSearchParams(window.location.search);
+      const q = qs.get("angle"), kw = (qs.get("kw") || "").toLowerCase();
+      // ?kw= picks a search headline; on its own it implies the hire angle.
+      if (q && ["build", "own", "saas", "hire"].includes(q)) this.setState({ pick: q });
+      else if (kw) this.setState({ pick: "hire" });
+      if (kw) this.setState({ kw });
     } catch (e) {}
     // Leadey's booking iframe posts {channel:"leadey:booking", event} for
     // everything; only booking_scheduled from Leadey's origin is a Schedule.
@@ -750,6 +826,35 @@ class Component extends DCLogic {
     const angle = this.state.pick || this.props.angle || "build";
     const fmt = (n) => cur + Math.round(n).toLocaleString("en-GB");
     const short = (n) => n >= 1e6 ? cur + (n / 1e6).toFixed(2) + "M" : cur + Math.round(n / 1000) + "k";
+    const senior = US ? "$5,000" : "£4,500";
+
+    // Claims waiting on Dan's sign-off. Until each is set, the page shows the
+    // safe wording below it, and nothing that depends on it.
+    const CONFIRMED = {
+      trialDays: null,       // e.g. 14 → "Two-week trial" replaces the guarantee
+      guaranteeDays: null,   // 14 or 30 → one number replaces "14/30-day"
+      exactEngineer: false,  // you get the exact engineer you interviewed
+      weeklyReport: false,   // every client gets the weekly output report
+      minimumTerm: null,     // e.g. "None, rolling monthly" for the Toptal table
+      basedIn: null,         // Dan's wording for where engineers are based
+    };
+    const G = CONFIRMED.trialDays
+      ? { short: "Free " + CONFIRMED.trialDays + "-day trial", title: CONFIRMED.trialDays + "-day trial",
+          long: "Work with your engineer for " + CONFIRMED.trialDays + " days. If it isn't right, you pay nothing for that time and we find a replacement or part ways." }
+      : CONFIRMED.guaranteeDays
+      ? { short: "Replace free if it's not a fit", title: CONFIRMED.guaranteeDays + "-day replacement guarantee",
+          long: "Not the right fit in the first " + CONFIRMED.guaranteeDays + " days? We replace your engineer at no cost." }
+      : { short: "Replace free if it's not a fit", title: "14/30-day replacement guarantee",
+          long: "Not the right fit? We replace them at no cost." };
+
+    // Search headlines by ?kw= (hire angle). Anything else falls back to hire.h1.
+    const KW_H1 = {
+      dedicated: "Hire dedicated developers who work only on your product.",
+      ai: "Hire AI developers trained on Cursor, Claude Code and agentic workflows.",
+      staffaug: "Staff augmentation: add vetted engineers to your team this week.",
+      toptal: "A Toptal alternative built for long-term teams.",
+    };
+    const kw = this.state.kw;
 
     const HERO = {
       build: { icon: "users", audience: "For companies building software",
@@ -767,6 +872,12 @@ class Component extends DCLogic {
         sub: "Pre-vetted, AI-native engineers trained on Cursor, Claude Code and agentic workflows — ready to join your build from " + fromPrice + ". No agency markup. All code and IP are yours.",
         cardKicker: "From", cardTitle: fromPrice, cardSub: "Per engineer · no recruiting fees",
         ctaTitle: "Get your SaaS built by engineers you keep.", formHint: "e.g. MVP for a B2B scheduling product, launching in Q2" },
+      // Search traffic. $2,000 is the junior rate; never pair it with "senior".
+      hire: { icon: "users", audience: "For teams hiring developers",
+        h1: KW_H1[kw] || "Hire vetted developers who join your team and stay.",
+        sub: "Full-time engineers who work for one client: you. Shortlist in 48 hours, " + (US ? "working US hours, " : "") + "in your repo from day one. From " + fromPrice.replace(" / ", " a ") + ", senior from " + senior + ".",
+        cardKicker: "From", cardTitle: fromPrice, cardSub: "Per engineer · no placement fee",
+        ctaTitle: "Meet 3–5 matched engineers in 48 hours.", formHint: "e.g. Two senior React engineers to join our product team" },
     };
     const AUD = [
       { id: "own", icon: "key-round", t: "Business owners", chip: "Replacing software", d: "Paying for tools that don't fit how you work? Build one product around your business and cancel the subscriptions.", proof: "Own the code · no per-seat fees" },
@@ -812,9 +923,44 @@ class Component extends DCLogic {
       own: { eyebrow: "Rent vs. own", title: "Subscriptions make you fit their product. Owning flips that.", sub: "Off-the-shelf tools charge more every time you grow, and still can't do the one thing that makes your business different.", left: "Renting SaaS",
         rows: [{ k: "Fit", l: "You change your process to match the tool", r: "Built around your exact workflow" }, { k: "Cost as you grow", l: "Rises with every seat and price change", r: "Flat — no per-seat fees" }, { k: "Who owns it", l: "The vendor. Cancel and it's gone", r: "You — code, IP and data" }, { k: "Roadmap", l: "Feature requests join a queue", r: "Your priorities, shipped weekly" }, { k: "Company value", l: "A recurring cost on the P&L", r: "An asset on the balance sheet" }] },
       saas: { eyebrow: "Agency vs. your own team", title: "Agencies build it and leave. Your team stays and keeps shipping.", sub: "A SaaS product is never finished. Build it with engineers who learn your product and stay with it after launch.", left: "Dev agency",
-        rows: [{ k: "Cost", l: "Agency margin on every hour", r: "One monthly price, no agency margin" }, { k: "After launch", l: "New contract for every change", r: "Same engineers keep shipping" }, { k: "Ownership", l: "Code handed over at the end, if at all", r: "Your repo and IP from day one" }, { k: "AI fluency", l: "Varies by who's assigned", r: "Proven in the Octogle AI Playbook" }, { k: "If it's not working", l: "Locked into the statement of work", r: "14/30-day replacement guarantee" }] },
+        rows: [{ k: "Cost", l: "Agency margin on every hour", r: "One monthly price, no agency margin" }, { k: "After launch", l: "New contract for every change", r: "Same engineers keep shipping" }, { k: "Ownership", l: "Code handed over at the end, if at all", r: "Your repo and IP from day one" }, { k: "AI fluency", l: "Varies by who's assigned", r: "Proven in the Octogle AI Playbook" }, { k: "If it's not working", l: "Locked into the statement of work", r: G.title }] },
       build: { eyebrow: "Hiring locally vs. Octogle", title: "Skip months of recruiting. Add engineers this week.", sub: "Local hiring is slow and expensive. We've already done the vetting, the contracts and the compliance.", left: "Hiring locally",
-        rows: [{ k: "Time to start", l: "Months of sourcing and interviews", r: "Shortlist in 48h, start in week 1" }, { k: "Cost", l: "Full local salary plus recruiter fees", r: "One monthly price, no agency margin" }, { k: "Vetting", l: "Your team's time, every round", r: "5-stage Gauntlet · 1 in 25 accepted" }, { k: "Admin", l: "Contracts, payroll, compliance", r: "One invoice — we're Employer of Record" }, { k: "Bad hire", l: "Months lost", r: "14/30-day replacement guarantee" }] },
+        rows: [{ k: "Time to start", l: "Months of sourcing and interviews", r: "Shortlist in 48h, start in week 1" }, { k: "Cost", l: "Full local salary plus recruiter fees", r: "One monthly price, no agency margin" }, { k: "Vetting", l: "Your team's time, every round", r: "5-stage Gauntlet · 1 in 25 accepted" }, { k: "Admin", l: "Contracts, payroll, compliance", r: "One invoice — we're Employer of Record" }, { k: "Bad hire", l: "Months lost", r: G.title }] },
+      hire: { eyebrow: "Freelancers and agencies vs. Octogle", title: "Stop gambling on freelancers. Stop paying agency margins.",
+        sub: "Marketplaces leave the vetting and managing to you. Agencies charge a margin and rotate people. This is a full-time engineer on your team.",
+        left: "Freelancers and dev agencies",
+        rows: [
+          { k: "Who you get", l: "Whoever is assigned, and it can change", r: CONFIRMED.exactEngineer ? "The engineer you interviewed and chose" : "Engineers you interview and choose" },
+          { k: "Focus", l: "Split across several clients", r: "Full-time, one client" },
+          { k: "Vetting", l: "Your time, or ratings you can't verify", r: "5-stage Gauntlet · 1 in 25 accepted" },
+          { k: "Progress", l: "Status updates and screenshots", r: CONFIRMED.weeklyReport ? "Merged work in your repo every week" : "Every commit in your own repo" },
+          { k: "Cost", l: "Hourly rates plus platform or agency margin", r: "One monthly price, no placement fee" },
+          { k: "If it's not working", l: "Disputes and partial refunds", r: G.title },
+        ] },
+    };
+    // "What goes wrong" rows (hire angle), from buyer research.
+    const WRONG = [
+      { bad: "They deliver half of what was promised", fix: CONFIRMED.weeklyReport
+          ? "You see merged work in your own repo every week. Real code, not status updates."
+          : "Your engineer works in your own repo from day one, so you see every commit yourself. Real code, not status updates." },
+      { bad: "They go quiet or disappear", fix: "Full-time on your team only. In your standup every day" + (US ? ", working US hours." : ".") },
+      { bad: "The senior you met gets swapped for a junior", fix: CONFIRMED.exactEngineer
+          ? "You interview and pick the exact engineer. No substitutions without your say."
+          : "You interview the shortlist and choose who joins your team." },
+      { bad: "You end up doing all the screening", fix: "We've done it. 1 in 25 applicants pass. You meet 3–5 matched engineers, not a pile of resumes." },
+      { bad: "The markup makes a long-term team unaffordable", fix: "One monthly price per engineer, shown up front. No placement fee, no agency margin." },
+    ];
+    // kw=toptal: competitors' own published figures, read 11 Nov 2026.
+    // Re-check every link the day before launch and keep the footnote.
+    const FEES = {
+      cols: ["Octogle", "Toptal", "Arc", "Uplers", "Lemon.io"],
+      rows: [
+        { k: "Published price", v: ["From " + fromPrice, "No public rates", "$15–$110+ per hour", "From $2,500 / month", "$60–$90 per hour"] },
+        { k: "Placement fee", v: ["None", "Not stated", "20% of annual salary on full-time hires", "10–15% of annual pay on direct hires", "Not stated"] },
+        CONFIRMED.minimumTerm && { k: "Minimum commitment", v: [CONFIRMED.minimumTerm, "Not stated", "None stated", "6 months on contract", "160 hours"] },
+        { k: "Other fees", v: ["None", "$79 monthly subscription", "None stated", "None stated", "Prepaid weekly or monthly"] },
+      ].filter(Boolean),
+      note: "Competitor figures from toptal.com/faq, arc.dev/pricing, uplers.com/pricing and docs.lemon.io/billing-and-payment, as published on 11 November 2026.",
     };
 
     const { spend, growth, team } = this.state;
@@ -837,7 +983,14 @@ class Component extends DCLogic {
     ];
     const pickAngle = (id) => this.setState({ pick: id });
     return {
-      hero: HERO[angle], isOwn: angle === "own", isSaas: angle === "saas", isBuild: angle === "build",
+      hero: HERO[angle], isOwn: angle === "own", isSaas: angle === "saas", isBuild: angle === "build" || angle === "hire",
+      isHire: angle === "hire", heroMicro: "Shortlist in 48 hours" + (US ? " · Working US hours" : "") + " · " + G.short,
+      wrong: WRONG, showReport: CONFIRMED.weeklyReport,
+      wrongCols: this.state.mobile ? "1fr" : "minmax(0,1fr) minmax(0,1.4fr)",
+      // Format of the report on octoglehire.com (components/marketing/transparency.tsx), labelled as a sample.
+      reportKpis: [{ v: "38", k: "PRs merged" }, { v: "4.2h", k: "Review latency" }, { v: "0.9%", k: "Revert rate" }],
+      reportMerged: ["Connection pooling on the order service", "Checkout trace instrumentation", "Retired the legacy webhook worker"],
+      isFees: angle === "hire" && kw === "toptal", notFees: !(angle === "hire" && kw === "toptal"), fees: FEES,
       ...this.formVals(angle),
       audiences: AUD.map((a) => { const on = a.id === angle; return { ...a, pick: () => pickAngle(a.id),
         optBg: on ? "var(--ice-100)" : "#fff",
@@ -845,7 +998,10 @@ class Component extends DCLogic {
         chipBg: on ? "var(--navy-950)" : "#fff", chipFg: on ? "#fff" : "var(--text-strong)", chipBorder: on ? "var(--navy-950)" : "var(--border-default)" }; }),
       featured: US ? CASES_US.beekey : CASES.own,
       otherCases: US ? [CASES_US.onevA, CASES_US.leadey] : [CASES.beekey, CASES.onevA],
-      cmp: CMP[angle],
+      cmp: angle === "hire" && kw === "toptal"
+        ? { ...CMP.hire, eyebrow: "Published pricing", title: "What the alternatives charge, from their own pricing pages.",
+            sub: "One monthly price per engineer, no placement fee and no subscription. Here is how that sits next to the marketplaces." }
+        : CMP[angle],
       ledger: [
         { tool: "CRM", note: "Per seat, 14 seats", cost: cur + "1,260" },
         { tool: "Project management", note: "Business tier", cost: cur + "640" },
@@ -892,7 +1048,7 @@ class Component extends DCLogic {
         { when: "Ongoing", t: "Ship, own, scale", d: "Keep shipping with the same engineers. Add or reduce headcount as you need." },
       ],
       assurances: [
-        { icon: "shield-check", t: "14/30-day replacement guarantee", d: "Not the right fit? We replace them at no cost." },
+        { icon: "shield-check", t: G.title, d: G.long },
         { icon: "file-text", t: "One invoice", d: "We handle contracts, payroll and local employment law as Employer of Record." },
         { icon: "lock", t: "ISO 27001 certified", d: "Your code and data are handled to an audited security standard." },
       ],
@@ -905,7 +1061,14 @@ class Component extends DCLogic {
         US && { q: "What hours do they work?", a: "US hours. Your engineer works your time zone, joins your standups and is online when your team is." },
         { q: "What does it cost?", a: US ? "Engineers start from $2,000 a month for a junior, $3,500 mid-level and $5,000 senior. One invoice covers salary, contracts and compliance."
           : "Engineers start from " + fromPrice + " for a junior, £2,500 mid-level and £4,500 senior. One invoice covers salary, contracts and compliance." },
-        { q: "What if it isn't working out?", a: "Every placement carries a 14/30-day replacement guarantee. We swap the engineer at no extra cost." },
+        { q: "What if it isn't working out?", a: CONFIRMED.trialDays ? G.long : "Every placement carries a " + G.title + ". We swap the engineer at no extra cost." },
+        // Search buyers' questions (hire angle only).
+        angle === "hire" && CONFIRMED.exactEngineer && { q: "Will I get the engineer I interviewed?", a: "Yes. You interview the shortlist and choose. That engineer joins your team, full-time, and works only for you." },
+        angle === "hire" && { q: "How do I know work is actually getting done?", a: CONFIRMED.weeklyReport
+          ? "Your engineer commits to your repository from day one. Each week you get a report built from that repo: what was merged, how fast reviews moved, and what is in progress."
+          : "Your engineer commits to your repository from day one, so you can see what was merged and what is in progress whenever you want." },
+        angle === "hire" && CONFIRMED.basedIn && { q: "Where are your engineers based?", a: CONFIRMED.basedIn },
+        angle === "hire" && { q: "What access do they need to my systems?", a: "Only what the work needs. The repository stays in your accounts, you grant and remove access yourself, and we are ISO 27001 certified." },
       ].filter(Boolean),
       inputStyle: { height: 44, fontSize: 15 }, fullWidth: { width: "100%", justifyContent: "space-between", paddingLeft: 24 },
       fullCenter: { width: "100%" },
