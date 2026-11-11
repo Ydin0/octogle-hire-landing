@@ -11,6 +11,10 @@ const WEBHOOK_URL = process.env.LEADEY_WEBSITE_LEADS_WEBHOOK_URL;
 // campaign (funnel_muplaf1g9lazl3). Until it's set they fall back to the main
 // webhook with country US, so nothing is lost.
 const US_WEBHOOK_URL = process.env.LEADEY_US_WEBHOOK_URL;
+// US leads from Google Ads (utm_source=google or a gclid) go to their own
+// "Google Ads — US" campaign (funnel_mwc3e9j72tekzy), never the Meta one.
+// Until it's set they fall back to the US webhook, so nothing is lost.
+const GOOGLE_US_WEBHOOK_URL = process.env.LEADEY_GOOGLE_US_WEBHOOK_URL;
 
 // If Leadey refuses a lead, keep enough in the logs to recover it by hand.
 function logLostLead(reason: string, p: Record<string, unknown>) {
@@ -143,6 +147,10 @@ export async function POST(req: Request) {
     company = `${company} (Lead)`;
   }
 
+  const us = body.market === "us";
+  const google =
+    str(body.utm_source).toLowerCase() === "google" || Boolean(str(body.gclid));
+
   const payload: Record<string, unknown> = {
     ...body,
     firstName: firstName || undefined,
@@ -150,7 +158,7 @@ export async function POST(req: Request) {
     company: company || undefined,
     // Keys the Website Leads field map understands, so these leads are
     // labelled and routed like the main site's (developer follow-up flow).
-    lead_source: "Landing Page",
+    lead_source: google ? "Google Ads" : "Landing Page",
     demand_type: "Engineering",
     service: "Hire engineers",
     source_page: str(body.page) || undefined,
@@ -167,9 +175,9 @@ export async function POST(req: Request) {
         })
       : Promise.resolve();
 
-  const us = body.market === "us";
   if (us && !US_WEBHOOK_URL) console.warn("[lead] LEADEY_US_WEBHOOK_URL not set, US lead sent to the main webhook");
-  const webhook = (us && US_WEBHOOK_URL) || WEBHOOK_URL;
+  if (us && google && !GOOGLE_US_WEBHOOK_URL) console.warn("[lead] LEADEY_GOOGLE_US_WEBHOOK_URL not set, Google lead sent to the US webhook");
+  const webhook = (us && google && GOOGLE_US_WEBHOOK_URL) || (us && US_WEBHOOK_URL) || WEBHOOK_URL;
   if (!webhook) {
     logLostLead("LEADEY_WEBSITE_LEADS_WEBHOOK_URL not set", payload);
     await capi;
