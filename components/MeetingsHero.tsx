@@ -37,7 +37,7 @@ export default function MeetingsHero({
         className={
           done
             ? "relative mx-auto max-w-content px-5 pb-16 pt-4 sm:px-8 md:pt-6"
-            : "relative mx-auto grid max-w-content items-start gap-10 px-5 pb-16 pt-2 sm:px-8 md:grid-cols-[1.05fr_.95fr] md:pb-24 md:pt-8"
+            : "relative mx-auto grid max-w-content items-start gap-10 px-5 pb-16 pt-6 sm:px-8 md:grid-cols-[1.05fr_.95fr] md:pb-24 md:pt-8"
         }
       >
         <div>
