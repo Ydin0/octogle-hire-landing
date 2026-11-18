@@ -13,7 +13,7 @@ import { DIAL_CODES, PRIORITY_ISO2, composePhone } from "@/lib/dial-codes";
 // Same-origin relay to Leadey (see app/api/lead/route.ts). Posting to Leadey
 // directly with no-cors dropped every lead.
 const LEAD_ENDPOINT = "/api/lead";
-const CALENDAR_URL =
+export const CALENDAR_URL =
   "https://app.leadey.ai/book/introduction-call-with-connor-6ibd7u?embed=1";
 const LOCATION_TAG = "landing page -dan";
 const LEADEY_ORIGIN = "https://app.leadey.ai";
@@ -28,7 +28,7 @@ const GOOGLE_ADS_LEAD_CONVERSION = "AW-18440423872/1XedCIbikPscEMCTitlE";
 type Fbq = (...args: unknown[]) => void;
 type Gtag = (...args: unknown[]) => void;
 
-function track(event: string, params?: object, opts?: object) {
+export function track(event: string, params?: object, opts?: object) {
   const fbq = (window as unknown as { fbq?: Fbq }).fbq;
   if (typeof fbq === "function") fbq("track", event, params || {}, opts || {});
 }
@@ -38,7 +38,7 @@ function track(event: string, params?: object, opts?: object) {
  * person (email, phone, name). fbevents.js hashes these client-side; they must
  * never go in event params. Call right before the conversion event.
  */
-function setAdvancedMatching(user: { name: string; email: string; phone: string }) {
+export function setAdvancedMatching(user: { name: string; email: string; phone: string }) {
   const fbq = (window as unknown as { fbq?: Fbq }).fbq;
   if (typeof fbq !== "function") return;
   const parts = user.name.trim().split(/\s+/).filter(Boolean);
@@ -51,7 +51,7 @@ function setAdvancedMatching(user: { name: string; email: string; phone: string 
   fbq("init", META_PIXEL_ID, data);
 }
 
-function trackGoogleAdsLead(transactionId: string) {
+export function trackGoogleAdsLead(transactionId: string) {
   const gtag = (window as unknown as { gtag?: Gtag }).gtag;
   if (typeof gtag !== "function") return;
   try {
@@ -75,10 +75,10 @@ const START_OPTIONS = [
 ];
 // Not ready to start: no calendar, a nurture message instead. Exploring leads
 // were the biggest source of "Not a Fit" calls.
-const EXPLORING = "Just exploring";
+export const EXPLORING = "Just exploring";
 // Leadey's Timeline custom field is a select; send its exact option labels
 // or the value is dropped.
-const LEADEY_TIMELINE: Record<string, string> = {
+export const LEADEY_TIMELINE: Record<string, string> = {
   "As soon as possible": "ASAP",
   "Within a month": "2–4 weeks",
   "In 1 to 3 months": "1–3 months",
@@ -93,9 +93,9 @@ const FREE_EMAIL_DOMAINS = new Set([
   "yahoo.co.uk", "icloud.com", "me.com", "aol.com", "proton.me",
   "protonmail.com", "btinternet.com", "sky.com", "gmx.com", "mail.com",
 ]);
-const isFreeEmail = (email: string) =>
+export const isFreeEmail = (email: string) =>
   FREE_EMAIL_DOMAINS.has(email.trim().toLowerCase().split("@")[1] ?? "");
-const emailOk = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
+export const emailOk = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
 
 // Campaign attribution, read from the landing URL so every lead in Leadey can
 // be tied back to the ad (utm_content = ad name) and the hero it saw.
@@ -109,9 +109,10 @@ const ATTRIBUTION_KEYS = [
   "adset_id",
   "ad_id",
   "fbclid",
+  "gclid",
 ] as const;
 
-function readAttribution(): Record<string, string> {
+export function readAttribution(): Record<string, string> {
   const params = new URLSearchParams(window.location.search);
   const out: Record<string, string> = {};
   for (const k of ATTRIBUTION_KEYS) {
@@ -126,7 +127,7 @@ function readAttribution(): Record<string, string> {
  * doesn't ask again: name, email, the form answers as notes, and the campaign
  * UTMs (the same params Leadey's embed.js sends).
  */
-function bookingSrc(p: { name: string; email: string; notes: string }) {
+export function bookingSrc(p: { name: string; email: string; notes: string }) {
   const url = new URL(CALENDAR_URL);
   if (p.name) url.searchParams.set("name", p.name);
   if (p.email) url.searchParams.set("email", p.email);
@@ -140,7 +141,7 @@ function bookingSrc(p: { name: string; email: string; notes: string }) {
 }
 
 // keepalive so the request survives the visitor closing the tab mid-send.
-function sendLead(body: object) {
+export function sendLead(body: object) {
   return fetch(LEAD_ENDPOINT, {
     method: "POST",
     keepalive: true,
@@ -267,45 +268,8 @@ export function BookForm({ variant }: { variant: string }) {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const eventId = useRef("lead_" + crypto.randomUUID());
-  const scheduled = useRef(false);
-  const frameRef = useRef<HTMLIFrameElement>(null);
   const exploring = start === EXPLORING;
   const freeEmail = emailOk(f.email) && isFreeEmail(f.email);
-
-  // Leadey's booking iframe posts {channel:"leadey:booking", event, ...} for
-  // everything, including size updates while it loads. Only a real
-  // booking_scheduled from Leadey's origin counts as a Schedule.
-  useEffect(() => {
-    if (step !== 3) return;
-    const onMsg = (e: MessageEvent) => {
-      if (e.origin !== LEADEY_ORIGIN) return;
-      const data = e.data as
-        | { channel?: string; event?: string; height?: number; url?: string }
-        | undefined;
-      if (!data || data.channel !== "leadey:booking") return;
-
-      if (data.event === "resize" && data.height && frameRef.current) {
-        frameRef.current.style.height = `${Math.max(560, data.height)}px`;
-        return;
-      }
-      if (data.event === "booking_scheduled" && !scheduled.current) {
-        scheduled.current = true;
-        try {
-          sessionStorage.setItem(SCHEDULE_SENT_KEY, "1");
-        } catch {
-          /* storage blocked; /booked may count it again, acceptable */
-        }
-        track("Schedule", {}, { eventID: "sched_" + eventId.current });
-        return;
-      }
-      // The iframe can't navigate the top window itself.
-      if (data.event === "redirect" && data.url) {
-        window.location.href = data.url;
-      }
-    };
-    window.addEventListener("message", onMsg);
-    return () => window.removeEventListener("message", onMsg);
-  }, [step]);
 
   const next = () => {
     if (!level || !start) return setError("Pick a level and a start date.");
@@ -390,8 +354,8 @@ export function BookForm({ variant }: { variant: string }) {
         <p className="mt-1 px-2 text-[14px] text-steel-700">
           15 minutes. Three profiles within 48 hours of the call.
         </p>
-        <iframe
-          ref={frameRef}
+        <BookingFrame
+          eventId={eventId.current}
           src={bookingSrc({
             name: f.name.trim(),
             email: f.email.trim(),
@@ -399,8 +363,6 @@ export function BookForm({ variant }: { variant: string }) {
               f.phone.trim() ? ` Mobile: ${composePhone(f.dialCc, f.phone)}.` : ""
             }`,
           })}
-          title="Book a call with Connor"
-          className="mt-3 h-[560px] w-full rounded-2xl border border-[var(--border-subtle)]"
         />
       </div>
     );
@@ -542,6 +504,58 @@ export function BookForm({ variant }: { variant: string }) {
   );
 }
 
-function ErrorLine({ children }: { children: React.ReactNode }) {
+/**
+ * Leadey's booking calendar, shown in place once the lead is captured.
+ * Counts a Schedule against the same id as the Lead.
+ */
+export function BookingFrame({ src, eventId }: { src: string; eventId: string }) {
+  const frameRef = useRef<HTMLIFrameElement>(null);
+  const scheduled = useRef(false);
+
+  // Leadey's booking iframe posts {channel:"leadey:booking", event, ...} for
+  // everything, including size updates while it loads. Only a real
+  // booking_scheduled from Leadey's origin counts as a Schedule.
+  useEffect(() => {
+    const onMsg = (e: MessageEvent) => {
+      if (e.origin !== LEADEY_ORIGIN) return;
+      const data = e.data as
+        | { channel?: string; event?: string; height?: number; url?: string }
+        | undefined;
+      if (!data || data.channel !== "leadey:booking") return;
+
+      if (data.event === "resize" && data.height && frameRef.current) {
+        frameRef.current.style.height = `${Math.max(560, data.height)}px`;
+        return;
+      }
+      if (data.event === "booking_scheduled" && !scheduled.current) {
+        scheduled.current = true;
+        try {
+          sessionStorage.setItem(SCHEDULE_SENT_KEY, "1");
+        } catch {
+          /* storage blocked; /booked may count it again, acceptable */
+        }
+        track("Schedule", {}, { eventID: "sched_" + eventId });
+        return;
+      }
+      // The iframe can't navigate the top window itself.
+      if (data.event === "redirect" && data.url) {
+        window.location.href = data.url;
+      }
+    };
+    window.addEventListener("message", onMsg);
+    return () => window.removeEventListener("message", onMsg);
+  }, [eventId]);
+
+  return (
+    <iframe
+      ref={frameRef}
+      src={src}
+      title="Book a call with Connor"
+      className="mt-3 h-[560px] w-full rounded-2xl border border-[var(--border-subtle)]"
+    />
+  );
+}
+
+export function ErrorLine({ children }: { children: React.ReactNode }) {
   return <p className="mt-3 text-[13px] font-medium text-[#d93a3f]">{children}</p>;
 }

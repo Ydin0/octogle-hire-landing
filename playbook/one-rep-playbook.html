@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="{{LANG}}">
+<head>
+<meta charset="utf-8">
+<title>The one-rep meeting machine · OctogleHire</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
+<style>
+@page { size: A4; margin: 0 }
+:root { --navy:#100F2F; --navy2:#1C3350; --sky:#66B8D6; --sky2:#A4D5ED; --ice:#F2F9FA; --ice2:#DCEBF1; --steel:#426E8C; --ink:#35566E; --good:#1FA971 }
+* { box-sizing:border-box }
+body { margin:0; font-family:Inter, "Segoe UI", system-ui, sans-serif; color:var(--navy); font-size:10.5pt; line-height:1.55 }
+.page { width:210mm; height:297mm; padding:18mm 18mm 16mm; position:relative; overflow:hidden; page-break-after:always; background:#fff; display:flex; flex-direction:column }
+.page:last-child { page-break-after:auto }
+.top { display:flex; justify-content:space-between; align-items:center; font-size:8.5pt; color:var(--steel); margin-bottom:12mm; letter-spacing:.04em }
+.top b { font-family:"Space Grotesk",sans-serif; color:var(--navy); font-size:11pt; letter-spacing:0 }
+.foot { margin-top:auto; display:flex; justify-content:space-between; font-size:8pt; color:var(--steel); border-top:1px solid var(--ice2); padding-top:3mm }
+.eyebrow { font-family:"Space Grotesk",sans-serif; text-transform:uppercase; letter-spacing:.14em; font-size:8.5pt; color:var(--steel); margin:0 0 3mm }
+h1 { font-family:"Space Grotesk",sans-serif; font-weight:600; font-size:34pt; line-height:1.05; letter-spacing:-.02em; margin:0 0 6mm }
+h2 { font-family:"Space Grotesk",sans-serif; font-weight:600; font-size:24pt; line-height:1.1; letter-spacing:-.015em; margin:0 0 5mm }
+h3 { font-family:"Space Grotesk",sans-serif; font-weight:600; font-size:12.5pt; margin:0 0 1.5mm }
+.grad { color:var(--sky) }
+p { margin:0 0 3.5mm; max-width:150mm }
+.lede { font-size:12pt; color:var(--ink); max-width:150mm }
+.num { display:inline-grid; place-items:center; width:9mm; height:9mm; border-radius:50%; background:var(--navy); color:#fff; font-family:"Space Grotesk",sans-serif; font-size:11pt; margin-right:3mm }
+.grid2 { display:grid; grid-template-columns:1fr 1fr; gap:5mm }
+.card { background:var(--ice); border-radius:4mm; padding:5mm 5.5mm }
+.card.dark { background:var(--navy); color:#EAF5FA }
+.card.dark h3 { color:#fff }
+.card p { margin:0; font-size:9.8pt; color:var(--ink) }
+.card.dark p { color:#B7D2E1 }
+.rules { display:flex; flex-direction:column; gap:3.5mm; margin-top:2mm }
+.rule { display:grid; grid-template-columns:12mm 1fr; gap:2mm; align-items:start; border-top:1px solid var(--ice2); padding-top:3.5mm }
+.rule .r { font-family:"Space Grotesk",sans-serif; font-size:9pt; color:var(--steel); padding-top:.6mm }
+.rule p { margin:0; font-size:10pt; color:var(--ink) }
+.script { background:var(--navy); color:#EAF5FA; border-radius:4mm; padding:6mm 7mm; font-size:11.5pt; line-height:1.6; margin:2mm 0 5mm }
+.script .who { font-family:"Space Grotesk",sans-serif; text-transform:uppercase; letter-spacing:.12em; font-size:8pt; color:var(--sky2); margin-bottom:2mm }
+.script p { margin:0 0 3mm; max-width:none } .script p:last-child { margin:0 }
+table { width:100%; border-collapse:collapse; font-size:9.8pt; margin:2mm 0 5mm }
+th { text-align:left; font-weight:500; color:var(--steel); font-size:8.5pt; letter-spacing:.06em; text-transform:uppercase; padding:2.5mm 3mm; border-bottom:1.5px solid var(--navy) }
+td { padding:3mm; border-bottom:1px solid var(--ice2); vertical-align:top; color:var(--ink) }
+td:first-child { color:var(--navy); font-weight:500 }
+td.us { background:var(--ice); color:var(--navy) }
+.big { font-family:"Space Grotesk",sans-serif; font-size:44pt; line-height:1; letter-spacing:-.03em }
+.stat { display:flex; gap:4mm; align-items:baseline }
+.cover { background:var(--navy); color:#fff; padding:22mm 20mm 18mm }
+.cover .top { color:var(--sky2) } .cover .top b { color:#fff }
+.cover h1 { font-size:44pt; color:#fff; margin-top:18mm }
+.cover .lede { color:#B7D2E1; font-size:13pt }
+.cover .meta { margin-top:auto; display:grid; grid-template-columns:repeat(3,1fr); gap:6mm; border-top:1px solid rgba(164,213,237,.25); padding-top:6mm; font-size:9.5pt; color:#B7D2E1 }
+.cover .meta b { display:block; color:#fff; font-weight:500; font-family:"Space Grotesk",sans-serif; font-size:8.5pt; letter-spacing:.12em; text-transform:uppercase; margin-bottom:1mm; color:var(--sky2) }
+.cta { background:var(--navy); color:#fff; border-radius:5mm; padding:9mm; margin-top:4mm }
+.cta h2 { color:#fff }
+.cta .btn { display:inline-block; margin-top:3mm; background:var(--sky); color:var(--navy); font-family:"Space Grotesk",sans-serif; font-weight:600; padding:3.5mm 7mm; border-radius:3mm; text-decoration:none; font-size:12pt }
+.cta .url { margin-top:3mm; font-size:9pt; color:var(--sky2) }
+.tick { color:var(--good); font-weight:600; margin-right:2mm }
+ul.ticks { list-style:none; padding:0; margin:0 0 4mm } ul.ticks li { margin:0 0 2mm; color:var(--ink) }
+.timeline { display:grid; grid-template-columns:repeat(5,1fr); gap:3mm; margin-top:3mm }
+.timeline div { background:var(--ice); border-radius:3mm; padding:4mm; font-size:9pt; color:var(--ink) }
+.timeline b { display:block; font-family:"Space Grotesk",sans-serif; color:var(--navy); font-size:10pt; margin-bottom:1mm }
+</style>
+</head>
+<body>
+
+<!-- 1 COVER -->
+<section class="page cover">
+  <div class="top"><b>OctogleHire</b><span>THE ONE-REP PLAYBOOK</span></div>
+  <p class="eyebrow" style="color:var(--sky2)">Free playbook · {{MARKET}}</p>
+  <h1>The one-rep<br><span class="grad">meeting machine.</span></h1>
+  <p class="lede">How one sales rep books 20+ meetings a month on the phone: who to hire, the list, the dial, the call, the follow-up and the five numbers to check every morning. Plus how agencies run the same rep for their clients.</p>
+  <div class="meta">
+    <div><b>For</b>Founders, sales leaders and agencies who need more meetings in the calendar</div>
+    <div><b>Read time</b>15 minutes, then a morning to set up</div>
+    <div><b>From</b>The OctogleHire team. Our SDRs average 20+ meetings a month</div>
+  </div>
+</section>
+
+<!-- 2 THE MATHS -->
+<section class="page">
+  <div class="top"><b>OctogleHire</b><span>WHY ONE REP</span></div>
+  <p class="eyebrow">Start here</p>
+  <h2>Meetings come from<br><span class="grad">calls, not campaigns.</span></h2>
+  <p class="lede">Most founders are still the person booking their own meetings, between everything else. One full-time rep on the phone, working a proper system, changes that. Our SDRs average 20+ booked meetings a month.</p>
+  <div class="grid2" style="margin:4mm 0 6mm">
+    <div class="card dark"><div class="stat"><span class="big" style="color:var(--sky)">20+</span></div><h3 style="margin-top:3mm">Meetings a month, per rep</h3><p>What our SDRs average across client accounts, booked straight into the calendar.</p></div>
+    <div class="card"><div class="stat"><span class="big">{{PRICE}}</span></div><h3 style="margin-top:3mm">A month for a full-time rep</h3><p>All-in through OctogleHire. No recruiter fee, no payroll to run, rolling monthly.</p></div>
+  </div>
+  <h3>The five parts of the machine</h3>
+  <table>
+    <tr><th>Part</th><th>What it fixes</th><th>Page</th></tr>
+    <tr><td>1 · The rep</td><td>Nobody owns the phone, so nobody calls</td><td>3</td></tr>
+    <tr><td>2 · The list</td><td>Reps calling switchboards and dead numbers</td><td>4</td></tr>
+    <tr><td>3 · The dial</td><td>Dead time between calls, and nobody picking up</td><td>4</td></tr>
+    <tr><td>4 · The call</td><td>"I'll send you some times" and the meeting dies</td><td>5</td></tr>
+    <tr><td>5 · The sit rate</td><td>Meetings booked that never happen</td><td>6</td></tr>
+    <tr><td>The numbers</td><td>Not knowing which part is broken</td><td>7</td></tr>
+  </table>
+  <div class="foot"><span>The one-rep meeting machine</span><span>octoglehire.com · 2</span></div>
+</section>
+
+<!-- 3 THE REP -->
+<section class="page">
+  <div class="top"><b>OctogleHire</b><span>PART 1 · THE REP</span></div>
+  <p class="eyebrow"><span class="num">1</span>Part 1</p>
+  <h2>Give one person<br><span class="grad">one job: the phone.</span></h2>
+  <p class="lede">The system only works if someone runs it all day. Part-time calling between other jobs is where meetings go missing. Three ways to get that person:</p>
+  <table>
+    <tr><th></th><th>Hire locally</th><th>Lead-gen agency</th><th>OctogleHire rep</th></tr>
+    <tr><td>Time to first call</td><td>Weeks of hiring, then ramp</td><td>Weeks to onboard</td><td class="us">Days, once you've picked your rep</td></tr>
+    <tr><td>Cost</td><td>Salary, employer tax, benefits and a recruiter fee</td><td>Retainer, often plus a fee per meeting</td><td class="us">{{PRICE}} a month, all-in</td></tr>
+    <tr><td>Who they work for</td><td>You</td><td>Several clients at once</td><td class="us">You only, full-time, in your hours</td></tr>
+    <tr><td>If it isn't working</td><td>Notice, then start again</td><td>Locked into the contract</td><td class="us">Rolling monthly. We replace the rep</td></tr>
+  </table>
+  <h3>What to look for in a rep</h3>
+  <div class="rules">
+    <div class="rule"><span class="r">1</span><p><b>They've done outbound before.</b> Ask how many dials a day they made and how many meetings came out of it. Anyone who can't answer in numbers hasn't run a phone day.</p></div>
+    <div class="rule"><span class="r">2</span><p><b>Role-play the opener before you hire.</b> Five minutes on a mock call tells you more than an hour of interview.</p></div>
+    <div class="rule"><span class="r">3</span><p><b>Their hours are your buyers' hours.</b> A rep who calls when your market is at its desk books more than a better rep who calls at the wrong time.</p></div>
+  </div>
+  <div class="foot"><span>The one-rep meeting machine</span><span>octoglehire.com · 3</span></div>
+</section>
+
+<!-- 4 LIST + DIAL -->
+<section class="page">
+  <div class="top"><b>OctogleHire</b><span>PARTS 2 AND 3 · THE LIST AND THE DIAL</span></div>
+  <p class="eyebrow"><span class="num">2</span>Part 2</p>
+  <h2>The list: mobiles,<br><span class="grad">not switchboards.</span></h2>
+  <div class="rules" style="margin-bottom:7mm">
+    <div class="rule"><span class="r">4</span><p><b>Call the person who signs, on their mobile.</b> A switchboard gets you a gatekeeper and "they're in a meeting". Build the list before the day starts, so the rep spends the morning dialling, not in a spreadsheet.</p></div>
+    <div class="rule"><span class="r">5</span><p><b>One market per list.</b> Same industry, same size, same problem. The rep gets sharper on every call because every call sounds the same.</p></div>
+    <div class="rule"><span class="r">6</span><p><b>Never call the same person twice by accident.</b> Remove anyone already in your CRM before the list goes live.{{TPS}}</p></div>
+  </div>
+  <p class="eyebrow"><span class="num">3</span>Part 3</p>
+  <h2>The dial: the next call rings<br><span class="grad">before the last one's down.</span></h2>
+  <div class="rules">
+    <div class="rule"><span class="r">7</span><p><b>Use a power dialer.</b> When a call ends, the rep taps the outcome and the next lead rings. Dialling by hand wastes most of the hour between calls.</p></div>
+    <div class="rule"><span class="r">8</span><p><b>Call from local numbers.</b> People answer numbers that look local. Match the caller ID to the market you're calling.</p></div>
+    <div class="rule"><span class="r">9</span><p><b>Block the hours that connect.</b> Watch which hours people pick up, and put the calling blocks there, not where they suit the diary.</p></div>
+  </div>
+  <div class="foot"><span>The one-rep meeting machine</span><span>octoglehire.com · 4</span></div>
+</section>
+
+<!-- 5 THE CALL -->
+<section class="page">
+  <div class="top"><b>OctogleHire</b><span>PART 4 · THE CALL</span></div>
+  <p class="eyebrow"><span class="num">4</span>Part 4</p>
+  <h2>Book it on the call.<br><span class="grad">Not "I'll send some times".</span></h2>
+  <p class="lede">The job of a cold call is the meeting, not the sale. Get to the point in one breath, then agree a slot while they're still on the line.</p>
+  <div class="script">
+    <div class="who">The opener</div>
+    <p>"Hi [name], it's [rep] from [company]. I'll be quick. We work with [type of business] on [the outcome they want]. Is [the problem you solve] something you're dealing with at the moment?"</p>
+    <div class="who" style="margin-top:4mm">If yes</div>
+    <p>"Makes sense. Easiest thing is 15 minutes with [closer] to show you how it works. I've got [day] at [time] or [day] at [time]. Which suits?"</p>
+  </div>
+  <div class="rules">
+    <div class="rule"><span class="r">10</span><p><b>Offer two times, not an open question.</b> "When suits you?" gets "send me something". Two slots gets a choice.</p></div>
+    <div class="rule"><span class="r">11</span><p><b>Book it while they're on the line.</b> Open the booking page, put them in, and read the time back before you hang up.</p></div>
+    <div class="rule"><span class="r">12</span><p><b>Ask one qualifying question before you book.</b> Booking people who were never a fit fills the calendar and empties the sit rate.</p></div>
+  </div>
+  <div class="foot"><span>The one-rep meeting machine</span><span>octoglehire.com · 5</span></div>
+</section>
+
+<!-- 6 SIT RATE -->
+<section class="page">
+  <div class="top"><b>OctogleHire</b><span>PART 5 · THE SIT RATE</span></div>
+  <p class="eyebrow"><span class="num">5</span>Part 5</p>
+  <h2>A booked meeting is worth nothing<br><span class="grad">until they turn up.</span></h2>
+  <p class="lede">Between the booking and the call, the prospect should hear from you enough that turning up feels like the obvious thing to do.</p>
+  <div class="rules">
+    <div class="rule"><span class="r">13</span><p><b>Confirm in the same minute.</b> Invite plus a short confirmation by email, text and WhatsApp while they still remember saying yes.</p></div>
+    <div class="rule"><span class="r">14</span><p><b>Send a 20-second voice note from the rep.</b> "Looking forward to Thursday, here's what we'll cover." A real person is much harder to stand up.</p></div>
+    <div class="rule"><span class="r">15</span><p><b>Remind them twice.</b> The day before and 30 minutes before, with the link.</p></div>
+    <div class="rule"><span class="r">16</span><p><b>Chase a no-show the same day.</b> A call and a message to rebook. A no-show is usually busy, not lost.</p></div>
+  </div>
+  <h3 style="margin-top:7mm">Every new lead gets a call within a minute</h3>
+  <p>Inbound leads go cold in minutes. Call while they're still on your website, and if you miss them, follow up on a schedule until they reply:</p>
+  <div class="timeline">
+    <div><b>Straight away</b>Call, plus text and email</div>
+    <div><b>10 minutes</b>Text if not reached</div>
+    <div><b>2 hours</b>WhatsApp</div>
+    <div><b>Next day</b>Call and email</div>
+    <div><b>Days 3 to 5</b>One more text, a last email</div>
+  </div>
+  <div class="foot"><span>The one-rep meeting machine</span><span>octoglehire.com · 6</span></div>
+</section>
+
+<!-- 7 NUMBERS + AGENCIES -->
+<section class="page">
+  <div class="top"><b>OctogleHire</b><span>THE NUMBERS</span></div>
+  <p class="eyebrow">Every morning</p>
+  <h2>Five numbers.<br><span class="grad">One screen.</span></h2>
+  <table>
+    <tr><th>Number</th><th>What it tells you</th><th>If it drops, go to</th></tr>
+    <tr><td>Meetings booked</td><td>Whether the whole machine is working</td><td>The other four, in this order</td></tr>
+    <tr><td>Connect rate</td><td>Whether people pick up</td><td>Part 3: local numbers, call hours</td></tr>
+    <tr><td>Calls per booking</td><td>Whether the list and the opener are right</td><td>Parts 2 and 4</td></tr>
+    <tr><td>Sit rate</td><td>Whether the bookings are real</td><td>Part 5: confirmations and reminders</td></tr>
+    <tr><td>Bookings per rep</td><td>Who needs coaching, and on what</td><td>Listen to three of their calls</td></tr>
+  </table>
+  <p>Once a week, listen to three calls per rep and coach on what actually happened. We run our reps on <b>Leadey</b>: list, power dialer, CRM, follow-up and these five numbers in one login. Any setup that gives you the same five numbers works.</p>
+  <div class="card" style="margin-top:4mm">
+    <p class="eyebrow" style="margin-bottom:2mm">For agencies</p>
+    <h3>One rep, booking for your clients</h3>
+    <p style="margin-bottom:2mm">The same machine runs for clients: one campaign and one booking page per client, so meetings land in the right calendar and each client gets their own numbers. Agree the qualifying question with each client before the first dial, and send them the five numbers every Monday.</p>
+  </div>
+  <div class="foot"><span>The one-rep meeting machine</span><span>octoglehire.com · 7</span></div>
+</section>
+
+<!-- 8 NEXT STEP -->
+<section class="page">
+  <div class="top"><b>OctogleHire</b><span>YOUR NEXT STEP</span></div>
+  <p class="eyebrow">Your next step</p>
+  <h2>Run the machine yourself,<br><span class="grad">or put our rep on it.</span></h2>
+  <p class="lede">Everything in this playbook works with a rep you hire yourself. If you'd rather skip the hiring and the ramp, we'll put a full-time OctogleHire SDR on it.</p>
+  <ul class="ticks">
+    <li><span class="tick">✓</span>A full-time SDR who works for you only, in your hours</li>
+    <li><span class="tick">✓</span>Our SDRs average 20+ booked meetings a month</li>
+    <li><span class="tick">✓</span>{{PRICE}} a month, all-in. No recruiter fee</li>
+    <li><span class="tick">✓</span>Rolling monthly. If the rep isn't right, we replace them</li>
+  </ul>
+  <div class="cta">
+    <p class="eyebrow" style="color:var(--sky2)">15 minutes with Connor</p>
+    <h2>Book a call. We'll map this<br>playbook onto your market.</h2>
+    <p style="color:#B7D2E1">Who to call, what to say, how many meetings to expect, and the rep we'd put on it.</p>
+    <a class="btn" href="{{BOOK}}">Book a call with Connor →</a>
+    <div class="url">{{BOOK_SHORT}}</div>
+  </div>
+  <div class="foot"><span>The one-rep meeting machine · OctogleHire</span><span>octoglehire.com · 8</span></div>
+</section>
+
+</body>
+</html>
