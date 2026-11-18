@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   BookingFrame,
   ErrorLine,
@@ -38,6 +38,12 @@ export default function PlaybookForm({ market, pdf, headline }: { market: "uk" |
   const eventId = useRef("lead_" + crypto.randomUUID());
   const started = useRef(false);
   const freeEmail = emailOk(f.email) && isFreeEmail(f.email);
+
+  // ?preview=thanks opens the thank-you screen without sending a lead, so the
+  // team can review it.
+  useEffect(() => {
+    if (new URLSearchParams(location.search).get("preview") === "thanks") setDone(true);
+  }, []);
 
   const pick = (key: string, value: string) => {
     if (!started.current) {
