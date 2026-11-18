@@ -164,8 +164,8 @@ export default function PlaybookForm({
           })}
         />
         <p className="mt-4 text-[14px] text-steel-700">
-          {door === "playbook" ? "Your playbook is in your email and texts too. " : "While you wait, see how it works: "}
-          <a href={pdf} target="_blank" rel="noopener noreferrer" className="font-medium text-navy-900 underline underline-offset-4">
+          {door === "playbook" ? "Your playbook: " : "While you wait, see how it works: "}
+          <a href={pdf} download target="_blank" rel="noopener noreferrer" className="font-medium text-navy-900 underline underline-offset-4">
             Open the playbook (PDF)
           </a>
         </p>
@@ -241,7 +241,7 @@ export default function PlaybookForm({
               )}
             </label>
             <label className="block text-[14px] font-medium text-steel-700">
-              Mobile <span className="font-normal text-[var(--text-faint)]">{door === "playbook" ? "(we'll text it to you)" : "(for a quick call back)"}</span>
+              Mobile <span className="font-normal text-[var(--text-faint)]">{door === "playbook" ? "(for a quick call back)" : "(for a quick call back)"}</span>
               <div className="mt-1 flex gap-2">
                 <select
                   aria-label="Country dialling code"
