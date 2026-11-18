@@ -176,12 +176,15 @@ export async function POST(req: Request) {
   const us = body.market === "us";
   if (us && !US_WEBHOOK_URL) console.warn("[lead] LEADEY_US_WEBHOOK_URL not set, US lead sent to the main webhook");
   const playbook = body.funnel === "playbook";
-  const webhook =
-    (playbook && (us ? PLAYBOOK_US_WEBHOOK_URL : PLAYBOOK_UK_WEBHOOK_URL)) ||
-    (us && US_WEBHOOK_URL) ||
-    WEBHOOK_URL;
+  // SDR lander leads go only to their own campaign ("SDR Lander — US/UK"), never
+  // to the Meta Lead Ads or Website Leads campaigns. No webhook set = logged, not rerouted.
+  const webhook = playbook
+    ? us
+      ? PLAYBOOK_US_WEBHOOK_URL
+      : PLAYBOOK_UK_WEBHOOK_URL
+    : (us && US_WEBHOOK_URL) || WEBHOOK_URL;
   if (!webhook) {
-    logLostLead("LEADEY_WEBSITE_LEADS_WEBHOOK_URL not set", payload);
+    logLostLead(playbook ? `LEADEY_PLAYBOOK_${us ? "US" : "UK"}_WEBHOOK_URL not set` : "LEADEY_WEBSITE_LEADS_WEBHOOK_URL not set", payload);
     await capi;
     return NextResponse.json({ ok: false }, { status: 500 });
   }
