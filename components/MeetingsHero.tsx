@@ -8,6 +8,7 @@ import PlaybookForm, { type Door } from "@/components/PlaybookForm";
 // the full width. One tree for both states, so the form keeps its answers.
 export default function MeetingsHero({
   intro,
+  after,
   visual,
   market,
   pdf,
@@ -16,6 +17,7 @@ export default function MeetingsHero({
   agencyHeadline,
 }: {
   intro: ReactNode;
+  after: ReactNode;
   visual: ReactNode;
   market: "uk" | "us";
   pdf: string;
@@ -35,7 +37,7 @@ export default function MeetingsHero({
         className={
           done
             ? "relative mx-auto max-w-content px-5 pb-16 pt-4 sm:px-8 md:pt-6"
-            : "relative mx-auto grid max-w-content items-center gap-10 px-5 pb-16 pt-2 sm:px-8 md:grid-cols-[1.05fr_.95fr] md:pb-24 md:pt-8"
+            : "relative mx-auto grid max-w-content items-start gap-10 px-5 pb-16 pt-2 sm:px-8 md:grid-cols-[1.05fr_.95fr] md:pb-24 md:pt-8"
         }
       >
         <div>
@@ -59,6 +61,7 @@ export default function MeetingsHero({
               }}
             />
           </div>
+          {!done && after}
         </div>
         {!done && visual}
       </div>
