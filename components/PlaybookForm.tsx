@@ -170,6 +170,20 @@ export default function PlaybookForm({
           </a>
         </p>
         <p className="mt-1 text-[13px] text-steel-600">Connor will also give you a quick call in the next few minutes.</p>
+        <div className="mt-6 flex flex-col items-start gap-3 rounded-2xl border border-[var(--border-subtle)] bg-ice-100/40 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-[14.5px] text-navy-900">
+            <span className="font-semibold">Rather not book a call?</span> Sign up and see the SDRs available now.
+          </p>
+          <a
+            href="https://www.octoglehire.com/hire/sdrs?utm_source=sdr_lander&utm_medium=thank_you"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => track("ViewContent", { content_name: "sdr_signup_click" })}
+            className="shrink-0 rounded-xl bg-navy-900 px-5 py-2.5 font-display text-[15px] font-medium text-white transition hover:bg-navy-800"
+          >
+            Sign up
+          </a>
+        </div>
       </div>
     );
   }
