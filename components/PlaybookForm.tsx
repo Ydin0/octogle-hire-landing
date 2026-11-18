@@ -71,6 +71,21 @@ export default function PlaybookForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Buttons further down the page open a door here: window event "sdr:door".
+  useEffect(() => {
+    const open = (e: Event) => {
+      const d = (e as CustomEvent<Door>).detail;
+      if (d === "book" || d === "playbook") {
+        begin();
+        setDoor(d);
+        setStep(0);
+      }
+    };
+    window.addEventListener("sdr:door", open);
+    return () => window.removeEventListener("sdr:door", open);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const begin = () => {
     if (!started.current) {
       started.current = true;
