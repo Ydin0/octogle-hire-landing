@@ -15,19 +15,19 @@ const HEADLINES = {
     call: "Free playbook for founders and sales leaders",
     a: "How one rep books",
     b: "20+ sales meetings a month.",
-    sub: "The whole system, step by step: who to hire, the list, the dial, the call, the follow-up and the five numbers to check every morning.",
+    sub: "Why cold calling still works, what 20 meetings a month are worth, and how we put a trained SDR on the phones for you.",
   },
   agency: {
     call: "Free playbook for agency owners",
     a: "Book 20+ meetings a month",
     b: "for every client, with one rep.",
-    sub: "How agencies run one rep across their clients: a campaign and a calendar per client, the call that books, and the numbers you send them every Monday.",
+    sub: "Put a trained SDR on the phones for your clients. Why cold calling works, what 20 meetings a month are worth, and how we set it up in a day.",
   },
   calendar: {
     call: "Free playbook for founders doing their own sales",
     a: "Want a calendar",
     b: "full of sales meetings?",
-    sub: "The calling system our SDRs run to book 20+ meetings a month, written down so you can copy it, or hand it to a rep.",
+    sub: "From 1–2 meetings a week to 1–2 a day. Why cold calling works, what it's worth to you, and how we put a trained SDR on it.",
   },
 } as const;
 
@@ -51,12 +51,12 @@ function pickHeadline(params: Record<string, string | string[] | undefined>): Ke
 }
 
 const INSIDE = [
-  "Who to hire, and the three questions that tell you they can run a phone day",
-  "The list: mobiles, not switchboards, and one market per list",
-  "The opener our reps adapt, and how to book the meeting on the call",
-  "How to make sure booked meetings actually turn up",
-  "The five numbers to check every morning, and what to fix when one drops",
-  "For agencies: running one rep across several clients",
+  "Your calendar before and after: from 1–2 meetings a week to 1–2 a day",
+  "What 20 meetings a month are worth, with two worked examples",
+  "Why cold calling works when every other channel is crowded",
+  "How we pick about 10 reps in every 500 applicants",
+  "The one tool stack our reps call from, instead of ten",
+  "How to get a trained SDR calling your customers, set up in a day",
 ];
 
 export default function MeetingsLanding({

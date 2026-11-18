@@ -9,3 +9,6 @@ npm-debug.log*
 .vercel
 next-env.d.ts
 /.turbo
+
+# Raw applicant screenshot (names, emails, pay). Only the blurred copy is committed.
+playbook/assets/applicants-raw.webp
