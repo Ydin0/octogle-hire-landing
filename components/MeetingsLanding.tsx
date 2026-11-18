@@ -99,9 +99,9 @@ export default function MeetingsLanding({
   return (
     <>
       <header className="bg-navy-950">
-        <div className="mx-auto max-w-content px-5 py-4 sm:px-8">
+        <div className="mx-auto flex max-w-content justify-center px-5 pb-2 pt-7 sm:px-8 md:pt-9">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/assets/octogle-darkmode.svg" alt="Octogle Hire" width={128} height={30} className="h-[28px] w-auto" />
+          <img src="/assets/octogle-darkmode.svg" alt="Octogle Hire" width={200} height={47} className="h-[38px] w-auto md:h-[46px]" />
         </div>
       </header>
 
