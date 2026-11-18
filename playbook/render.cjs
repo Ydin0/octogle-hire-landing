@@ -4,7 +4,7 @@
 const fs = require('fs'), path = require('path')
 const { chromium } = require(process.env.PW)
 
-const BOOK = 'https://app.leadey.ai/book/introduction-call-with-connor-6ibd7u'
+const BOOK = 'https://app.leadey.ai/book/octogle-hire-introduction-with-c-n6ggx5'
 // Worked examples (page 3): revenue minus the rep minus delivery cost. Cost per meeting is the
 // rep's monthly price over 20 and 10 meetings.
 const VARIANTS = {
