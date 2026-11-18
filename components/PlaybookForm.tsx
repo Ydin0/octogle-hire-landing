@@ -51,7 +51,7 @@ export default function PlaybookForm({ market, pdf, headline }: { market: "uk" |
   const submit = async () => {
     if (f.name.trim().length < 2) return setError("Add your name.");
     if (!emailOk(f.email)) return setError("Add a valid email.");
-    if (f.phone.replace(/\D/g, "").length < 6) return setError("Add your mobile so we can send it by WhatsApp.");
+    if (f.phone.replace(/\D/g, "").length < 6) return setError("Add your mobile so we can text it to you.");
     setError("");
     setSubmitting(true);
     const phone = composePhone(f.dialCc, f.phone);
@@ -114,7 +114,7 @@ export default function PlaybookForm({ market, pdf, headline }: { market: "uk" |
           Open the playbook (PDF)
         </a>
         <p className="mt-3 text-[13.5px] text-steel-700">
-          We&apos;ve also sent it to your email and WhatsApp. Connor will give you a quick call to talk it through.
+          We&apos;ve also sent it to your email and by text. Connor will give you a quick call to talk it through.
         </p>
         <p className="mt-6 font-display text-[18px] font-semibold">Skip the wait: pick a time with Connor.</p>
         <p className="mt-1 text-[14px] text-steel-700">
@@ -176,7 +176,7 @@ export default function PlaybookForm({ market, pdf, headline }: { market: "uk" |
               )}
             </label>
             <label className="block text-[14px] font-medium text-steel-700">
-              Mobile <span className="font-normal text-[var(--text-faint)]">(we&apos;ll WhatsApp it to you)</span>
+              Mobile <span className="font-normal text-[var(--text-faint)]">(we&apos;ll text it to you)</span>
               <div className="mt-1 flex gap-2">
                 <select
                   aria-label="Country dialling code"
