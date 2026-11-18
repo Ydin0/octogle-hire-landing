@@ -1,7 +1,9 @@
-import PlaybookForm from "@/components/PlaybookForm";
+import MeetingsHero from "@/components/MeetingsHero";
+import type { Door } from "@/components/PlaybookForm";
 
-// The SDR lead magnet page: "The one-rep meeting machine" PDF in exchange for
-// name, email and mobile. The headline matches the ad: ?h=<key>, or a key's
+// The SDR funnel page. Default promise: a trained SDR cold calling your offer.
+// Two doors: book a call with Connor now (?door=book) or take the free playbook
+// first (?door=playbook); with no door set, the visitor picks. The headline matches the ad: ?h=<key>, or a key's
 // words in the ad name (utm_content). Everything below the hero is shared.
 // Proof is limited to what Dan cleared on 18 Nov 2026: our SDRs average 20+
 // meetings a month. Prices: $2,500 US, £2,000 UK.
@@ -11,6 +13,12 @@ type Market = "uk" | "us";
 const PRICE: Record<Market, string> = { uk: "£2,000", us: "$2,500" };
 
 const HEADLINES = {
+  get: {
+    call: "For founders and sales leaders",
+    a: "Get a trained SDR",
+    b: "cold calling your offer.",
+    sub: "Our SDRs average 20+ booked meetings a month. We hire, train and manage the rep; you take the meetings. Book a 15-minute call, or start with the free playbook.",
+  },
   rep: {
     call: "Free playbook for founders and sales leaders",
     a: "How one rep books",
@@ -39,7 +47,8 @@ const AD_WORDS: [string, Key][] = [
   ["CALENDAR", "calendar"],
   ["FULL", "calendar"],
   ["ONE REP", "rep"],
-  ["20", "rep"],
+  ["PLAYBOOK", "rep"],
+  ["SDR", "get"],
 ];
 
 function pickHeadline(params: Record<string, string | string[] | undefined>): Key {
@@ -47,7 +56,12 @@ function pickHeadline(params: Record<string, string | string[] | undefined>): Ke
   const forced = one(params.h).toLowerCase();
   if (forced in HEADLINES) return forced as Key;
   const ad = one(params.utm_content).toUpperCase().replace(/[_+-]+/g, " ");
-  return AD_WORDS.find(([w]) => ad.includes(w))?.[1] ?? "rep";
+  return AD_WORDS.find(([w]) => ad.includes(w))?.[1] ?? "get";
+}
+
+function pickDoor(params: Record<string, string | string[] | undefined>): Door | null {
+  const d = (Array.isArray(params.door) ? params.door[0] : params.door) ?? "";
+  return d === "book" || d === "playbook" ? d : null;
 }
 
 const INSIDE = [
@@ -78,47 +92,50 @@ export default function MeetingsLanding({
       </header>
 
       <main className="overflow-x-hidden">
-        <section className="mx-auto grid max-w-content items-start gap-8 px-5 pb-14 pt-4 sm:px-8 md:grid-cols-[1.1fr_.9fr] md:gap-x-10 md:gap-y-6 md:pt-10">
-          <div>
-            <p className="eyebrow text-[11px] text-steel-600">{h.call}</p>
-            <h1 className="mt-3 font-display text-[clamp(2.1rem,5.4vw,3.4rem)] font-semibold leading-[1.04] tracking-[-0.02em]">
-              {h.a} <span className="headline-gradient">{h.b}</span>
-            </h1>
-            <p className="mt-5 max-w-[34rem] text-[17px] leading-relaxed text-steel-700">{h.sub}</p>
-          </div>
-
-          {/* Form beside the headline on desktop, straight under it on a phone. */}
-          <div className="rounded-3xl border border-[var(--border-subtle)] bg-white p-5 shadow-card sm:p-6 md:col-start-2 md:row-span-2 md:row-start-1">
-            <PlaybookForm market={market} pdf={pdf} headline={key} />
-          </div>
-
-          <div className="md:col-start-1 md:row-start-2">
-            <div className="flex items-start gap-5">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={`/playbook/cover-${market}.png`}
-                alt="The one-rep meeting machine playbook"
-                width={150}
-                height={212}
-                className="hidden w-[132px] shrink-0 rounded-lg shadow-card sm:block"
-              />
-              <div className="min-w-0">
-                <p className="font-display text-[15px] font-semibold">What&apos;s inside</p>
-                <ul className="mt-2 space-y-2 text-[15px] text-navy-900">
-                  {INSIDE.map((i) => (
-                    <li key={i} className="flex gap-2.5">
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden className="mt-1 shrink-0 text-good">
-                        <path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                      {i}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+        <MeetingsHero
+          market={market}
+          pdf={pdf}
+          headline={key}
+          initialDoor={pickDoor(params)}
+          agencyHeadline={key === "agency"}
+          intro={
+            <div>
+              <p className="eyebrow text-[11px] text-steel-600">{h.call}</p>
+              <h1 className="mt-3 font-display text-[clamp(2.1rem,5.4vw,3.4rem)] font-semibold leading-[1.04] tracking-[-0.02em]">
+                {h.a} <span className="headline-gradient">{h.b}</span>
+              </h1>
+              <p className="mt-5 max-w-[34rem] text-[17px] leading-relaxed text-steel-700">{h.sub}</p>
             </div>
-            <p className="mt-6 text-[13.5px] text-steel-600">From the OctogleHire team. Our SDRs average 20+ booked meetings a month.</p>
-          </div>
-        </section>
+          }
+          inside={
+            <>
+              <div className="flex items-start gap-5">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={`/playbook/cover-${market}.png`}
+                  alt="The one-rep meeting machine playbook"
+                  width={150}
+                  height={212}
+                  className="hidden w-[132px] shrink-0 rounded-lg shadow-card sm:block"
+                />
+                <div className="min-w-0">
+                  <p className="font-display text-[15px] font-semibold">What&apos;s in the free playbook</p>
+                  <ul className="mt-2 space-y-2 text-[15px] text-navy-900">
+                    {INSIDE.map((i) => (
+                      <li key={i} className="flex gap-2.5">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden className="mt-1 shrink-0 text-good">
+                          <path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        {i}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+              <p className="mt-6 text-[13.5px] text-steel-600">From the OctogleHire team. Our SDRs average 20+ booked meetings a month.</p>
+            </>
+          }
+        />
 
         <section className="bg-navy-900 text-white">
           <div className="mx-auto grid max-w-content gap-6 px-5 py-12 sm:px-8 md:grid-cols-3">
