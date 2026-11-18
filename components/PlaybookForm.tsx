@@ -50,7 +50,7 @@ export default function PlaybookForm({
   const [door, setDoor] = useState<Door | null>(initialDoor);
   const [step, setStep] = useState(0);
   const [a, setA] = useState<Answers>({});
-  const [f, setF] = useState({ name: "", email: "", phone: "", company: "", dialCc: market === "us" ? "US" : "GB" });
+  const [f, setF] = useState({ name: "", email: "", phone: "", company: "", sell: "", dialCc: market === "us" ? "US" : "GB" });
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
@@ -93,6 +93,7 @@ export default function PlaybookForm({
     if (f.name.trim().length < 2) return setError("Add your name.");
     if (!emailOk(f.email)) return setError("Add a valid email.");
     if (f.phone.replace(/\D/g, "").length < 6) return setError("Add your mobile so we can text you.");
+    if (f.sell.trim().length < 2) return setError("Tell us what you sell, so Connor can prep the call.");
     setError("");
     setSubmitting(true);
     const phone = composePhone(f.dialCc, f.phone);
@@ -101,7 +102,7 @@ export default function PlaybookForm({
     track("Lead", { content_category: agency ? "sdr-agency" : "sdr", content_name: door ?? "playbook" }, { eventID: eventId.current });
     trackGoogleAdsLead(eventId.current);
 
-    const answers = door === "playbook" ? `${a.kind}; booked by: ${a.booker}; meetings a month: ${a.meetings}` : "asked for a call";
+    const answers = `sells: ${f.sell.trim()}; ` + (door === "playbook" ? `${a.kind}; booked by: ${a.booker}; meetings a month: ${a.meetings}` : "asked for a call");
     // status "partial" is the step at which /api/lead sends the CAPI Lead.
     await sendLead({
       name: f.name.trim(),
@@ -113,6 +114,7 @@ export default function PlaybookForm({
       demand_type: "Sales",
       service: "Hire sales reps",
       role: "SDR",
+      what_you_sell: f.sell.trim(),
       who_books_now: a.booker,
       meetings_needed: a.meetings,
       buyer_type: agency ? "Agency" : "Business",
@@ -158,7 +160,7 @@ export default function PlaybookForm({
           src={bookingSrc({
             name: f.name.trim(),
             email: f.email.trim(),
-            notes: `SDR funnel (${door} door). ${door === "playbook" ? `${a.kind}. Books now: ${a.booker}. Meetings a month: ${a.meetings}.` : ""} Mobile: ${f.phone ? composePhone(f.dialCc, f.phone) : "n/a"}.`,
+            notes: `SDR funnel (${door} door). Sells: ${f.sell.trim()}. ${door === "playbook" ? `${a.kind}. Books now: ${a.booker}. Meetings a month: ${a.meetings}.` : ""} Mobile: ${f.phone ? composePhone(f.dialCc, f.phone) : "n/a"}.`,
           })}
         />
         <p className="mt-4 text-[14px] text-steel-700">
@@ -268,6 +270,10 @@ export default function PlaybookForm({
                   className="w-full min-w-0 rounded-xl border border-[var(--border-default)] bg-ice-100/40 px-4 py-3 text-[16px] text-navy-900 outline-none focus:border-sky-500 focus:bg-white"
                 />
               </div>
+            </label>
+            <label className="block text-[14px] font-medium text-steel-700">
+              What do you sell?
+              <input placeholder="e.g. SEO retainers for dental clinics" value={f.sell} onChange={(e) => setF({ ...f, sell: e.target.value })} className={inputCls} />
             </label>
             <label className="block text-[14px] font-medium text-steel-700">
               Company <span className="font-normal text-[var(--text-faint)]">(optional)</span>
