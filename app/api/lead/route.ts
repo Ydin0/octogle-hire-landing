@@ -11,6 +11,11 @@ const WEBHOOK_URL = process.env.LEADEY_WEBSITE_LEADS_WEBHOOK_URL;
 // campaign (funnel_muplaf1g9lazl3). Until it's set they fall back to the main
 // webhook with country US, so nothing is lost.
 const US_WEBHOOK_URL = process.env.LEADEY_US_WEBHOOK_URL;
+// The SDR playbook opt-in (/meetings, /us/meetings) posts funnel "playbook";
+// those leads go to their own OctogleHire Playbook campaigns, one per market.
+// Until those are set they fall back to the campaigns above.
+const PLAYBOOK_UK_WEBHOOK_URL = process.env.LEADEY_PLAYBOOK_UK_WEBHOOK_URL;
+const PLAYBOOK_US_WEBHOOK_URL = process.env.LEADEY_PLAYBOOK_US_WEBHOOK_URL;
 
 // If Leadey refuses a lead, keep enough in the logs to recover it by hand.
 function logLostLead(reason: string, p: Record<string, unknown>) {
@@ -151,8 +156,9 @@ export async function POST(req: Request) {
     // Keys the Website Leads field map understands, so these leads are
     // labelled and routed like the main site's (developer follow-up flow).
     lead_source: "Landing Page",
-    demand_type: "Engineering",
-    service: "Hire engineers",
+    // The playbook sends its own (Sales, Hire sales reps); everything else is developers.
+    demand_type: str(body.demand_type) || "Engineering",
+    service: str(body.service) || "Hire engineers",
     source_page: str(body.page) || undefined,
   };
 
@@ -169,9 +175,16 @@ export async function POST(req: Request) {
 
   const us = body.market === "us";
   if (us && !US_WEBHOOK_URL) console.warn("[lead] LEADEY_US_WEBHOOK_URL not set, US lead sent to the main webhook");
-  const webhook = (us && US_WEBHOOK_URL) || WEBHOOK_URL;
+  const playbook = body.funnel === "playbook";
+  // SDR lander leads go only to their own campaign ("SDR Lander — US/UK"), never
+  // to the Meta Lead Ads or Website Leads campaigns. No webhook set = logged, not rerouted.
+  const webhook = playbook
+    ? us
+      ? PLAYBOOK_US_WEBHOOK_URL
+      : PLAYBOOK_UK_WEBHOOK_URL
+    : (us && US_WEBHOOK_URL) || WEBHOOK_URL;
   if (!webhook) {
-    logLostLead("LEADEY_WEBSITE_LEADS_WEBHOOK_URL not set", payload);
+    logLostLead(playbook ? `LEADEY_PLAYBOOK_${us ? "US" : "UK"}_WEBHOOK_URL not set` : "LEADEY_WEBSITE_LEADS_WEBHOOK_URL not set", payload);
     await capi;
     return NextResponse.json({ ok: false }, { status: 500 });
   }

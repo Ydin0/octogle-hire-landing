@@ -1,0 +1,166 @@
+import MeetingsHero from "@/components/MeetingsHero";
+import type { Door } from "@/components/PlaybookForm";
+
+// The SDR funnel page. Default promise: a trained SDR cold calling your offer.
+// Two doors: book a call with Connor now (?door=book) or take the free playbook
+// first (?door=playbook); with no door set, the visitor picks. The headline matches the ad: ?h=<key>, or a key's
+// words in the ad name (utm_content). Everything below the hero is shared.
+// Proof is limited to what Dan cleared on 18 Nov 2026: our SDRs average 20+
+// meetings a month. Prices: $2,500 US, £2,000 UK.
+
+type Market = "uk" | "us";
+
+const PRICE: Record<Market, string> = { uk: "£2,000", us: "$2,500" };
+
+const HEADLINES = {
+  get: {
+    call: "For founders and sales leaders",
+    a: "Get a trained SDR",
+    b: "cold calling your offer.",
+    sub: "Our SDRs average 20+ booked meetings a month. We hire, train and manage the rep; you take the meetings. Book a 15-minute call, or start with the free playbook.",
+  },
+  rep: {
+    call: "Free playbook for founders and sales leaders",
+    a: "How one rep books",
+    b: "20+ sales meetings a month.",
+    sub: "Why cold calling still works, what 20 meetings a month are worth, and how we put a trained SDR on the phones for you.",
+  },
+  agency: {
+    call: "Free playbook for agency owners",
+    a: "Book 20+ meetings a month",
+    b: "for every client, with one rep.",
+    sub: "Put a trained SDR on the phones for your clients. Why cold calling works, what 20 meetings a month are worth, and how we set it up in a day.",
+  },
+  calendar: {
+    call: "Free playbook for founders doing their own sales",
+    a: "Want a calendar",
+    b: "full of sales meetings?",
+    sub: "From 1–2 meetings a week to 1–2 a day. Why cold calling works, what it's worth to you, and how we put a trained SDR on it.",
+  },
+} as const;
+
+type Key = keyof typeof HEADLINES;
+
+const AD_WORDS: [string, Key][] = [
+  ["AGENCY", "agency"],
+  ["CLIENT", "agency"],
+  ["CALENDAR", "calendar"],
+  ["FULL", "calendar"],
+  ["ONE REP", "rep"],
+  ["PLAYBOOK", "rep"],
+  ["SDR", "get"],
+];
+
+function pickHeadline(params: Record<string, string | string[] | undefined>): Key {
+  const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) ?? "";
+  const forced = one(params.h).toLowerCase();
+  if (forced in HEADLINES) return forced as Key;
+  const ad = one(params.utm_content).toUpperCase().replace(/[_+-]+/g, " ");
+  return AD_WORDS.find(([w]) => ad.includes(w))?.[1] ?? "get";
+}
+
+function pickDoor(params: Record<string, string | string[] | undefined>): Door | null {
+  const d = (Array.isArray(params.door) ? params.door[0] : params.door) ?? "";
+  return d === "book" || d === "playbook" ? d : null;
+}
+
+const INSIDE = [
+  "Your calendar before and after: from 1–2 meetings a week to 1–2 a day",
+  "What 20 meetings a month are worth, with two worked examples",
+  "Why cold calling works when every other channel is crowded",
+  "How we pick about 10 reps in every 500 applicants",
+  "The one tool stack our reps call from, instead of ten",
+  "How to get a trained SDR calling your customers, set up in a day",
+];
+
+export default function MeetingsLanding({
+  market,
+  params,
+}: {
+  market: Market;
+  params: Record<string, string | string[] | undefined>;
+}) {
+  const key = pickHeadline(params);
+  const h = HEADLINES[key];
+  const pdf = `/playbook/one-rep-meeting-machine-${market}.pdf`;
+
+  return (
+    <>
+      <header className="mx-auto max-w-content px-5 py-4 sm:px-8">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/octogle-logo.svg" alt="Octogle Hire" width={128} height={30} className="h-[28px] w-auto" />
+      </header>
+
+      <main className="overflow-x-hidden">
+        <MeetingsHero
+          market={market}
+          pdf={pdf}
+          headline={key}
+          initialDoor={pickDoor(params)}
+          agencyHeadline={key === "agency"}
+          intro={
+            <div>
+              <p className="eyebrow text-[11px] text-steel-600">{h.call}</p>
+              <h1 className="mt-3 font-display text-[clamp(2.1rem,5.4vw,3.4rem)] font-semibold leading-[1.04] tracking-[-0.02em]">
+                {h.a} <span className="headline-gradient">{h.b}</span>
+              </h1>
+              <p className="mt-5 max-w-[34rem] text-[17px] leading-relaxed text-steel-700">{h.sub}</p>
+            </div>
+          }
+          inside={
+            <>
+              <div className="flex items-start gap-5">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={`/playbook/cover-${market}.png`}
+                  alt="The one-rep meeting machine playbook"
+                  width={150}
+                  height={212}
+                  className="hidden w-[132px] shrink-0 rounded-lg shadow-card sm:block"
+                />
+                <div className="min-w-0">
+                  <p className="font-display text-[15px] font-semibold">What&apos;s in the free playbook</p>
+                  <ul className="mt-2 space-y-2 text-[15px] text-navy-900">
+                    {INSIDE.map((i) => (
+                      <li key={i} className="flex gap-2.5">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden className="mt-1 shrink-0 text-good">
+                          <path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        {i}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+              <p className="mt-6 text-[13.5px] text-steel-600">From the OctogleHire team. Our SDRs average 20+ booked meetings a month.</p>
+            </>
+          }
+        />
+
+        <section className="bg-navy-900 text-white">
+          <div className="mx-auto grid max-w-content gap-6 px-5 py-12 sm:px-8 md:grid-cols-3">
+            <div>
+              <p className="font-display text-[34px] font-semibold text-sky-300">20+</p>
+              <p className="mt-1 text-[15px] text-white/75">Meetings a month, the average for our SDRs</p>
+            </div>
+            <div>
+              <p className="font-display text-[34px] font-semibold text-sky-300">{PRICE[market]}</p>
+              <p className="mt-1 text-[15px] text-white/75">A month for a full-time OctogleHire SDR, if you&apos;d rather we ran it</p>
+            </div>
+            <div>
+              <p className="font-display text-[34px] font-semibold text-sky-300">Monthly</p>
+              <p className="mt-1 text-[15px] text-white/75">Rolling contract. If the rep isn&apos;t right, we replace them</p>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer className="border-t border-[var(--border-subtle)] px-5 py-8 text-center text-[12.5px] text-[var(--text-faint)]">
+        © {new Date().getFullYear()} Octogle Hire ·{" "}
+        <a href="https://www.octoglehire.com/privacy" className="underline underline-offset-2 hover:text-steel-700">
+          Privacy
+        </a>
+      </footer>
+    </>
+  );
+}

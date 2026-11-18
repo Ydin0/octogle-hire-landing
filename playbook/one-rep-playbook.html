@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="{{LANG}}">
+<head>
+<meta charset="utf-8">
+<title>20+ meetings a month with one rep · OctogleHire</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
+<!--
+  The OctogleHire SDR playbook (Dan's outline, 18 Nov 2026). Every figure is Dan's own:
+  3 years, 2M+ cold calls, 100+ callers hired, an agency of 30+ live reps, ~10 picked per 500
+  applicants, 50 reps on the bench, set up in a day, 25-35% pick-up, our SDRs average 20+
+  meetings a month. Leadey's seat price is from leadey.ai. The worked examples are maths, not
+  client results. render.cjs fills the double-brace keys per market and embeds the screenshots.
+-->
+<style>
+@page { size: A4; margin: 0 }
+:root { --navy:#100F2F; --navy2:#1C3350; --sky:#66B8D6; --sky2:#A4D5ED; --ice:#F2F9FA; --ice2:#DCEBF1; --steel:#426E8C; --ink:#35566E; --good:#1FA971; --bad:#C2373C }
+* { box-sizing:border-box }
+body { margin:0; font-family:Inter, "Segoe UI", system-ui, sans-serif; color:var(--navy); font-size:10.5pt; line-height:1.55 }
+.page { width:210mm; height:297mm; padding:16mm 17mm 14mm; position:relative; overflow:hidden; page-break-after:always; background:#fff; display:flex; flex-direction:column }
+.page:last-child { page-break-after:auto }
+.top { display:flex; justify-content:space-between; align-items:center; font-size:8.5pt; color:var(--steel); margin-bottom:9mm; letter-spacing:.04em }
+.top b { font-family:"Space Grotesk",sans-serif; color:var(--navy); font-size:11pt; letter-spacing:0 }
+.foot { margin-top:auto; display:flex; justify-content:space-between; font-size:8pt; color:var(--steel); border-top:1px solid var(--ice2); padding-top:3mm }
+.eyebrow { font-family:"Space Grotesk",sans-serif; text-transform:uppercase; letter-spacing:.14em; font-size:8.5pt; color:var(--steel); margin:0 0 3mm }
+h1 { font-family:"Space Grotesk",sans-serif; font-weight:600; font-size:40pt; line-height:1.04; letter-spacing:-.02em; margin:0 0 6mm }
+h2 { font-family:"Space Grotesk",sans-serif; font-weight:600; font-size:23pt; line-height:1.1; letter-spacing:-.015em; margin:0 0 4mm }
+h3 { font-family:"Space Grotesk",sans-serif; font-weight:600; font-size:12pt; margin:0 0 1.5mm }
+.grad { color:var(--sky) }
+p { margin:0 0 3mm; max-width:160mm }
+.lede { font-size:11.5pt; color:var(--ink) }
+.small { font-size:8.5pt; color:var(--steel) }
+.grid2 { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:5mm }
+.grid3 { display:grid; grid-template-columns:repeat(3,1fr); gap:4mm }
+.card { background:var(--ice); border-radius:4mm; padding:5mm }
+.card.dark { background:var(--navy); color:#EAF5FA }
+.card.dark h3 { color:#fff } .card.dark p { color:#B7D2E1 }
+.card p { margin:0; font-size:9.6pt; color:var(--ink) }
+.big { font-family:"Space Grotesk",sans-serif; font-size:38pt; line-height:1; letter-spacing:-.03em }
+.mid { font-family:"Space Grotesk",sans-serif; font-size:22pt; line-height:1.05; letter-spacing:-.02em }
+table { width:100%; border-collapse:collapse; font-size:9.6pt; margin:1mm 0 4mm; font-variant-numeric:tabular-nums }
+th { text-align:left; font-weight:500; color:var(--steel); font-size:8pt; letter-spacing:.06em; text-transform:uppercase; padding:2mm 3mm; border-bottom:1.5px solid var(--navy) }
+td { padding:2.6mm 3mm; border-bottom:1px solid var(--ice2); vertical-align:top; color:var(--ink) }
+td:first-child { color:var(--navy); font-weight:500 }
+td.r, th.r { text-align:right }
+tr.total td { color:var(--navy); font-weight:600; border-bottom:none; background:var(--ice) }
+.shot { width:100%; border-radius:3mm; border:1px solid var(--ice2); display:block }
+.shot.crop { object-fit:cover; object-position:top }
+.phone { width:44mm; flex:none; border-radius:4mm; display:block; border:1px solid var(--ice2) }
+.row { display:flex; gap:5mm; align-items:flex-start }
+.row > .grow { flex:1; min-width:0 }
+.shotcap { font-size:8.5pt; color:var(--steel); margin:1.5mm 0 0 }
+.step { display:inline-grid; place-items:center; width:8mm; height:8mm; border-radius:50%; background:var(--navy); color:#fff; font-family:"Space Grotesk",sans-serif; font-size:10pt; margin-right:2.5mm; vertical-align:middle }
+.cover { background:var(--navy); color:#fff; padding:22mm 20mm 18mm }
+.cover .top { color:var(--sky2) } .cover .top b { color:#fff }
+.cover h1 { color:#fff; margin-top:14mm }
+.cover .lede { color:#B7D2E1; font-size:13pt }
+.cover .meta { margin-top:auto; display:grid; grid-template-columns:repeat(3,1fr); gap:6mm; border-top:1px solid rgba(164,213,237,.25); padding-top:6mm; font-size:9.5pt; color:#B7D2E1 }
+.cover .meta b { display:block; font-weight:500; font-family:"Space Grotesk",sans-serif; font-size:8.5pt; letter-spacing:.12em; text-transform:uppercase; margin-bottom:1mm; color:var(--sky2) }
+.cal { border:1px solid var(--ice2); border-radius:3mm; padding:3.5mm; background:#fff }
+.cal h3 { font-size:10.5pt; display:flex; justify-content:space-between; align-items:baseline }
+.cal h3 span { font-family:Inter,sans-serif; font-weight:500; font-size:9pt; color:var(--steel) }
+.calgrid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:1.2mm; margin-top:2mm }
+.calgrid .dow { font-size:7pt; color:var(--steel); text-align:center; letter-spacing:.06em }
+.day { min-width:0; height:14mm; border-radius:1.6mm; background:var(--ice); padding:1mm; display:flex; flex-direction:column; gap:.8mm }
+.day .d { font-size:6.5pt; color:var(--steel) }
+.mtg { text-overflow:ellipsis; font-size:6pt; line-height:1.2; padding:.6mm 1mm; border-radius:1mm; background:var(--navy); color:#fff; white-space:nowrap; overflow:hidden }
+.mtg.b { background:var(--sky); color:var(--navy) }
+.funnel { display:flex; flex-direction:column; gap:2.2mm; margin:3mm 0 4mm }
+.frow { display:grid; grid-template-columns:52mm 1fr; align-items:center; gap:3mm }
+.frow .l { font-size:9.5pt; color:var(--ink) }
+.frow .bar { white-space:nowrap; height:9mm; border-radius:2mm; background:var(--navy); color:#fff; display:flex; align-items:center; padding:0 3mm; font-family:"Space Grotesk",sans-serif; font-size:11pt; min-width:22mm }
+.frow .bar.s { background:var(--sky); color:var(--navy) }
+.chips { display:flex; flex-wrap:wrap; gap:2mm; margin:2mm 0 4mm }
+.chip { background:var(--ice); border-radius:999px; padding:1.5mm 3.5mm; font-size:9pt; color:var(--ink) }
+.vet { display:grid; grid-template-columns:repeat(5,1fr); gap:2.5mm; margin:3mm 0 }
+.vet div { background:var(--ice); border-radius:2.5mm; padding:3mm; text-align:center; font-size:8.5pt; color:var(--ink) }
+.vet b { display:block; font-family:"Space Grotesk",sans-serif; font-size:15pt; color:var(--navy) }
+.vet div.last { background:var(--navy); color:#B7D2E1 } .vet div.last b { color:var(--sky) }
+.cta { background:var(--navy); color:#fff; border-radius:5mm; padding:8mm 9mm; margin-top:3mm }
+.cta h2 { color:#fff }
+.cta p { color:#B7D2E1 }
+.cta .btn { display:inline-block; margin-top:2mm; background:var(--sky); color:var(--navy); font-family:"Space Grotesk",sans-serif; font-weight:600; padding:3.5mm 7mm; border-radius:3mm; text-decoration:none; font-size:12pt }
+.cta .url { margin-top:3mm; font-size:9pt; color:var(--sky2) }
+.tick { color:var(--good); font-weight:600; margin-right:2mm }
+ul.ticks { list-style:none; padding:0; margin:0 0 3mm } ul.ticks li { margin:0 0 1.8mm; color:var(--ink) }
+</style>
+</head>
+<body>
+
+<!-- 1 COVER -->
+<section class="page cover">
+  <div class="top"><b>OctogleHire</b><span>THE SDR PLAYBOOK · {{MARKET}}</span></div>
+  <h1>How to get <span class="grad">20+ sales meetings</span> a month with one rep.</h1>
+  <p class="lede">Why cold calling still works when every other channel is drowning, what 20 meetings are worth to your business, and exactly how we put a trained SDR on the phones for you, calling your ideal customers and booking them into your calendar.</p>
+  <div class="meta">
+    <div><b>For</b>Founders, sales leaders and agencies who want a full calendar</div>
+    <div><b>Read time</b>15 minutes</div>
+    <div><b>From</b>The team behind OctogleHire and Leadey: 2M+ cold calls in 3 years</div>
+  </div>
+</section>
+
+<!-- 2 BEFORE / AFTER -->
+<section class="page">
+  <div class="top"><b>OctogleHire</b><span>WHERE YOU ARE NOW</span></div>
+  <p class="eyebrow">Your calendar, before and after</p>
+  <h2>From 1–2 meetings a week<br><span class="grad">to 1–2 meetings a day.</span></h2>
+  <p class="lede">Most founders we speak to book their own sales meetings, between everything else. That usually means one or two a week. One SDR on the phones, every working day, changes the shape of the month.</p>
+  <div class="grid2" style="margin-top:3mm">
+    <div class="cal"><h3>Now <span>~6 meetings a month</span></h3><div class="calgrid" data-cal="now"></div></div>
+    <div class="cal"><h3>With one SDR <span>20+ meetings a month</span></h3><div class="calgrid" data-cal="sdr"></div></div>
+  </div>
+  <div class="grid3" style="margin-top:6mm">
+    <div class="card"><span class="mid">1–2</span><h3 style="margin-top:2mm">A week, today</h3><p>Booked by you, when you find the time.</p></div>
+    <div class="card dark"><span class="mid" style="color:var(--sky)">20+</span><h3 style="margin-top:2mm">A month, with one SDR</h3><p>What our SDRs average, booked straight into your calendar.</p></div>
+    <div class="card"><span class="mid">{{PRICE}}</span><h3 style="margin-top:2mm">A month for the rep</h3><p>Full-time, all-in. No recruiter fee.</p></div>
+  </div>
+  <div class="foot"><span>20+ meetings a month with one rep</span><span>octoglehire.com · 2</span></div>
+</section>
+
+<!-- 3 WHAT IT'S WORTH -->
+<section class="page">
+  <div class="top"><b>OctogleHire</b><span>WHAT 20 MEETINGS ARE WORTH</span></div>
+  <p class="eyebrow">The maths</p>
+  <h2>One rep, 20 meetings.<br><span class="grad">Here's what that's worth.</span></h2>
+  <p class="lede">Two worked examples. Swap in your own deal size and close rate.</p>
+  <div class="grid2">
+    <div>
+      <h3>Example 1: a {{C}}5,000 offer</h3>
+      <table>
+        <tr><td>Meetings booked</td><td class="r">20</td></tr>
+        <tr><td>Close 1 in 10 (10%)</td><td class="r">2 customers</td></tr>
+        <tr><td>Revenue</td><td class="r">{{C}}10,000</td></tr>
+        <tr><td>The SDR</td><td class="r">−{{PRICE}}</td></tr>
+        <tr><td>Delivery cost (15%)</td><td class="r">−{{C}}1,500</td></tr>
+        <tr class="total"><td>Profit from one month</td><td class="r">{{E1_PROFIT}}</td></tr>
+      </table>
+    </div>
+    <div>
+      <h3>Example 2: a {{C}}10,000 offer</h3>
+      <table>
+        <tr><td>Meetings booked</td><td class="r">20</td></tr>
+        <tr><td>Close 1 in 5 (20%)</td><td class="r">4 customers</td></tr>
+        <tr><td>Revenue</td><td class="r">{{C}}40,000</td></tr>
+        <tr><td>The SDR</td><td class="r">−{{PRICE}}</td></tr>
+        <tr><td>Delivery cost (10%)</td><td class="r">−{{C}}4,000</td></tr>
+        <tr class="total"><td>Profit from one month</td><td class="r">{{E2_PROFIT}}</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="card dark" style="margin-top:2mm">
+    <h3>Cost per meeting: {{CPM_LOW}} to {{CPM_HIGH}}</h3>
+    <p>{{PRICE}} a month, divided by 10 to 20 booked meetings. Compare that with what a booked sales call costs you from ads, agencies or your own time, then add that these meetings are booked for you, with no ad account to manage and no leads to chase.</p>
+  </div>
+  <p class="small" style="margin-top:4mm">These are worked examples, not client results. What you'll book depends on your offer: a harder offer may book fewer than 20, an easier one 50 or more. We'll tell you which on the first call.</p>
+  <div class="foot"><span>20+ meetings a month with one rep</span><span>octoglehire.com · 3</span></div>
+</section>
+
+<!-- 4 WHY COLD CALLING -->
+<section class="page">
+  <div class="top"><b>OctogleHire</b><span>WHY COLD CALLING</span></div>
+  <p class="eyebrow">Why cold calling</p>
+  <h2>Every other channel is crowded.<br><span class="grad">The phone isn't.</span></h2>
+  <p class="lede">Your buyers get pitched all day on Instagram, Facebook, LinkedIn, X and by cold email. Those channels are crowded because they're easy: AI can run them without a person. A phone call still needs a real person, so far fewer companies do it well.</p>
+  <p class="lede">Call a valid number and the person picks up 25–35% of the time. That's a live conversation with exactly the customer you want, every time. Here's what one rep's month looks like:</p>
+  <div class="funnel">
+    <div class="frow"><span class="l">Dials a day</span><div class="bar" style="width:100%">100</div></div>
+    <div class="frow"><span class="l">Conversations a day (~30%)</span><div class="bar" style="width:62%">30</div></div>
+    <div class="frow"><span class="l">Conversations a month (20 days)</span><div class="bar" style="width:100%">600</div></div>
+    <div class="frow"><span class="l">Interested (~10%)</span><div class="bar s" style="width:38%">60</div></div>
+    <div class="frow"><span class="l">Booked (~1 in 3)</span><div class="bar s" style="width:28%">20 meetings</div></div>
+  </div>
+  <p>Ask yourself: which other channel puts you in a live conversation with 600 of your ideal customers a month? Give the rep a good pitch with something useful to offer, like a free audit or a guide, and those conversations turn into meetings.</p>
+  <div class="foot"><span>20+ meetings a month with one rep</span><span>octoglehire.com · 4</span></div>
+</section>
+
+<!-- 5 WHY IT'S HARD -->
+<section class="page">
+  <div class="top"><b>OctogleHire</b><span>THE CATCH</span></div>
+  <p class="eyebrow">The catch</p>
+  <h2>Cold calling works.<br><span class="grad">Doing it well is hard.</span></h2>
+  <p class="lede">It took us three years to get cold calling right. Most companies that try it give up in the first few months, for the same three reasons.</p>
+  <div class="grid3" style="margin:2mm 0 6mm">
+    <div class="card"><h3>Hiring</h3><p>Where to find people who are good on the phone, and knowing what a good rep looks and sounds like before you hire them.</p></div>
+    <div class="card"><h3>Training</h3><p>3–4 hours a day of call reviews, analytics reviews, script reviews and testing. Every day, for months.</p></div>
+    <div class="card"><h3>Tools</h3><p>Data, a dialer, a CRM, sequences, a scheduler and reporting. Six logins, and every gap between them loses leads.</p></div>
+  </div>
+  <h3>What we've already done, so you don't have to</h3>
+  <div class="grid2" style="margin-top:3mm">
+    <div class="card dark"><span class="mid" style="color:var(--sky)">2M+</span><h3 style="margin-top:2mm">Cold calls in 3 years</h3><p>Across our own agencies and businesses. We know what works, and we build your script from day one.</p></div>
+    <div class="card dark"><span class="mid" style="color:var(--sky)">100+</span><h3 style="margin-top:2mm">Cold callers hired</h3><p>We know who to hire, when, and what they need to be able to do.</p></div>
+    <div class="card dark"><span class="mid" style="color:var(--sky)">30+</span><h3 style="margin-top:2mm">Live reps in our agency</h3><p>Booking thousands of meetings a month.</p></div>
+    <div class="card dark"><span class="mid" style="color:var(--sky)">1</span><h3 style="margin-top:2mm">Tool for the whole job</h3><p>We built Leadey so our reps could make the most calls and book the most meetings, in one place.</p></div>
+  </div>
+  <div class="foot"><span>20+ meetings a month with one rep</span><span>octoglehire.com · 5</span></div>
+</section>
+
+<!-- 6 HOW IT WORKS: SIGN UP -->
+<section class="page">
+  <div class="top"><b>OctogleHire</b><span>HOW IT WORKS · 1</span></div>
+  <p class="eyebrow">How it works</p>
+  <h2>Tell us what you sell.<br><span class="grad">We find the rep.</span></h2>
+  <p><span class="step">1</span><b>Go to octoglehire.com/hire/sdrs</b> and press Find a SDR.</p>
+  <img class="shot crop" style="height:88mm" src="{{IMG:sdr-page.webp}}" alt="The OctogleHire SDR page">
+  <div class="grid2" style="margin-top:5mm; align-items:start">
+    <div>
+      <p><span class="step">2</span><b>Pick the role</b>, usually SDR / BDR.</p>
+      <img class="shot crop" style="height:78mm" src="{{IMG:form-step1.png}}" alt="Step 1: what do you need">
+    </div>
+    <div>
+      <p><span class="step">3</span><b>Tell us where to send profiles.</b> The team gets in touch, usually the same day.</p>
+      <img class="shot crop" style="height:78mm" src="{{IMG:form-step2.png}}" alt="Step 2: where to send profiles">
+    </div>
+  </div>
+  <div class="foot"><span>20+ meetings a month with one rep</span><span>octoglehire.com · 6</span></div>
+</section>
+
+<!-- 7 VETTING -->
+<section class="page">
+  <div class="top"><b>OctogleHire</b><span>HOW IT WORKS · 2</span></div>
+  <p class="eyebrow">Who you get</p>
+  <h2>Hundreds apply.<br><span class="grad">We pick about 10 in every 500.</span></h2>
+  <p class="lede"><span class="step">4</span>Every applicant goes through our pipeline: screening, a role-play cold call, a discovery interview and background checks. Most don't make it.</p>
+  <img class="shot" src="{{IMG:applicants-blurred.png}}" alt="Our sales-rep applicant pipeline, names hidden">
+  <p class="shotcap">Our live applicant pipeline: 237 sales reps in progress. Names, contact details and pay hidden.</p>
+  <div class="vet">
+    <div><b>500</b>apply</div>
+    <div><b>HR</b>screening</div>
+    <div><b>Role-play</b>cold call</div>
+    <div><b>Interview</b>+ checks</div>
+    <div class="last"><b>~10</b>make it</div>
+  </div>
+  <p>That's about 2%. The ones who make it then train on our system before they ever call one of your customers.</p>
+  <div class="foot"><span>20+ meetings a month with one rep</span><span>octoglehire.com · 7</span></div>
+</section>
+
+<!-- 8 TRAINED ON LEADEY -->
+<section class="page">
+  <div class="top"><b>OctogleHire</b><span>HOW IT WORKS · 3</span></div>
+  <p class="eyebrow">Trained on Leadey</p>
+  <h2>One tool stack, not ten.<br><span class="grad">Your rep is calling on day one.</span></h2>
+  <p class="lede"><span class="step">5</span>Every rep trains on Leadey, the power dialer and CRM we built for our own teams: lead finding, cold email, workflows, booking pages and live numbers in one login. It turns cold leads into booked meetings in one place.</p>
+  <div class="row">
+    <div><img class="phone" src="{{IMG:dialer.jpg}}" alt="Leadey power dialer"><p class="shotcap" style="width:44mm">The power dialer: the next lead rings as the last call ends.</p></div>
+    <div class="grow">
+      <img class="shot" src="{{IMG:cockpit.jpg}}" alt="Leadey cockpit"><p class="shotcap">The rep's home screen: who to call next, and why.</p>
+      <img class="shot crop" style="height:42mm; margin-top:3mm" src="{{IMG:analytics.jpg}}" alt="Leadey analytics"><p class="shotcap">Live numbers you can check every morning.</p>
+    </div>
+  </div>
+  <p class="small" style="margin-top:2mm">Product screens show sample data. Leadey is from {{LEADEY_PRICE}} a seat a month.</p>
+  <div class="foot"><span>20+ meetings a month with one rep</span><span>octoglehire.com · 8</span></div>
+</section>
+
+<!-- 9 PLACED IN YOUR BUSINESS -->
+<section class="page">
+  <div class="top"><b>OctogleHire</b><span>HOW IT WORKS · 4</span></div>
+  <p class="eyebrow">In your business</p>
+  <h2>Your rep learns your offer.<br><span class="grad">Then calls your customers every day.</span></h2>
+  <ul class="ticks" style="margin-top:2mm">
+    <li><span class="step">6</span><b>We learn your business.</b> A short discovery on what you sell, who buys it and why.</li>
+    <li><span class="step">7</span><b>We write the script.</b> Built from 2M+ calls of what works, for your market.</li>
+    <li><span class="step">8</span><b>You're set up in a day.</b> Leadey, the dialer, the list, the booking page and a reporting channel with us.</li>
+    <li><span class="step">9</span><b>The rep calls your ideal customers every day</b> and books them straight into your calendar.</li>
+  </ul>
+  <div class="row" style="margin-top:3mm">
+    <div><img class="phone" src="{{IMG:livecall.jpg}}" alt="A live call in Leadey"><p class="shotcap" style="width:44mm">A live call: notes and outcome while the rep talks.</p></div>
+    <div class="grow"><img class="shot" src="{{IMG:calendar.jpg}}" alt="Leadey calendar"><p class="shotcap">Meetings land in your calendar, with confirmations sent automatically.</p></div>
+  </div>
+  <div class="card" style="margin-top:4mm">
+    <h3>You just take the sales calls</h3>
+    <p>Ads, cold email and LinkedIn take time to set up, need managing and still leave you chasing leads. Here, the meetings arrive booked. You, or your sales team, turn up and sell. No experience running a calling team needed: we manage the rep with you.</p>
+  </div>
+  <div class="foot"><span>20+ meetings a month with one rep</span><span>octoglehire.com · 9</span></div>
+</section>
+
+<!-- 10 NEXT STEP -->
+<section class="page">
+  <div class="top"><b>OctogleHire</b><span>YOUR NEXT STEP</span></div>
+  <p class="eyebrow">Why OctogleHire</p>
+  <h2>The fastest way from an empty calendar<br><span class="grad">to 20+ meetings a month.</span></h2>
+  <ul class="ticks" style="margin-top:2mm">
+    <li><span class="tick">✓</span>50 trained reps on our bench, working for our own businesses today</li>
+    <li><span class="tick">✓</span>A rep who knows your offer and starts calling from day one</li>
+    <li><span class="tick">✓</span>Our SDRs average 20+ booked meetings a month</li>
+    <li><span class="tick">✓</span>Set up on Leadey in a day, with reporting straight to you</li>
+    <li><span class="tick">✓</span>{{PRICE}} a month, all-in. Rolling monthly, and we replace the rep if they're not right</li>
+  </ul>
+  <div class="cta">
+    <p class="eyebrow" style="color:var(--sky2)">15 minutes with Connor</p>
+    <h2>Book a call. We'll work out how many<br>meetings your offer can book.</h2>
+    <p>A quick discovery on what you sell and who buys it, then the rep we'd put on it and how fast they can start.</p>
+    <a class="btn" href="{{BOOK}}">Book a call with Connor →</a>
+    <div class="url">{{BOOK_SHORT}}</div>
+  </div>
+  <p class="small" style="margin-top:5mm">Rather run it yourself? Everything in this playbook works with a rep you hire and train. We're here if you want it done for you.</p>
+  <div class="foot"><span>20+ meetings a month with one rep · OctogleHire</span><span>octoglehire.com · 10</span></div>
+</section>
+
+<script>
+// Before/after calendars: 4 working weeks. "now" has ~6 meetings, "sdr" has 1-2 a day (22).
+(() => {
+  const names = ['Discovery call', 'Intro call', 'Demo', 'Sales call']
+  const now = { 1: 1, 4: 1, 7: 1, 11: 1, 14: 1, 18: 1 }
+  const sdr = [1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1].map((n, i) => n)
+  for (const el of document.querySelectorAll('[data-cal]')) {
+    const isSdr = el.dataset.cal === 'sdr'
+    for (const d of ['MON', 'TUE', 'WED', 'THU', 'FRI']) { const h = document.createElement('div'); h.className = 'dow'; h.textContent = d; el.append(h) }
+    for (let i = 0; i < 20; i++) {
+      const day = document.createElement('div'); day.className = 'day'
+      const n = document.createElement('span'); n.className = 'd'; n.textContent = i + 1; day.append(n)
+      const count = isSdr ? sdr[i] : (now[i] || 0)
+      for (let k = 0; k < count; k++) { const m = document.createElement('div'); m.className = 'mtg' + (k ? ' b' : ''); m.textContent = (k ? '2pm ' : '10am ') + names[(i + k) % 4]; day.append(m) }
+      el.append(day)
+    }
+  }
+})()
+</script>
+</body>
+</html>
