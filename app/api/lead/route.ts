@@ -10,6 +10,26 @@ import { NextResponse } from "next/server";
 const META_US_WEBHOOK_URL = process.env.LEADEY_META_US_WEBHOOK_URL || process.env.LEADEY_PLAYBOOK_US_WEBHOOK_URL;
 const META_UK_WEBHOOK_URL = process.env.LEADEY_META_UK_WEBHOOK_URL || process.env.LEADEY_WEBSITE_LEADS_WEBHOOK_URL;
 
+// Backup copy of every lead in a Make data store ("OctogleHire inbound lead
+// backup", 267103), sent before Leadey so a failed CRM post still leaves a
+// record. Never throws and gives up after 3s.
+const BACKUP_WEBHOOK_URL = process.env.LEAD_BACKUP_WEBHOOK_URL;
+
+async function sendBackup(record: Record<string, unknown>) {
+  if (!BACKUP_WEBHOOK_URL) return;
+  try {
+    await fetch(BACKUP_WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(record),
+      signal: AbortSignal.timeout(3000),
+      cache: "no-store",
+    });
+  } catch (err) {
+    console.error("[lead] backup failed", err);
+  }
+}
+
 // If Leadey refuses a lead, keep enough in the logs to recover it by hand.
 function logLostLead(reason: string, p: Record<string, unknown>) {
   console.error(
@@ -183,9 +203,22 @@ export async function POST(req: Request) {
   const us = body.market === "us" || country === "US" || country === "USA" || phone.startsWith("+1");
   payload.country = us ? "US" : str(body.country) || "UK";
   const webhook = us ? META_US_WEBHOOK_URL : META_UK_WEBHOOK_URL;
+  // Started now, awaited with the CAPI call, so it never delays the Leadey post.
+  const backup = sendBackup({
+    source: "Lander",
+    market: us ? "US" : "UK",
+    name,
+    email,
+    phone: str(body.phone),
+    company: company || undefined,
+    service: payload.service,
+    page: str(body.page) || undefined,
+    payload: JSON.stringify(body),
+  });
+  const done = () => Promise.all([capi, backup]);
   if (!webhook) {
     logLostLead(`LEADEY_META_${us ? "US" : "UK"}_WEBHOOK_URL not set`, payload);
-    await capi;
+    await done();
     return NextResponse.json({ ok: false }, { status: 500 });
   }
 
@@ -200,15 +233,15 @@ export async function POST(req: Request) {
       const detail = await res.text();
       console.error("[lead] Leadey rejected lead", res.status, detail);
       logLostLead(`Leadey ${res.status}`, payload);
-      await capi;
+      await done();
       return NextResponse.json({ ok: false, status: res.status }, { status: 502 });
     }
-    await capi;
+    await done();
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("[lead] Leadey unreachable", err);
     logLostLead("Leadey unreachable", payload);
-    await capi;
+    await done();
     return NextResponse.json({ ok: false }, { status: 502 });
   }
 }
