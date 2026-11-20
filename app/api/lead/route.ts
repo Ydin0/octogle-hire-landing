@@ -127,6 +127,18 @@ async function sendCapiLead(
  * Leadey does not split a full name, so we send firstName/lastName, and it
  * blanks `company` when it equals the person's name, so we disambiguate that.
  */
+// A lead came from a Meta ad if the ad's UTM says so or the click carried an fbclid.
+function fromMeta(body: Record<string, unknown>): boolean {
+  const src = typeof body.utm_source === "string" ? body.utm_source.toLowerCase() : "";
+  if (/^(fb|facebook|ig|instagram|meta)/.test(src)) return true;
+  if (typeof body.fbclid === "string" && body.fbclid) return true;
+  try {
+    return typeof body.page === "string" && !!new URL(body.page).searchParams.get("fbclid");
+  } catch {
+    return false;
+  }
+}
+
 export async function POST(req: Request) {
   let body: Record<string, unknown>;
   try {
@@ -153,9 +165,9 @@ export async function POST(req: Request) {
     firstName: firstName || undefined,
     lastName: rest.join(" ") || undefined,
     company: company || undefined,
-    // Keys the Website Leads field map understands, so these leads are
-    // labelled and routed like the main site's (developer follow-up flow).
-    lead_source: "Landing Page",
+    // "Meta Ads" for anyone who came from a Facebook/Instagram ad, so lander
+    // leads sit with the Meta form leads in Leadey; "Landing Page" otherwise.
+    lead_source: fromMeta(body) ? "Meta Ads" : "Landing Page",
     // The playbook sends its own (Sales, Hire sales reps); everything else is developers.
     demand_type: str(body.demand_type) || "Engineering",
     service: str(body.service) || "Hire engineers",
