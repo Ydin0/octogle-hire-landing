@@ -5,9 +5,10 @@ import { NextResponse } from "next/server";
 // (funnel_muplaf1g9lazl3) and "Meta Lead Ads — UK" (funnel_mu1pe83agxj1nc).
 // US = the /us pages, country US or a +1 phone; everything else is UK. Set in
 // Vercel, never in code: the repo is public and the URLs carry tokens. The
-// LEADEY_PLAYBOOK_US_WEBHOOK_URL fallback is the Meta US URL, set 20 Nov 2026.
+// The fallbacks were tested on 20 Nov 2026: LEADEY_PLAYBOOK_US_WEBHOOK_URL lands
+// in Meta US and LEADEY_WEBSITE_LEADS_WEBHOOK_URL lands in Meta UK.
 const META_US_WEBHOOK_URL = process.env.LEADEY_META_US_WEBHOOK_URL || process.env.LEADEY_PLAYBOOK_US_WEBHOOK_URL;
-const META_UK_WEBHOOK_URL = process.env.LEADEY_META_UK_WEBHOOK_URL;
+const META_UK_WEBHOOK_URL = process.env.LEADEY_META_UK_WEBHOOK_URL || process.env.LEADEY_WEBSITE_LEADS_WEBHOOK_URL;
 
 // If Leadey refuses a lead, keep enough in the logs to recover it by hand.
 function logLostLead(reason: string, p: Record<string, unknown>) {
