@@ -1,21 +1,34 @@
 import { createHash } from "node:crypto";
 import { NextResponse } from "next/server";
 
-// Leadey inbound webhook for the "Website Leads" campaign
-// (funnel_mv8093xyv8wrjq), the same one www.octoglehire.com feeds, so lander
-// leads get the same follow-up workflows. Set in Vercel, never in code: the
-// repo is public and the URL carries the token. The original lander campaign
-// was deleted in Leadey on ~2026-09-27, which silently 401'd every lead.
-const WEBHOOK_URL = process.env.LEADEY_WEBSITE_LEADS_WEBHOOK_URL;
-// The /us page posts market "us"; those leads go to the "Meta Lead Ads — US"
-// campaign (funnel_muplaf1g9lazl3). Until it's set they fall back to the main
-// webhook with country US, so nothing is lost.
-const US_WEBHOOK_URL = process.env.LEADEY_US_WEBHOOK_URL;
-// The SDR playbook opt-in (/meetings, /us/meetings) posts funnel "playbook";
-// those leads go to their own OctogleHire Playbook campaigns, one per market.
-// Until those are set they fall back to the campaigns above.
-const PLAYBOOK_UK_WEBHOOK_URL = process.env.LEADEY_PLAYBOOK_UK_WEBHOOK_URL;
-const PLAYBOOK_US_WEBHOOK_URL = process.env.LEADEY_PLAYBOOK_US_WEBHOOK_URL;
+// Two Leadey campaigns take every lander lead: "Meta Lead Ads — US"
+// (funnel_muplaf1g9lazl3) and "Meta Lead Ads — UK" (funnel_mu1pe83agxj1nc).
+// US = the /us pages, country US or a +1 phone; everything else is UK. Set in
+// Vercel, never in code: the repo is public and the URLs carry tokens. The
+// The fallbacks were tested on 20 Nov 2026: LEADEY_PLAYBOOK_US_WEBHOOK_URL lands
+// in Meta US and LEADEY_WEBSITE_LEADS_WEBHOOK_URL lands in Meta UK.
+const META_US_WEBHOOK_URL = process.env.LEADEY_META_US_WEBHOOK_URL || process.env.LEADEY_PLAYBOOK_US_WEBHOOK_URL;
+const META_UK_WEBHOOK_URL = process.env.LEADEY_META_UK_WEBHOOK_URL || process.env.LEADEY_WEBSITE_LEADS_WEBHOOK_URL;
+
+// Backup copy of every lead in a Make data store ("OctogleHire inbound lead
+// backup", 267103), sent before Leadey so a failed CRM post still leaves a
+// record. Never throws and gives up after 3s.
+const BACKUP_WEBHOOK_URL = process.env.LEAD_BACKUP_WEBHOOK_URL;
+
+async function sendBackup(record: Record<string, unknown>) {
+  if (!BACKUP_WEBHOOK_URL) return;
+  try {
+    await fetch(BACKUP_WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(record),
+      signal: AbortSignal.timeout(3000),
+      cache: "no-store",
+    });
+  } catch (err) {
+    console.error("[lead] backup failed", err);
+  }
+}
 
 // If Leadey refuses a lead, keep enough in the logs to recover it by hand.
 function logLostLead(reason: string, p: Record<string, unknown>) {
@@ -185,19 +198,27 @@ export async function POST(req: Request) {
         })
       : Promise.resolve();
 
-  const us = body.market === "us";
-  if (us && !US_WEBHOOK_URL) console.warn("[lead] LEADEY_US_WEBHOOK_URL not set, US lead sent to the main webhook");
-  const playbook = body.funnel === "playbook";
-  // SDR lander leads go only to their own campaign ("SDR Lander — US/UK"), never
-  // to the Meta Lead Ads or Website Leads campaigns. No webhook set = logged, not rerouted.
-  const webhook = playbook
-    ? us
-      ? PLAYBOOK_US_WEBHOOK_URL
-      : PLAYBOOK_UK_WEBHOOK_URL
-    : (us && US_WEBHOOK_URL) || WEBHOOK_URL;
+  const country = str(body.country).toUpperCase();
+  const phone = str(body.phone).replace(/[^\d+]/g, "");
+  const us = body.market === "us" || country === "US" || country === "USA" || phone.startsWith("+1");
+  payload.country = us ? "US" : str(body.country) || "UK";
+  const webhook = us ? META_US_WEBHOOK_URL : META_UK_WEBHOOK_URL;
+  // Started now, awaited with the CAPI call, so it never delays the Leadey post.
+  const backup = sendBackup({
+    source: "Lander",
+    market: us ? "US" : "UK",
+    name,
+    email,
+    phone: str(body.phone),
+    company: company || undefined,
+    service: payload.service,
+    page: str(body.page) || undefined,
+    payload: JSON.stringify(body),
+  });
+  const done = () => Promise.all([capi, backup]);
   if (!webhook) {
-    logLostLead(playbook ? `LEADEY_PLAYBOOK_${us ? "US" : "UK"}_WEBHOOK_URL not set` : "LEADEY_WEBSITE_LEADS_WEBHOOK_URL not set", payload);
-    await capi;
+    logLostLead(`LEADEY_META_${us ? "US" : "UK"}_WEBHOOK_URL not set`, payload);
+    await done();
     return NextResponse.json({ ok: false }, { status: 500 });
   }
 
@@ -212,15 +233,15 @@ export async function POST(req: Request) {
       const detail = await res.text();
       console.error("[lead] Leadey rejected lead", res.status, detail);
       logLostLead(`Leadey ${res.status}`, payload);
-      await capi;
+      await done();
       return NextResponse.json({ ok: false, status: res.status }, { status: 502 });
     }
-    await capi;
+    await done();
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("[lead] Leadey unreachable", err);
     logLostLead("Leadey unreachable", payload);
-    await capi;
+    await done();
     return NextResponse.json({ ok: false }, { status: 502 });
   }
 }
