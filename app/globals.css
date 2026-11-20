@@ -133,3 +133,15 @@ body {
   100% { transform: none; opacity: 1; }
 }
 @media (prefers-reduced-motion: reduce) { .calc-pop { animation: none; } }
+
+/* Scrolling proof strip on the SDR lander. The track holds the items twice. */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.marquee-track {
+  animation: marquee 38s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track { animation: none; }
+}

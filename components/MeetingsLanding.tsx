@@ -2,11 +2,12 @@ import MeetingsHero from "@/components/MeetingsHero";
 import type { Door } from "@/components/PlaybookForm";
 
 // The SDR funnel page. Default promise: a trained SDR cold calling your offer.
-// Two doors: book a call with Connor now (?door=book) or take the free playbook
-// first (?door=playbook); with no door set, the visitor picks. The headline matches the ad: ?h=<key>, or a key's
-// words in the ad name (utm_content). Everything below the hero is shared.
-// Proof is limited to what Dan cleared on 18 Nov 2026: our SDRs average 20+
-// meetings a month. Prices: $2,500 US, £2,000 UK.
+// Two doors into one form: book a call with Connor now (?door=book) or take the
+// free playbook first (?door=playbook); with no door set, the visitor picks.
+// Claims are limited to the ones Dan confirmed on 18 Nov 2026: 20+ meetings a
+// month on average, 2M+ calls, 100+ callers hired, 30+ live reps, 50 on the
+// bench, 25–35% pick-up, ~10 in 500 applicants, we replace the rep, rolling
+// monthly with no recruiter fee, set up in a day. Prices: $2,500 US, £2,000 UK.
 
 type Market = "uk" | "us";
 
@@ -14,10 +15,10 @@ const PRICE: Record<Market, string> = { uk: "£2,000", us: "$2,500" };
 
 const HEADLINES = {
   get: {
-    call: "For founders and sales leaders",
+    call: "For founders, sales leaders and agencies",
     a: "Get a trained SDR",
     b: "cold calling your offer.",
-    sub: "Our SDRs average 20+ booked meetings a month. We hire, train and manage the rep; you take the meetings. Book a 15-minute call, or start with the free playbook.",
+    sub: "We hire, train and manage the rep. They call your market and book meetings straight into your calendar. Our SDRs average 20+ booked meetings a month.",
   },
   rep: {
     call: "Free playbook for founders and sales leaders",
@@ -26,16 +27,16 @@ const HEADLINES = {
     sub: "Why cold calling still works, what 20 meetings a month are worth, and how we put a trained SDR on the phones for you.",
   },
   agency: {
-    call: "Free playbook for agency owners",
+    call: "For agency owners",
     a: "Book 20+ meetings a month",
-    b: "for every client, with one rep.",
-    sub: "Put a trained SDR on the phones for your clients. Why cold calling works, what 20 meetings a month are worth, and how we set it up in a day.",
+    b: "with one trained rep.",
+    sub: "Put a trained SDR on the phones for your agency. We hire, train and manage them; you take the meetings. Set up in a day.",
   },
   calendar: {
-    call: "Free playbook for founders doing their own sales",
+    call: "For founders doing their own sales",
     a: "Want a calendar",
     b: "full of sales meetings?",
-    sub: "From 1–2 meetings a week to 1–2 a day. Why cold calling works, what it's worth to you, and how we put a trained SDR on it.",
+    sub: "From 1–2 meetings a week to 1–2 a day. A trained SDR calls your market and books the meetings for you.",
   },
 } as const;
 
@@ -64,13 +65,24 @@ function pickDoor(params: Record<string, string | string[] | undefined>): Door |
   return d === "book" || d === "playbook" ? d : null;
 }
 
-const INSIDE = [
-  "Your calendar before and after: from 1–2 meetings a week to 1–2 a day",
-  "What 20 meetings a month are worth, with two worked examples",
-  "Why cold calling works when every other channel is crowded",
-  "How we pick about 10 reps in every 500 applicants",
-  "The one tool stack our reps call from, instead of ten",
-  "How to get a trained SDR calling your customers, set up in a day",
+const CHIPS = ["2M+ calls made", "100+ callers hired", "Rolling monthly", "We replace the rep"];
+
+const GET = [
+  "A vetted SDR: about 10 in every 500 applicants make it",
+  "Trained on your offer and calling in a day",
+  "Meetings booked straight into your calendar",
+  "From $2,500 a month, rolling monthly, no recruiter fee",
+];
+
+const PROOF: [string, string][] = [
+  ["20+", "meetings a month, our SDR average"],
+  ["2M+", "calls made by our reps"],
+  ["100+", "callers hired"],
+  ["30+", "reps live right now"],
+  ["25–35%", "pick-up rate"],
+  ["~10 in 500", "applicants make it"],
+  ["1 day", "to set up"],
+  ["50", "trained reps on the bench"],
 ];
 
 export default function MeetingsLanding({
@@ -86,9 +98,11 @@ export default function MeetingsLanding({
 
   return (
     <>
-      <header className="mx-auto max-w-content px-5 py-4 sm:px-8">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/octogle-logo.svg" alt="Octogle Hire" width={128} height={30} className="h-[28px] w-auto" />
+      <header className="bg-navy-950">
+        <div className="mx-auto flex max-w-content justify-center px-5 pb-2 pt-7 sm:px-8 md:pt-9">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/assets/octogle-darkmode.svg" alt="Octogle Hire" width={200} height={47} className="h-[38px] w-auto md:h-[46px]" />
+        </div>
       </header>
 
       <main className="overflow-x-hidden">
@@ -99,65 +113,85 @@ export default function MeetingsLanding({
           initialDoor={pickDoor(params)}
           agencyHeadline={key === "agency"}
           intro={
-            <div>
-              <p className="eyebrow text-[11px] text-steel-600">{h.call}</p>
-              <h1 className="mt-3 font-display text-[clamp(2.1rem,5.4vw,3.4rem)] font-semibold leading-[1.04] tracking-[-0.02em]">
-                {h.a} <span className="headline-gradient">{h.b}</span>
+            <>
+              <p className="eyebrow text-[11px] text-sky-300">{h.call}</p>
+              <h1 className="mt-3 font-display text-[clamp(2.3rem,6vw,4rem)] font-semibold leading-[1.02] tracking-[-0.025em]">
+                {h.a} <span className="text-sky-300">{h.b}</span>
               </h1>
-              <p className="mt-5 max-w-[34rem] text-[17px] leading-relaxed text-steel-700">{h.sub}</p>
+              <p className="mt-5 max-w-[34rem] text-[17.5px] leading-relaxed text-white/75">{h.sub}</p>
+              <ul className="mt-5 flex flex-wrap gap-2">
+                {CHIPS.map((c) => (
+                  <li key={c} className="rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-[13px] text-white/85">
+                    {c}
+                  </li>
+                ))}
+              </ul>
+            </>
+          }
+          after={
+            <div className="mt-8 max-w-[30rem]">
+              <p className="font-display text-[15px] font-semibold text-white">What you get</p>
+              <ul className="mt-3 space-y-2.5">
+                {GET.map((g) => (
+                  <li key={g} className="flex gap-2.5 text-[15px] text-white/80">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden className="mt-0.5 shrink-0 text-good">
+                      <path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    {g}
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-6 flex items-center gap-3">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/people/connor.jpg" alt="Connor" width={40} height={40} className="h-10 w-10 rounded-full object-cover" />
+                <p className="text-[13.5px] text-white/60">Your 15 minutes are with Connor at OctogleHire.</p>
+              </div>
             </div>
           }
-          inside={
-            <>
-              <div className="flex items-start gap-5">
+          visual={
+            <div className="relative mx-auto hidden w-full max-w-[420px] md:sticky md:top-10 md:mt-10 md:block">
+              <div className="relative mx-auto w-[270px] rotate-[2deg] overflow-hidden rounded-[2.4rem] border-[7px] border-navy-800 bg-navy-900 shadow-[0_30px_80px_rgba(0,0,0,.55)]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={`/playbook/cover-${market}.png`}
-                  alt="The one-rep meeting machine playbook"
-                  width={150}
-                  height={212}
-                  className="hidden w-[132px] shrink-0 rounded-lg shadow-card sm:block"
-                />
-                <div className="min-w-0">
-                  <p className="font-display text-[15px] font-semibold">What&apos;s in the free playbook</p>
-                  <ul className="mt-2 space-y-2 text-[15px] text-navy-900">
-                    {INSIDE.map((i) => (
-                      <li key={i} className="flex gap-2.5">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden className="mt-1 shrink-0 text-good">
-                          <path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                        {i}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                <img src="/meetings/livecall-us.jpg" alt="A live call on the Leadey dialer" width={416} height={900} className="block w-full" />
               </div>
-              <p className="mt-6 text-[13.5px] text-steel-600">From the OctogleHire team. Our SDRs average 20+ booked meetings a month.</p>
-            </>
+              <div className="absolute -left-4 top-16 rounded-2xl bg-white px-4 py-3 text-navy-900 shadow-cta">
+                <p className="flex items-center gap-2 text-[13px] font-semibold">
+                  <span className="h-2 w-2 rounded-full bg-good" /> Meeting booked
+                </p>
+                <p className="mt-0.5 text-[12px] text-steel-600">Discovery call · Tue 2:00 PM</p>
+              </div>
+              <div className="absolute -right-2 top-56 rounded-2xl bg-white px-4 py-3 text-navy-900 shadow-cta">
+                <p className="font-display text-[22px] font-semibold leading-none">20+</p>
+                <p className="mt-1 text-[12px] text-steel-600">meetings a month, our SDR average</p>
+              </div>
+              <div className="absolute -left-2 bottom-14 rounded-2xl bg-white px-4 py-3 text-navy-900 shadow-cta">
+                <p className="flex items-center gap-2 text-[13px] font-semibold">
+                  <span className="h-2 w-2 rounded-full bg-good" /> Meeting booked
+                </p>
+                <p className="mt-0.5 text-[12px] text-steel-600">Intro call · Thu 11:00 AM</p>
+              </div>
+            </div>
           }
         />
 
-        <section className="bg-navy-900 text-white">
-          <div className="mx-auto grid max-w-content gap-6 px-5 py-12 sm:px-8 md:grid-cols-3">
-            <div>
-              <p className="font-display text-[34px] font-semibold text-sky-300">20+</p>
-              <p className="mt-1 text-[15px] text-white/75">Meetings a month, the average for our SDRs</p>
-            </div>
-            <div>
-              <p className="font-display text-[34px] font-semibold text-sky-300">{PRICE[market]}</p>
-              <p className="mt-1 text-[15px] text-white/75">A month for a full-time OctogleHire SDR, if you&apos;d rather we ran it</p>
-            </div>
-            <div>
-              <p className="font-display text-[34px] font-semibold text-sky-300">Monthly</p>
-              <p className="mt-1 text-[15px] text-white/75">Rolling contract. If the rep isn&apos;t right, we replace them</p>
+        {/* Proof strip */}
+        <section className="border-t border-white/10 bg-navy-950 py-6 text-white">
+          <div className="relative overflow-hidden [mask-image:linear-gradient(90deg,transparent,#000_8%,#000_92%,transparent)]">
+            <div className="marquee-track flex w-max gap-4">
+              {[...PROOF, ...PROOF].map(([n, l], i) => (
+                <div key={i} className="flex shrink-0 items-baseline gap-2.5 rounded-2xl border border-white/10 bg-white/[.04] px-5 py-3">
+                  <span className="font-display text-[24px] font-semibold text-sky-300">{n}</span>
+                  <span className="text-[14px] text-white/65">{l}</span>
+                </div>
+              ))}
             </div>
           </div>
         </section>
       </main>
 
-      <footer className="border-t border-[var(--border-subtle)] px-5 py-8 text-center text-[12.5px] text-[var(--text-faint)]">
+      <footer className="bg-navy-950 px-5 py-8 text-center text-[12.5px] text-white/45">
         © {new Date().getFullYear()} Octogle Hire ·{" "}
-        <a href="https://www.octoglehire.com/privacy" className="underline underline-offset-2 hover:text-steel-700">
+        <a href="https://www.octoglehire.com/privacy" className="underline underline-offset-2 hover:text-white/80">
           Privacy
         </a>
       </footer>

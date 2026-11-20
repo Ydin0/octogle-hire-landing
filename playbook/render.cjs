@@ -8,8 +8,8 @@ const BOOK = 'https://app.leadey.ai/book/octogle-hire-introduction-with-c-n6ggx5
 // Worked examples (page 3): revenue minus the rep minus delivery cost. Cost per meeting is the
 // rep's monthly price over 20 and 10 meetings.
 const VARIANTS = {
-  uk: { LANG: 'en-GB', MARKET: 'UK', C: '£', PRICE: '£2,000', E1_PROFIT: '£6,500', E2_PROFIT: '£34,000', CPM_LOW: '£100', CPM_HIGH: '£200', LEADEY_PRICE: '£49' },
-  us: { LANG: 'en-US', MARKET: 'US', C: '$', PRICE: '$2,500', E1_PROFIT: '$6,000', E2_PROFIT: '$33,500', CPM_LOW: '$125', CPM_HIGH: '$250', LEADEY_PRICE: '$59' },
+  uk: { LANG: 'en-GB', MARKET: 'UK', C: '£', PRICE: '£2,000', E1_PROFIT: '£6,500', E2_PROFIT: '£34,000', CPM_LOW: '£100', CPM_HIGH: '£200', LEADEY_PRICE: '£49', MATH: 'The maths' },
+  us: { LANG: 'en-US', MARKET: 'US', C: '$', PRICE: '$2,500', E1_PROFIT: '$6,000', E2_PROFIT: '$33,500', CPM_LOW: '$125', CPM_HIGH: '$250', LEADEY_PRICE: '$59', MATH: 'The math' },
 }
 const MIME = { '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp' }
 

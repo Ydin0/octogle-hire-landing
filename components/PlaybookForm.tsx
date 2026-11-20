@@ -240,7 +240,7 @@ export default function PlaybookForm({
           }}
         >
           <p className="mt-3 font-display text-[19px] font-semibold leading-snug">
-            {door === "playbook" ? "Your playbook's ready. Where should we send it?" : "Where can Connor reach you?"}
+            {door === "playbook" ? "Your playbook's ready. Who's it for?" : "Where can Connor reach you?"}
           </p>
           <div className="mt-4 space-y-3">
             <label className="block text-[14px] font-medium text-steel-700">
